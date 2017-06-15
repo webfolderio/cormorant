@@ -1,0 +1,14 @@
+{
+    "version": {
+        "status": "stable",
+        "media-types": [{
+            "base": "application/json",
+            "type": "application/vnd.openstack.identity-v2.0+json;version=2.0"
+        }],
+        "id": "v2.0",
+        "links": [{
+            "href": "http://localhost:8080/v2.0",
+            "rel": "self"
+        }]
+    }
+}

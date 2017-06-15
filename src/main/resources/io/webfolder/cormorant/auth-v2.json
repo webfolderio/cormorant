@@ -1,0 +1,31 @@
+{
+    "access": {
+        "token": {
+            "id": "__TOKEN__",
+            "expires": "__EXPIRES__",
+            "tenant": {
+                "id": "__TENANT_ID__",
+                "name": "__TENANT_NAME__"
+            }
+        },
+        "user": {
+            "name": "__USER_NAME__",
+            "id": "__USER_ID__",
+            "roles": [{
+                "id": "__ROLE_ID__",
+                "name": "__ROLE_NAME__"
+            }]
+        },
+        "serviceCatalog": [{
+            "endpoints": [{
+                "region": "default",
+                "adminURL": "__PUBLIC_URL",
+                "publicURL": "__PUBLIC_URL__",
+                "versionId": 1,
+                "tenantId": "__TENANT_ID__"
+            }],
+            "name": "WebFolder Object Storage",
+            "type": "object-store"
+        }]
+    }
+}

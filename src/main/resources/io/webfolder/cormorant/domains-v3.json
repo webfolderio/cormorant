@@ -1,0 +1,8 @@
+{
+    "domains": [{
+        "description": "Object Storage Server",
+        "enabled": true,
+        "id": "__ID__",
+        "name": "__NAME__"
+    }]
+}

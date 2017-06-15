@@ -1,0 +1,8 @@
+{
+    "user": {
+        "domain_id": "__DOMAIN_ID__",
+        "enabled": __ENABLE__,
+        "id": "__ID__",
+        "name": "__NAME__"
+    }
+}

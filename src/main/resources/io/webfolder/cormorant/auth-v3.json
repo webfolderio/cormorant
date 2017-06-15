@@ -1,0 +1,63 @@
+{
+	"token": {
+		"methods": [
+			"password"
+		],
+		"expires_at": "__EXPIRES_AT__",
+		"issued_at": "__ISSUED_AT__",
+		"catalog": [
+			{
+				"type": "identity",
+				"name": "keystone",
+				"endpoints": [
+					{
+						"url": "__KEYSTONE_URL__",
+						"id": "default",
+						"region": "RegionOne",
+						"interface": "public"
+					}
+				]
+			},
+			{
+				"type": "object-store",
+				"id": "object-store",
+				"endpoints": [
+					{
+						"url": "__OBJECT_STORE_URL__",
+						"id": "default",
+						"region": "RegionOne",
+						"interface": "public"
+					}
+				]
+			}
+		],
+		"roles": [
+			{
+				"name": "__ROLE__",
+				"id": "__ROLE_ID__"
+			}
+		],
+		"extras": {
+			
+		},
+		"user": {
+			"domain": {
+				"name": "default",
+				"id": "default"
+			},
+			"name": "__USER__",
+			"id": "__USER_ID__"
+		},
+		"audit_ids": [
+			"__AUDIT_ID__"
+		],
+		"project": {
+			"id": "default",
+			"domain": {
+				"name": "default",
+				"id": "default"
+			},
+			"name": "default"
+		}
+	}
+}

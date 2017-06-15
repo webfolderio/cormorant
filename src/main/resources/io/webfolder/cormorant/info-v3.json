@@ -1,0 +1,17 @@
+{
+    "links": {
+        "next": null,
+        "previous": null,
+        "self": "http://localhost:8080/v3/services"
+    },
+    "services": [{
+        "description": "Swift Service",
+        "enabled": true,
+        "id": "Swift Service",
+        "links": {
+            "self": "__PUBLIC_URL__"
+        },
+        "name": "swift",
+        "type": "object-store"
+    }]
+}

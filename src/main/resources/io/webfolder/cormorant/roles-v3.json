@@ -1,0 +1,11 @@
+{
+    "roles": [{
+            "id": "admin",
+            "name": "admin"
+        },
+        {
+            "id": "Member",
+            "name": "Member"
+        }
+    ]
+}

@@ -1,0 +1,8 @@
+/.settings
+/mydir
+/target
+/.classpath
+/.project
+/mymetadata/
+/.clover/
+/dependency-reduced-pom.xml
