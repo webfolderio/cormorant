@@ -40,6 +40,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributeView;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -346,5 +347,10 @@ public class PathObjectService implements ObjectService<Path> {
             normalizedPath = LEADING_SLASH.matcher(normalizedPath).replaceAll("");
         }
         return normalizedPath;
+    }
+
+    @Override
+    public void sortLexicographically(List<Path> objects) {
+        Collections.sort(objects);
     }
 }

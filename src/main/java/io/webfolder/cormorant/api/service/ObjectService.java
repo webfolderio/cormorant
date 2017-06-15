@@ -72,4 +72,6 @@ public interface ObjectService<T> {
     String toPath(T container, T object);
 
     boolean exist(T container, T object);
+
+    void sortLexicographically(List<T> objects);
 }
