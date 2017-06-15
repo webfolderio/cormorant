@@ -1,2 +1,22 @@
-# cormorant
-Object Storage Server
+cormorant - Object Storage Server
+=================================
+
+[![License](https://img.shields.io/badge/license-AGPL-blue.svg)](https://opensource.org/licenses/AGPL-3.0)
+[![circleci](https://img.shields.io/circleci/project/github/webfolderio/cdp4j.svg?label=Build)]
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/d6af9f5df82d4568ba29ea6fceb9d605)](https://www.codacy.com/app/WebFolder/cormorant?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=webfolderio/cormorant&amp;utm_campaign=Badge_Grade)
+
+Supported Platforms
+-------------------
+cormorant has been tested under Windows 10 and Ubuntu, but should work on any platform where a Java available.
+
+How it is tested
+----------------
+cormorant is regularly built and tested on [circleci](https://circleci.com/gh/webfolderio/cormorant).
+
+Getting Help
+--------------------------------------------------------------------------------------------
+
+![WebFolder](https://raw.githubusercontent.com/webfolderio/cdp4j/master/images/logo.png)
+
+The amount of effort needed to maintain and develop new features for the project is not sustainable without proper financial backing. You can support cormorant development by 
+**buying** support package. Please [contact us](https://webfolder.io/support) for support packages & pricing.
