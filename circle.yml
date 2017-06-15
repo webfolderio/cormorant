@@ -44,7 +44,7 @@ jobs:
           name: Execute tempest
           command: |
             source ./refstack-client/.venv/bin/activate
-            bash ./refstack-client/refstack-client test -c tempest.conf -v --test-list cormorant-tempest.txt
+            ./refstack-client/refstack-client test -c tempest.conf -v --test-list cormorant-tempest.txt
 
       - store_test_results:
           path: target/surefire-reports

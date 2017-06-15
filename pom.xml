@@ -146,7 +146,7 @@
                     <systemProperties>
                         <systemProperty>
                             <key>org.slf4j.simpleLogger.defaultLogLevel</key>
-                            <value>debug</value>
+                            <value>error</value>
                         </systemProperty>
                         <systemProperty>
                             <key>user.language</key>
