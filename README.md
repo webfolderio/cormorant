@@ -2,8 +2,9 @@ cormorant - Object Storage Server
 =================================
 
 [![License](https://img.shields.io/badge/license-AGPL-blue.svg)](https://opensource.org/licenses/AGPL-3.0)
-[![circleci](https://img.shields.io/circleci/project/github/webfolderio/cdp4j.svg?label=Build)]
+[![circleci](https://img.shields.io/circleci/project/github/webfolderio/cdp4j.svg?label=linux)](https://www.codacy.com/app/WebFolder/cormorant)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/d6af9f5df82d4568ba29ea6fceb9d605)](https://www.codacy.com/app/WebFolder/cormorant?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=webfolderio/cormorant&amp;utm_campaign=Badge_Grade)
+[![AppVeyor](https://img.shields.io/appveyor/ci/WebFolder/cormorant.svg?label=windows)](https://ci.appveyor.com/project/WebFolder/cormorant)
 
 Supported Platforms
 -------------------
@@ -11,7 +12,7 @@ cormorant has been tested under Windows 10 and Ubuntu, but should work on any pl
 
 How it is tested
 ----------------
-cormorant is regularly built and tested on [circleci](https://circleci.com/gh/webfolderio/cormorant).
+cormorant is regularly built and tested on [circleci](https://circleci.com/gh/webfolderio/cormorant) and [AppVeyor](https://ci.appveyor.com/project/WebFolder/cormorant).
 
 Getting Help
 --------------------------------------------------------------------------------------------
