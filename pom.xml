@@ -78,7 +78,7 @@
                     <header>com/mycila/maven/plugin/license/templates/AGPL-3.txt</header>
                     <properties>
                         <owner>WebFolder OÜ</owner>
-                        <email>cormorant@webfolder.io</email>
+                        <email>support@webfolder.io</email>
                     </properties>
                     <excludes>
                         <exclude>pom.xml</exclude>
