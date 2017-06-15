@@ -20,6 +20,15 @@ jobs:
           key: cormorant-{{ checksum "pom.xml" }}
 
       - run:
+          name: Test
+          command: mvn test
+
+      - run:
+          name: Execute Server
+          command: mvn exec:java
+          background: true
+
+      - run:
           name: Install git client
           command: sudo apt-get install git -y
 
@@ -27,9 +36,8 @@ jobs:
           name: Checkout refstack
           command: |
             git clone https://github.com/openstack/refstack-client.git refstack-client
-            cd refstack-client
-            bash ./setup_env
-            source .venv/bin/activate && ./refstack-client test -c ../cormorant/tempest.conf -v --test-list ../cormorant/cormorant-tempest.txt
+            bash refstack-client/setup_env
+            source refstack-client/.venv/bin/activate && refstack-client/refstack-client test -c cormorant/tempest.conf -v --test-list cormorant/cormorant-tempest.txt
 
       - store_test_results:
           path: target/surefire-reports
