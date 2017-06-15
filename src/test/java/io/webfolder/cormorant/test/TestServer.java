@@ -19,8 +19,6 @@ package io.webfolder.cormorant.test;
 
 import static java.util.Locale.ENGLISH;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Locale;
@@ -42,12 +40,7 @@ public class TestServer {
         Path objectStore = Paths.get("mydir");
         Path metadataStore = Paths.get("mymetadata");
 
-        try {
-            server.setHost(InetAddress.getLocalHost().getHostAddress());
-            System.out.println(server.getHost());
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
-        }
+        server.setHost("localhost");
 
         AccountService accountService = new TestAccountService(objectStore);
         AuthenticationService authenticationService = new TestAuthenticationService();
