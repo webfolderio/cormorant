@@ -21,8 +21,6 @@ import static java.util.Locale.ENGLISH;
 import static org.jclouds.ContextBuilder.newBuilder;
 
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -45,7 +43,6 @@ import com.google.inject.Module;
 import io.undertow.Handlers;
 import io.webfolder.cormorant.api.CormorantApplication;
 import io.webfolder.cormorant.api.CormorantServer;
-import io.webfolder.cormorant.api.exception.CormorantException;
 import io.webfolder.cormorant.api.service.AccountService;
 import io.webfolder.cormorant.api.service.AuthenticationService;
 
@@ -77,12 +74,7 @@ public class TestSwift {
         objectStore   = Paths.get("mydir");
         metadataStore = Paths.get("mymetadata");
 
-        try {
-            String host = InetAddress.getLocalHost().getHostAddress();
-            server.setHost(host);
-        } catch (UnknownHostException e) {
-            throw new CormorantException(e);
-        }
+        server.setHost("localhost");
 
         AccountService accountService = new TestAccountService(objectStore);
         AuthenticationService authenticationService = new TestAuthenticationService();
