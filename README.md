@@ -1,0 +1,2 @@
+# cormorant
+Object Storage Server
