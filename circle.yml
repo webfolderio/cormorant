@@ -1,0 +1,35 @@
+version: 2
+
+jobs:
+  build:
+    working_directory: ~/cormorant
+    docker:
+      - image: circleci/openjdk:8-jdk-browsers
+
+    steps:
+      - checkout
+
+      - restore_cache:
+          key: cormorant-{{ checksum "pom.xml" }}
+
+      - run: mvn dependency:go-offline
+
+      - save_cache:
+          paths:
+            - ~/.m2
+          key: cormorant-{{ checksum "pom.xml" }}
+
+      - run:
+          name: Install git client
+          command: sudo apt-get install git -y
+
+      - run:
+          name: Checkout refstack
+          command: |
+            git clone https://github.com/openstack/refstack-client.git refstack-client
+            cd refstack-client
+            bash ./setup_env
+            source .venv/bin/activate && ./refstack-client test -c ../cormorant/tempest.conf -v --test-list ../cormorant/cormorant-tempest.txt
+
+      - store_test_results:
+          path: target/surefire-reports
