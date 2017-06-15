@@ -34,10 +34,17 @@ jobs:
 
       - run:
           name: Checkout refstack
+          command: git clone https://github.com/openstack/refstack-client.git refstack-client
+
+      - run:
+          name: Install refstack
+          command: bash refstack-client/setup_env
+
+      - run:
+          name: Execute tempest
           command: |
-            git clone https://github.com/openstack/refstack-client.git refstack-client
-            bash refstack-client/setup_env
-            source refstack-client/.venv/bin/activate && refstack-client/refstack-client test -c cormorant/tempest.conf -v --test-list cormorant/cormorant-tempest.txt
+            source refstack-client/.venv/bin/activate
+            refstack-client/refstack-client test -c cormorant/tempest.conf -v --test-list cormorant/cormorant-tempest.txt
 
       - store_test_results:
           path: target/surefire-reports
