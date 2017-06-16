@@ -23,7 +23,6 @@ import static java.lang.String.valueOf;
 import static java.nio.ByteBuffer.allocateDirect;
 import static java.nio.ByteBuffer.wrap;
 import static java.nio.channels.Channels.newChannel;
-import static java.nio.channels.Channels.newReader;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Arrays.binarySearch;
 import static java.util.Arrays.sort;
@@ -37,14 +36,12 @@ import static javax.ws.rs.core.Response.Status.PARTIAL_CONTENT;
 import static javax.ws.rs.core.Response.Status.PRECONDITION_FAILED;
 import static javax.ws.rs.core.Response.Status.REQUESTED_RANGE_NOT_SATISFIABLE;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.WritableByteChannel;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.regex.Pattern;
 
@@ -52,7 +49,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.Response.Status;
 
-import io.webfolder.cormorant.api.Json;
 import io.webfolder.cormorant.api.service.ObjectService;
 
 class ResourceHandler<T> {
@@ -61,24 +57,18 @@ class ResourceHandler<T> {
     private static final long    ONE_SECOND_IN_MILLIS = SECONDS.toMillis(1);
     private static final int     BUFFER_SIZE          = 16 * 1024;
     private static final byte[]  NEW_LINE             = "\r\n".getBytes(UTF_8);
+    private static final char    CHAR_SLASH           = '/';
+    private static final Pattern LEADING_SLASH        = compile("^/+");
 
     private final ObjectService<T> objectService;
 
     private final Resource<T> resource;
 
-    private final String accountName;
-
-    private final String containerName;
-
     public ResourceHandler(
             final ObjectService<T> objectService,
-            final Resource<T>      response,
-            final String           accountName,
-            final String           containerName) {
+            final Resource<T>      response) {
         this.objectService = objectService;
         this.resource      = response;
-        this.accountName   = accountName;
-        this.containerName = containerName;
     }
 
     public Status handle(
@@ -250,7 +240,6 @@ class ResourceHandler<T> {
         }
     }
 
-    @SuppressWarnings("unchecked")
     protected void write(
                         final HttpServletResponse response,
                         final Resource<T>         resource,
@@ -272,22 +261,8 @@ class ResourceHandler<T> {
                     if (resource.isDynamicLargeObject()) {
                         objects = objectService.listDynamicLargeObject(resource.getObject());
                     } else {
-                        try (final BufferedReader reader = new BufferedReader(newReader(objectService.getReadableChannel(resource.getObject()), UTF_8.name()))) {
-                            final StringBuilder builder = new StringBuilder();
-                            String line;
-                            while ( ( line = reader.readLine() ) != null ) {
-                                builder.append(line);
-                            }
-                            final Json json = Json.read(builder.toString());
-                            final List<Object> list = json.asList();
-                            for (Object next : list) {
-                                final Map<String, Object> foo = (Map<String, Object>) next;
-                                String path = foo.get("path").toString();
-                                int start = path.indexOf('/');
-                                String objectPath = path.substring(start + 1, path.length());
-                                T object = objectService.getObject(accountName, containerName, objectPath);
-                                objects.add(object);
-                            }
+                        for (Segment<T> next : resource.getSegments()) {
+                            objects.add(next.getObject());
                         }
                     }
 
@@ -370,5 +345,19 @@ class ResourceHandler<T> {
                         final int    endIndex) {
         final String str = value.substring(beginIndex, endIndex);
         return str.isEmpty() ? -1 : parseLong(str);
+    }
+
+    protected String removeLeadingSlash(String path) {
+        if (path == null) {
+            return null;
+        }
+        String normalizedPath = path;
+        if (normalizedPath.charAt(0) == CHAR_SLASH) {
+            normalizedPath = path.substring(1, path.length());
+        }
+        if (normalizedPath.charAt(0) == CHAR_SLASH) {
+            normalizedPath = LEADING_SLASH.matcher(normalizedPath).replaceAll("");
+        }
+        return normalizedPath;
     }
 }

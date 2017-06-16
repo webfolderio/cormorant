@@ -58,3 +58,4 @@ tempest.api.object_storage.test_object_services.ObjectTest.test_list_object_meta
 tempest.api.object_storage.test_object_slo.ObjectSloTest.test_upload_manifest[id-2c3f24a6-36e8-4711-9aa2-800ee1fc7b5b]
 tempest.api.object_storage.test_object_slo.ObjectSloTest.test_list_large_object_metadata[id-e69ad766-e1aa-44a2-bdd2-bf62c09c1456]
 tempest.api.object_storage.test_object_slo.ObjectSloTest.test_delete_large_object[id-87b6dfa1-abe9-404d-8bf0-6c3751e6aa77]
+tempest.api.object_storage.test_object_slo.ObjectSloTest.test_retrieve_large_object[id-49bc49bc-dd1b-4c0f-904e-d9f10b830ee8]

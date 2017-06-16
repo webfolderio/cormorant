@@ -17,6 +17,7 @@
  */
 package io.webfolder.cormorant.internal.jaxrs;
 
+import java.util.List;
 import java.util.Map;
 
 class Resource<T> {
@@ -41,6 +42,8 @@ class Resource<T> {
 
     private final Map<String, String> headers;
 
+    private final List<Segment<T>> segments;
+
     public Resource(
                 final T                   object,
                 final long                length,
@@ -51,7 +54,8 @@ class Resource<T> {
                 final String              contentDisposition,
                 final boolean             manifest,
                 final boolean             dynamicLargeObject,
-                final Map<String, String> headers) {
+                final Map<String, String> headers,
+                final List<Segment<T>>    segments) {
         this.object             = object;
         this.length             = length;
         this.lastModified       = lastModified;
@@ -62,6 +66,7 @@ class Resource<T> {
         this.manifest           = manifest;
         this.dynamicLargeObject = dynamicLargeObject;
         this.headers            = headers;
+        this.segments           = segments;
     }
 
     public T getObject() {
@@ -104,11 +109,7 @@ class Resource<T> {
         return headers;
     }
 
-    @Override
-    public String toString() {
-        return "Resource [object=" + object + ", length=" + length + ", lastModified=" + lastModified
-                + ", creationTime=" + creationTime + ", eTag=" + eTag + ", contentType=" + contentType
-                + ", contentDisposition=" + contentDisposition + ", manifest=" + manifest + ", dynamicLargeObject="
-                + dynamicLargeObject + ", headers=" + headers + "]";
+    public List<Segment<T>> getSegments() {
+        return segments;
     }
 }

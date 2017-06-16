@@ -26,11 +26,13 @@ import static java.lang.String.valueOf;
 import static java.lang.System.currentTimeMillis;
 import static java.nio.ByteBuffer.allocateDirect;
 import static java.nio.channels.Channels.newChannel;
+import static java.nio.channels.Channels.newReader;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.time.Instant.ofEpochMilli;
 import static java.time.ZoneId.of;
 import static java.time.ZonedDateTime.ofInstant;
 import static java.time.format.DateTimeFormatter.ofPattern;
+import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.Locale.ENGLISH;
 import static java.util.regex.Pattern.compile;
@@ -48,6 +50,7 @@ import static javax.ws.rs.core.Response.Status.LENGTH_REQUIRED;
 import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 import static javax.ws.rs.core.Response.Status.REQUEST_ENTITY_TOO_LARGE;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.EOFException;
@@ -116,7 +119,6 @@ public class ObjectController<T> {
                                                                 .withLocale(ENGLISH)
                                                                 .withZone(GMT);
 
-    private static final String  SLASH                  = "/";
 
     private static final char    CHAR_SLASH             = '/';
 
@@ -210,11 +212,11 @@ public class ObjectController<T> {
                 final String objectManifest = systemMetadataService.getProperty(namespace, X_OBJECT_MANIFEST);
                 if ( objectManifest != null ) {
                     final String directoryPath = removeLeadingSlash(objectManifest);
-                    final String containerName = directoryPath.indexOf(SLASH) > 0 ? directoryPath.substring(0, directoryPath.indexOf(SLASH)) : null;
+                    final String containerName = directoryPath.indexOf(CHAR_SLASH) > 0 ? directoryPath.substring(0, directoryPath.indexOf(CHAR_SLASH)) : null;
                     if ( containerName != null ) {
                         T dynamicLargeObjectContainer = containerService.getContainer(request.getAccount(), containerName);
                         if (objectService.isValidPath(dynamicLargeObjectContainer, directoryPath)) {
-                            final String objectPath = directoryPath.substring(directoryPath.indexOf(SLASH) + 1, directoryPath.length());
+                            final String objectPath = directoryPath.substring(directoryPath.indexOf(CHAR_SLASH) + 1, directoryPath.length());
                             object = objectService.getDirectory(dynamicLargeObjectContainer, objectPath);
                             container = dynamicLargeObjectContainer;
                             dynamicLargeObject = true;
@@ -240,9 +242,7 @@ public class ObjectController<T> {
             }
         }
 
-        final Long    size               = dynamicLargeObject ? objectService.getDyanmicObjectSize(object) : objectService.getSize(object);
         final String  namespace          = objectService.getNamespace(container, object);
-        final String  contentType        = systemMetadataService.getProperty(namespace, CONTENT_TYPE);
         final long    lastModified       = objectService.getLastModified(object);
         final long    creationTime       = objectService.getCreationTime(object);
         final String  etag               = dynamicLargeObjectEtag != null ? dynamicLargeObjectEtag : checksumService.calculateChecksum(container, object);
@@ -278,9 +278,30 @@ public class ObjectController<T> {
             headers.put(TRANSFER_ENCODING, (String) systemMetadata.get(TRANSFER_ENCODING));
         }
 
+        final String contentType;
+        final Long   size;
+
+        List<Segment<T>> segments;
+        
         final boolean staticLargeObject = objectService.isMultipartManifest(object);
         if (staticLargeObject) {
             headers.put(X_STATIC_LARGE_OBJECT, "True");
+            segments = listStaticLargeObject(request.getAccount(), object);
+            if ( !segments.isEmpty() ) {
+                long totalSize = 0L;
+                for (Segment<T> next : segments) {
+                    totalSize += next.getSize();
+                }
+                size = totalSize;
+                contentType = segments.get(0).getContentType();
+            } else {
+                size = 0L;
+                contentType = null;
+            }
+        } else {
+            segments = emptyList();
+            contentType = systemMetadataService.getProperty(namespace, CONTENT_TYPE);
+            size = dynamicLargeObject ? objectService.getDyanmicObjectSize(object) : objectService.getSize(object);
         }
 
         final boolean isLargeObject = dynamicLargeObject || manifest;
@@ -295,13 +316,12 @@ public class ObjectController<T> {
                                                       lastModified      , creationTime,
                                                       objectEtag        , contentType ,
                                                       contentDisposition, manifest    ,
-                                                      dynamicLargeObject, headers);
+                                                      dynamicLargeObject, headers,
+                                                      segments);
 
         final ResourceHandler<T> handler = new ResourceHandler<>(
                                                 objectService,
-                                                resource,
-                                                request.getAccount(),
-                                                request.getContainer());
+                                                resource);
 
         final Status status;
         try {
@@ -312,6 +332,41 @@ public class ObjectController<T> {
 
         final ResponseBuilder builder = status(status);
         return builder.build();
+    }
+
+    @SuppressWarnings("unchecked")
+    protected List<Segment<T>> listStaticLargeObject(final String accountName, final T manifestObject) {
+        final List<Segment<T>> segments = new ArrayList<>();
+        try (final BufferedReader reader = new BufferedReader(newReader(objectService.getReadableChannel(manifestObject), UTF_8.name()))) {
+            final StringBuilder builder = new StringBuilder();
+            String line;
+            while ( ( line = reader.readLine() ) != null ) {
+                builder.append(line);
+            }
+            final Json json = Json.read(builder.toString());
+            final List<Object> list = json.asList();
+            for (Object next : list) {
+                final Map<String, Object> foo = (Map<String, Object>) next;
+                final String path = removeLeadingSlash(foo.get("path").toString());
+                if ( path != null && ! path.trim().isEmpty() ) {
+                    final String containerName = path.indexOf(CHAR_SLASH) > 0 ? path.substring(0, path.indexOf(CHAR_SLASH)) : null;
+                    final String objectPath = path.substring(path.indexOf(CHAR_SLASH) + 1, path.length());
+                    T container = containerService.getContainer(accountName, containerName);
+                    if ( container != null ) {
+                        final T object = objectService.getObject(accountName, containerName, objectPath);
+                        if ( object != null ) {
+                            final long size = objectService.getSize(object);
+                            final String contentType = checksumService.getMimeType(container, object, true);
+                            Segment<T> segment = new Segment<T>(contentType, size, container, object);
+                            segments.add(segment);
+                        }
+                    }
+                }
+            }
+        } catch (IOException e) {
+            throw new CormorantException(e);
+        }
+        return segments;
     }
 
     @PUT
@@ -478,10 +533,10 @@ public class ObjectController<T> {
                                     Map<String, Object> map = (Map<String, Object>) next;
                                     String path = (String) map.get("path");
                                     final String directoryPath = removeLeadingSlash(path);
-                                    final String containerName = directoryPath.indexOf(SLASH) > 0 ? directoryPath.substring(0, directoryPath.indexOf(SLASH)) : null;
+                                    final String containerName = directoryPath.indexOf(CHAR_SLASH) > 0 ? directoryPath.substring(0, directoryPath.indexOf(CHAR_SLASH)) : null;
                                     final T manifestContainer = containerService.getContainer(request.getAccount(), containerName);
                                     if ( manifestContainer != null ) {
-                                        String objectPath = directoryPath.substring(directoryPath.indexOf(SLASH) + 1, directoryPath.length());
+                                        String objectPath = directoryPath.substring(directoryPath.indexOf(CHAR_SLASH) + 1, directoryPath.length());
                                         T manifestObject = objectService.getObject(request.getAccount(), containerName, objectPath);
                                         if ( manifestObject != null ) {
                                             if ( objectService.exist(manifestContainer, manifestObject) &&
@@ -535,11 +590,11 @@ public class ObjectController<T> {
         final T dynamicLargeObjectContainer;
         if ( request.getObjectManifest() != null ) {
             final String directoryPath = removeLeadingSlash(request.getObjectManifest());
-            final String containerName = directoryPath.indexOf(SLASH) > 0 ? directoryPath.substring(0, directoryPath.indexOf(SLASH)) : null;
+            final String containerName = directoryPath.indexOf(CHAR_SLASH) > 0 ? directoryPath.substring(0, directoryPath.indexOf(CHAR_SLASH)) : null;
             if ( containerName != null ) {
                 dynamicLargeObjectContainer = containerService.getContainer(request.getAccount(), containerName);
                 if (objectService.isValidPath(dynamicLargeObjectContainer, directoryPath)) {
-                    final String objectPath = directoryPath.substring(directoryPath.indexOf(SLASH) + 1, directoryPath.length());
+                    final String objectPath = directoryPath.substring(directoryPath.indexOf(CHAR_SLASH) + 1, directoryPath.length());
                     object = objectService.getDirectory(dynamicLargeObjectContainer, objectPath);
                 } else {
                     object = null;
@@ -611,7 +666,7 @@ public class ObjectController<T> {
                                             request.getAccount() : request.getDestinationAccount();
 
         final String targetPath = removeLeadingSlash(request.getDestination());
-        final int    start      = targetPath.indexOf(SLASH);
+        final int    start      = targetPath.indexOf(CHAR_SLASH);
 
         if (start < 0) {
             throw new CormorantException("Failed to copy object [" + targetPath + "]. Missing container name.");
@@ -823,7 +878,7 @@ public class ObjectController<T> {
         final boolean chunked = isChunked(request.getTransferEncoding());
 
         if ( copy ) {
-            final int start = copyFrom.indexOf(SLASH);
+            final int start = copyFrom.indexOf(CHAR_SLASH);
             if (start < 0) {
                 throw new CormorantException("Failed to copy object [" + copyFrom + "]. Missing container name. " +
                                              "[X-Copy-From] header value must be in form {container}/{object}.");
@@ -1004,10 +1059,10 @@ public class ObjectController<T> {
             return null;
         }
         String normalizedPath = path;
-        if (normalizedPath.charAt(0) == SLASH.charAt(0)) {
+        if (normalizedPath.charAt(0) == CHAR_SLASH) {
             normalizedPath = path.substring(1, path.length());
         }
-        if (normalizedPath.charAt(0) == SLASH.charAt(0)) {
+        if (normalizedPath.charAt(0) == CHAR_SLASH) {
             normalizedPath = LEADING_SLASH.matcher(normalizedPath).replaceAll("");
         }
         return normalizedPath;
