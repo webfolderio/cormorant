@@ -57,7 +57,7 @@ jobs:
           name: Execute tempest
           background: true
           command: |
-            sleep 1
+            sleep 2
             source ./refstack-client/.venv/bin/activate
             ./refstack-client/refstack-client test -c tempest.conf -v --test-list cormorant-tempest.txt
             wget http://localhost:5000/shutdown
