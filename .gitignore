@@ -6,3 +6,10 @@
 /mymetadata/
 /.clover/
 /dependency-reduced-pom.xml
+/cormorant-core/target
+/cormorant-core/.classpath
+/cormorant-core/.gitignore
+/cormorant-core/.project
+/cormorant-core/.settings
+/cormorant-core/mydir
+/cormorant-core/mymetadata
