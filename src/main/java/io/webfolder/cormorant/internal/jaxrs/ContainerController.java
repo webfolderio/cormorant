@@ -168,7 +168,8 @@ public class ContainerController<T> {
     public Response post(@BeanParam final ContainerPostRequest request) {
         final String account = request.getAccount();
         final String container = request.getContainer();
-        if ( account != null && container != null && accountService.containsContainer(account, container) ) {
+        final boolean foundContainer = accountService.containsContainer(account, container);
+        if ( account != null && container != null && foundContainer ) {
             MultivaluedMap<String, String> headers = httpHeaders.getRequestHeaders();
             for (String key : headers.keySet()) {
                 // Metadata keys (the name of the metadata) must be treated as case-insensitive at all times.
@@ -209,7 +210,7 @@ public class ContainerController<T> {
         }
         ContainerPostResponse response = new ContainerPostResponse();
         response.setContentType(TEXT_PLAIN);
-        return status(NO_CONTENT).entity(response).build();
+        return status(foundContainer ? NO_CONTENT : NOT_FOUND).entity(response).build();
     }
 
     /**
@@ -255,7 +256,7 @@ public class ContainerController<T> {
         containerService.delete(request.getAccount(), request.getContainer());
         final boolean successful = accountService.getContainer(request.getAccount(), request.getContainer()) == null;
         if ( ! successful ) {
-            throw new CormorantException("Container [" + request.getContainer() + "] is not empty.", CONFLICT);
+            throw new CormorantException("There was a conflict when trying to complete your request.", CONFLICT);
         } else {
             final ContainerDeleteResponse response = new ContainerDeleteResponse();
             response.setContentType(TEXT_PLAIN);
