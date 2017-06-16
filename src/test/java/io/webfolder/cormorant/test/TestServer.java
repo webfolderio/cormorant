@@ -17,13 +17,18 @@
  */
 package io.webfolder.cormorant.test;
 
-import static java.util.Locale.ENGLISH;
+import static io.undertow.Handlers.predicate;
+import static io.undertow.Handlers.requestDump;
+import static io.undertow.predicate.Predicates.path;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Locale;
+import java.util.concurrent.CountDownLatch;
 
-import io.undertow.Handlers;
+import org.junit.Test;
+
+import io.undertow.server.HttpHandler;
+import io.undertow.server.HttpServerExchange;
 import io.webfolder.cormorant.api.CormorantApplication;
 import io.webfolder.cormorant.api.CormorantServer;
 import io.webfolder.cormorant.api.service.AccountService;
@@ -31,17 +36,18 @@ import io.webfolder.cormorant.api.service.AuthenticationService;
 
 public class TestServer {
 
-    public static void main(String[] args) {
-        System.setProperty("org.slf4j.simpleLogger.defaultLogLevel", "debug");
+    @Test
+    public void startServer() {
 
-        Locale.setDefault(ENGLISH);
+        if ( ! "true".equals(System.getProperty("start.server")) ) {
+            return;
+        }
 
         CormorantServer server = new CormorantServer();
+
         Path objectStore = Paths.get("mydir");
         Path metadataStore = Paths.get("mymetadata");
-
-        server.setHost("localhost");
-
+        
         AccountService accountService = new TestAccountService(objectStore);
         AuthenticationService authenticationService = new TestAuthenticationService();
 
@@ -54,6 +60,42 @@ public class TestServer {
                                          server.getPort(),
                                          "",
                                          "myaccount"));
-        server.start((root) -> { return Handlers.requestDump(root); });
+
+        CountDownLatch latch = new CountDownLatch(1);
+
+        HttpHandler shutdownHandler = new HttpHandler() {
+
+            @Override
+            public void handleRequest(HttpServerExchange exchange) throws Exception {
+                new Thread() {
+
+                    @Override
+                    public void run() {
+                        try {
+                            Thread.sleep(1000);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        System.out.println("bye");
+                        latch.countDown();
+                    }
+                }.start();
+
+                exchange.setStatusCode(200);
+                exchange.getResponseSender().send("OK");
+                exchange.getResponseSender().close();
+            }
+        };
+
+        server.start((root) -> { return
+                    predicate(path("/shutdown"), shutdownHandler, requestDump(root));
+        });
+
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            System.exit(-2);
+        }
     }
 }

@@ -130,30 +130,22 @@
                 </configuration>
             </plugin>
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>exec-maven-plugin</artifactId>
-                <version>1.6.0</version>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>0.7.9</version>
                 <executions>
                     <execution>
+                        <id>prepare-agent</id>
                         <goals>
-                            <goal>java</goal>
+                            <goal>prepare-agent</goal>
                         </goals>
                     </execution>
                 </executions>
-                <configuration>
-                    <mainClass>io.webfolder.cormorant.test.TestServer</mainClass>
-                    <classpathScope>test</classpathScope>
-                    <systemProperties>
-                        <systemProperty>
-                            <key>org.slf4j.simpleLogger.defaultLogLevel</key>
-                            <value>error</value>
-                        </systemProperty>
-                        <systemProperty>
-                            <key>user.language</key>
-                            <value>en</value>
-                        </systemProperty>
-                    </systemProperties>
-                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.eluder.coveralls</groupId>
+                <artifactId>coveralls-maven-plugin</artifactId>
+                <version>4.3.0</version>
             </plugin>
         </plugins>
     </build>
