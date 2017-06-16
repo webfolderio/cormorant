@@ -42,11 +42,6 @@ jobs:
           command: mvn -q test
 
       - run:
-          name: Start Server
-          command: mvn clean -Dtest=TestServer#startServer -Dstart.server=true -Dorg.slf4j.simpleLogger.defaultLogLevel=error -Duser.language=en test jacoco:report coveralls:report -DrepoToken=$COVERALLS_TOKEN
-          background: true
-
-      - run:
           name: Install git client
           command: sudo apt-get install git -y
 
@@ -60,13 +55,17 @@ jobs:
 
       - run:
           name: Execute tempest
+          background: true
           command: |
+            sleep 1
             source ./refstack-client/.venv/bin/activate
             ./refstack-client/refstack-client test -c tempest.conf -v --test-list cormorant-tempest.txt
+            wget http://localhost:5000/shutdown
 
       - run:
-          name: Shutdown Server
-          command: wget http://localhost:5000/shutdown
+          name: Start server
+          command: |
+            mvn -Dtest=TestServer#startServer -Dstart.server=true -Dorg.slf4j.simpleLogger.defaultLogLevel=error -Duser.language=en test jacoco:report coveralls:report -DrepoToken=$COVERALLS_TOKEN
 
       - store_test_results:
           path: target/surefire-reports

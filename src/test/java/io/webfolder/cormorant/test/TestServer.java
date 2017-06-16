@@ -46,6 +46,7 @@ public class TestServer {
         CormorantServer server = new CormorantServer();
 
         Path objectStore = Paths.get("mydir");
+
         Path metadataStore = Paths.get("mymetadata");
         
         AccountService accountService = new TestAccountService(objectStore);
@@ -87,8 +88,10 @@ public class TestServer {
             }
         };
 
+        boolean dumpRequest = "true".equals(System.getProperty("dump.request"));
+
         server.start((root) -> { return
-                    predicate(path("/shutdown"), shutdownHandler, requestDump(root));
+            predicate(path("/shutdown"), shutdownHandler, dumpRequest ? requestDump(root) : root);
         });
 
         try {
