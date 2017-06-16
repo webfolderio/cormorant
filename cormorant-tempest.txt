@@ -7,7 +7,6 @@ tempest.api.object_storage.test_account_services.AccountTest.test_update_account
 tempest.api.object_storage.test_account_services.AccountTest.test_update_account_metadata_with_create_metadata_key[id-64fd53f3-adbd-4639-af54-436e4982dbfb]
 tempest.api.object_storage.test_account_services.AccountTest.test_update_account_metadata_with_delete_metadata[id-9f60348d-c46f-4465-ae06-d51dbd470953]
 tempest.api.object_storage.test_account_services.AccountTest.test_update_account_metadata_with_delete_metadata_key[id-d4d884d3-4696-4b85-bc98-4f57c4dd2bf1]
-tempest.api.object_storage.test_container_acl.ObjectTestACLs.test_read_object_with_rights[id-a3270f3f-7640-4944-8448-c7ea783ea5b6]
 tempest.api.object_storage.test_container_quotas.ContainerQuotasTest.test_upload_large_object[id-22eeeb2b-3668-4160-baef-44790f65a5a0]
 tempest.api.object_storage.test_container_quotas.ContainerQuotasTest.test_upload_too_many_objects[id-3a387039-697a-44fc-a9c0-935de31f426b]
 tempest.api.object_storage.test_container_quotas.ContainerQuotasTest.test_upload_valid_object[id-9a0fb034-86af-4df0-86fa-f8bd7db21ae0]
