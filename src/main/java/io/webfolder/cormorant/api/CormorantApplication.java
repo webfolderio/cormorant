@@ -50,6 +50,7 @@ import io.webfolder.cormorant.api.service.ObjectService;
 import io.webfolder.cormorant.internal.jaxrs.AccountController;
 import io.webfolder.cormorant.internal.jaxrs.AuthenticationController;
 import io.webfolder.cormorant.internal.jaxrs.ContainerController;
+import io.webfolder.cormorant.internal.jaxrs.HealthCheckController;
 import io.webfolder.cormorant.internal.jaxrs.ObjectController;
 
 public class CormorantApplication extends Application {
@@ -114,6 +115,8 @@ public class CormorantApplication extends Application {
                                                                 new DefaultCacheFactory();
 
         final Map<String, Principal> tokens = cacheFactory.create(TOKENS);
+
+        singletons.add(new HealthCheckController());
 
         singletons.add(new CormorantFeature<>(tokens, authenticationService, accountMetadataService, containerService, contextPath));
 

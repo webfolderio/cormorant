@@ -208,6 +208,7 @@ public class ContainerController<T> {
             }
         }
         ContainerPostResponse response = new ContainerPostResponse();
+        response.setContentType(TEXT_PLAIN);
         return status(NO_CONTENT).entity(response).build();
     }
 

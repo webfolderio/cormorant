@@ -208,6 +208,15 @@ public class ResponseWriter implements MessageBodyWriter {
 
                 agr.getResponse().setContentType(applicationXml);
                 agr.getResponse().setContentLength(valueOf(content.length()));                
+            } else {
+                List<AccountGetResponseBody> list = agr.getBody();
+                for (int i = 0; i < list.size(); i++) {
+                    AccountGetResponseBody next = list.get(i);
+                    builder.append(next.getName()).append("\r\n");
+                }
+                content = builder.toString();
+                agr.getResponse().setContentType(textPlain);
+                agr.getResponse().setContentLength(valueOf(content.length()));
             }
         } else if (ContainerGetResponseContext.class.isInstance(retValue)) {
             final ContainerGetResponseContext cgr = (ContainerGetResponseContext) retValue;

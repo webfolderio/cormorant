@@ -63,6 +63,9 @@ public class AccountGetResponse implements CormorantResponse {
     @HeaderParam("Content-Type")
     private String contentType;
 
+    @HeaderParam("Accept-Ranges")
+    private String acceptRanges;
+
     /**
      * <p>If the operation succeeds, the length of the response body in bytes. On error, this is the length of the error text.</p>
      */
@@ -257,5 +260,13 @@ public class AccountGetResponse implements CormorantResponse {
      */
     public void setContentType(String contentType) {
         this.contentType = contentType;
+    }
+
+    public String getAcceptRanges() {
+        return acceptRanges;
+    }
+
+    public void setAcceptRanges(String acceptRanges) {
+        this.acceptRanges = acceptRanges;
     }
 }

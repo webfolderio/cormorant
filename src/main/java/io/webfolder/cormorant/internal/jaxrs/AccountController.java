@@ -19,6 +19,7 @@ package io.webfolder.cormorant.internal.jaxrs;
 
 import static java.util.Collections.emptyList;
 import static java.util.Locale.ENGLISH;
+import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
 import static javax.ws.rs.core.Response.ok;
 import static javax.ws.rs.core.Response.status;
 import static javax.ws.rs.core.Response.Status.NO_CONTENT;
@@ -62,9 +63,11 @@ import io.webfolder.cormorant.internal.response.AccountPostResponse;
 @DeclareRoles({ "cormorant-account" })
 public class AccountController {
 
-    private static final String META_PREFIX = "x-account-meta-";
+    private static final String META_PREFIX        = "x-account-meta-";
 
     private static final String META_REMOVE_PREFIX = "x-remove-account-meta-";
+
+    private static final String BYTES_RESPONSE     = "bytes";
 
     private final AccountService accountService;
 
@@ -103,6 +106,14 @@ public class AccountController {
             body.setLastModified(next.getLastModified());
             context.getBody().add(body);
         }
+        Account account = accountService.getAccount(request.getAccount());
+        if ( account != null ) {
+            context.getResponse().setTimestamp(account.getTimestamp());
+            context.getResponse().setAccountBytesUsed(account.getTotalBytesUsed());
+            context.getResponse().setAccountContainerCount(account.getTotalContainerCount());
+            context.getResponse().setAccountObjectCount(account.getTotalObjectCount());
+        }
+        context.getResponse().setAcceptRanges(BYTES_RESPONSE);
         return context;
     }
 
@@ -189,6 +200,7 @@ public class AccountController {
             }
         }
         AccountPostResponse response = new AccountPostResponse();
+        response.setContentType(TEXT_PLAIN);
         return status(NO_CONTENT).entity(response).build();
     }
 }
