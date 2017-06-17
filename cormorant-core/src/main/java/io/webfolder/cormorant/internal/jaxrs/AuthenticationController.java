@@ -44,6 +44,7 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.HEAD;
+import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
@@ -70,7 +71,7 @@ public class AuthenticationController {
 
     private static final String HEADER_AUTH_TOKEN_PREFIX = "AUTH_";
 
-    private static final String HEADER_SUBJECT_TOKEN = "X-Subject-Token";
+    private static final String HEADER_SUBJECT_TOKEN     = "X-Subject-Token";
 
     private final ThreadLocalRandom random = ThreadLocalRandom.current();
 
@@ -183,16 +184,9 @@ public class AuthenticationController {
 
     @DELETE
     @Path("/v2.0/tokens")
-    public Response revokeTokensV2() {
-        final Principal principal = securityContext.getUserPrincipal();
-        if ( principal != null ) {
-            for (Map.Entry<String, Principal> next : this.tokens.entrySet()) {
-                if (principal.getName().equals(next.getValue().getName())) {
-                    this.tokens.remove(next.getKey());
-                }
-            }
-        }
-        return ok().build();
+    public Response revokeTokensV2(@HeaderParam("AUTH_TOKEN") final String authToken) {
+        return Response.status(tokens.remove(authToken) != null ?
+                    Status.NO_CONTENT : Status.BAD_REQUEST).build();
     }
 
     @HEAD
@@ -360,8 +354,8 @@ public class AuthenticationController {
 
     @DELETE
     @Path("/v3/auth/tokens")
-    public Response revokeTokensV3() {
-        return revokeTokensV2();
+    public Response revokeTokensV3(@HeaderParam("AUTH_TOKEN") final String authToken) {
+        return revokeTokensV2(authToken);
     }
 
     @HEAD
@@ -395,10 +389,7 @@ public class AuthenticationController {
             return Response.status(Status.NOT_FOUND).entity("User [" + userId + "] not found").build();
         }
         boolean deleted = authenticationService.deleteUser(userId);
-        if (deleted) {
-            revokeTokensV3();
-        }
-        return Response.status(Status.NO_CONTENT).build();
+        return Response.status(deleted ? Status.NO_CONTENT : Status.BAD_REQUEST).build();
     }
 
     @DELETE
@@ -407,8 +398,8 @@ public class AuthenticationController {
         if ( ! authenticationService.containsProject(projectId) ) {
             return Response.status(Status.NOT_FOUND).entity("Project [" + projectId + "] not found").build();   
         }
-        authenticationService.deleteProject(projectId);
-        return Response.status(Status.NO_CONTENT).build();
+        boolean deleted = authenticationService.deleteProject(projectId);
+        return Response.status(deleted ? Status.NO_CONTENT : Status.BAD_REQUEST).build();
     }
 
     protected String loadResource(final String name) {

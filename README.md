@@ -19,7 +19,7 @@ Features
 * Upload & download Static Large Objects
 * Upload & download Dynamic Large Objects
 * Supports TempURL
-* [Passed 84](https://github.com/webfolderio/cormorant/blob/master/tempest.conf) test of tempest
+* [Passed 84](https://github.com/webfolderio/cormorant/blob/master/cormorant-tempest.txt) test of tempest
 * Support container quotas
 
 License

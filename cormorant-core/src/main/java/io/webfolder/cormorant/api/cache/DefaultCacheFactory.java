@@ -32,8 +32,6 @@ public class DefaultCacheFactory implements CacheFactory {
 
     public static final int CACHE_DURATION = 60 * 60 * 24;
 
-    // TODO: auth?
-    // https://developer.rackspace.com/docs/cloud-identity/v2/getting-started/manage-auth-tokens/
     @Override
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public <K, V> Map<K, V> create(String name) {
