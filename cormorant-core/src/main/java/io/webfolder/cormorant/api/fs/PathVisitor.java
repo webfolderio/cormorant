@@ -17,6 +17,7 @@
  */
 package io.webfolder.cormorant.api.fs;
 
+import static java.lang.Boolean.TRUE;
 import static java.nio.file.FileVisitResult.CONTINUE;
 import static java.nio.file.FileVisitResult.TERMINATE;
 
@@ -27,6 +28,7 @@ import java.nio.file.FileVisitor;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Iterator;
+import java.util.NavigableSet;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -56,6 +58,8 @@ class PathVisitor implements FileVisitor<Path>, DirectoryStream<Path> {
 
     private final String endMarker;
 
+    private final boolean reverse;
+
     public PathVisitor(
                     final ListContainerOptions options,
                     final Path root,
@@ -67,6 +71,7 @@ class PathVisitor implements FileVisitor<Path>, DirectoryStream<Path> {
         this.limit               = options.getLimit()     == null ? pathMaxCount           : options.getLimit();
         this.marker              = options.getMarker()    != null ? options.getMarker()    : null;
         this.endMarker           = options.getEndMarker() != null ? options.getEndMarker() : null;
+        this.reverse             = TRUE.equals(options.getReverse());
     }
 
     @Override
@@ -122,19 +127,19 @@ class PathVisitor implements FileVisitor<Path>, DirectoryStream<Path> {
     @Override
     public Iterator<Path> iterator() {
         final boolean inclusive = false;
+        NavigableSet<Path> set = files;
         if ( marker != null && endMarker != null ) {
             final Path pMarker = root.resolve(marker).toAbsolutePath().normalize();
             final Path pEndMarker = root.resolve(endMarker).toAbsolutePath().normalize();
-            return files.subSet(pMarker, inclusive, pEndMarker, inclusive).iterator();
+            set = files.subSet(pMarker, inclusive, pEndMarker, inclusive);
         } else if ( marker != null && endMarker == null ) {
             final Path pMarker = root.resolve(marker).toAbsolutePath().normalize();
-            return files.tailSet(pMarker, inclusive).iterator();
+            set = files.tailSet(pMarker, inclusive);
         } else if ( marker == null && endMarker != null ) {
             final Path pEndMarker = root.resolve(endMarker).toAbsolutePath().normalize();
-            return files.headSet(pEndMarker, inclusive).iterator();
-        } else {
-            return files.iterator();
+            set = files.headSet(pEndMarker, inclusive);
         }
+        return reverse ? set.descendingIterator() : set.iterator();
     }
 
     @Override

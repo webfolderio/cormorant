@@ -113,6 +113,9 @@ public class AccountController {
             }
             containers = set;
         }
+        if (TRUE.equals(request.getReverse())) {
+            containers = containers.descendingSet();
+        }
         final boolean inclusive = false;
         if ( request.getMarker() != null && request.getEndMarker() != null ) {
             containers = containers.subSet(new Container(request.getMarker()), inclusive, new Container(request.getEndMarker()), inclusive);
@@ -120,9 +123,6 @@ public class AccountController {
             containers = containers.tailSet(new Container(request.getMarker()), inclusive);
         } else if ( request.getMarker() == null && request.getEndMarker() != null ) {
             containers = containers.headSet(new Container(request.getEndMarker()), inclusive);
-        }
-        if (TRUE.equals(request.getReverse())) {
-            containers = containers.descendingSet();
         }
         for (Container next : containers) {
             AccountGetResponseBody body = new AccountGetResponseBody();

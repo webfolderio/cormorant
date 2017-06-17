@@ -31,19 +31,23 @@ public class ListContainerOptions {
 
     private final String endMarker;
 
+    private final Boolean reverse;
+
     public ListContainerOptions(
                     final String path,
                     final String delimiter,
                     final String prefix,
                     final Integer limit,
                     final String marker,
-                    final String endMarker) {
+                    final String endMarker,
+                    final Boolean reverse) {
         this.path = path;
         this.delimiter = delimiter;
         this.prefix = prefix;
         this.limit = limit;
         this.marker = marker;
         this.endMarker = endMarker;
+        this.reverse = reverse;
     }
 
     public String getPath() {
@@ -70,9 +74,7 @@ public class ListContainerOptions {
         return endMarker;
     }
 
-    @Override
-    public String toString() {
-        return "ListContainerOptions [path=" + path + ", delimiter=" + delimiter + ", prefix=" + prefix + ", limit="
-                + limit + ", marker=" + marker + ", endMarker=" + endMarker + "]";
+    public Boolean getReverse() {
+        return reverse;
     }
 }

@@ -115,7 +115,8 @@ public class ContainerController<T> {
                                                     request.getPrefix(),
                                                     request.getLimit(),
                                                     request.getMarker(),
-                                                    request.getEndMarker());
+                                                    request.getEndMarker(),
+                                                    request.getReverse());
         ResourceStream<?> resources = null;
         if ( request.getContainer() != null &&
                     ! request.getContainer().trim().isEmpty() ) {

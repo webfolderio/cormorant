@@ -73,6 +73,9 @@ public class ContainerGetRequest {
     @HeaderParam("X-Storage-Policy")
     private String storagePolicy;
 
+    @QueryParam("reverse")
+    private Boolean reverse;
+
     /**
      * <p>The unique name for the account. An account is also known as the project or tenant.</p>
      */
@@ -309,5 +312,13 @@ public class ContainerGetRequest {
      */
     public void setStoragePolicy(String storagePolicy) {
         this.storagePolicy = storagePolicy;
+    }
+
+    public Boolean getReverse() {
+        return reverse;
+    }
+
+    public void setReverse(Boolean reverse) {
+        this.reverse = reverse;
     }
 }
