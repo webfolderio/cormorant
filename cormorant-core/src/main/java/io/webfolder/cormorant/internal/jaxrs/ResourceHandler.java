@@ -335,7 +335,6 @@ class ResourceHandler<T> {
     protected boolean isModified(
                         final long modifiedHeader,
                         final long lastModified) {
-        System.out.println(modifiedHeader + " - " + lastModified);
         return (modifiedHeader + ONE_SECOND_IN_MILLIS <= lastModified);
     }
 

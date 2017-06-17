@@ -30,14 +30,18 @@ class CormorantSecurityContext implements SecurityContext {
     private final Principal principal;
 
     private final AuthenticationService authenticationService;
+
+    private final String method;
     
     public CormorantSecurityContext(
-                final SecurityContext securityContext,
-                final Principal principal,
-                final AuthenticationService authenticationService) {
+                final SecurityContext       securityContext,
+                final Principal             principal,
+                final AuthenticationService authenticationService,
+                final String                method) {
         this.securityContext = securityContext;
         this.principal = principal;
         this.authenticationService = authenticationService;
+        this.method = method;
     }
 
     @Override
@@ -47,7 +51,7 @@ class CormorantSecurityContext implements SecurityContext {
 
     @Override
     public boolean isUserInRole(String role) {
-        return authenticationService.isUserInRole(principal.getName(), role);
+        return authenticationService.hasPermission(principal.getName(), role, method);
     }
 
     @Override

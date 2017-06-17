@@ -21,7 +21,6 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Response;
 
-@PermitAll
 @Path("/")
 public class HealthCheckController {
 
@@ -34,6 +33,7 @@ public class HealthCheckController {
                                                     .withZone(GMT);
 
     @GET
+    @PermitAll
     @Path("/healthcheck")
     public Response infoV2() {
         final String part1 = leadingZeros(valueOf(toHexString(current().nextLong())), 21);

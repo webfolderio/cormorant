@@ -17,22 +17,10 @@
  */
 package io.webfolder.cormorant.api.model;
 
-public class Domain {
+public class Permission {
 
-    private final String name;
-
-    private final String id;
-
-    public Domain(String name, String id) {
-        this.name = name;
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getId() {
-        return id;
-    }
+    public static final String OBJECT    = "cormorant-object"   ;
+    public static final String CONTAINER = "cormorant-container";
+    public static final String ACCOUNT   = "cormorant-account"  ;
+    public static final String ADMIN     = "cormorant-admin"    ;
 }

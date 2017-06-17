@@ -1,7 +1,7 @@
 {
     "roles": [{
-            "id": "admin",
-            "name": "admin"
+            "id": "Admin",
+            "name": "Admin"
         },
         {
             "id": "Member",

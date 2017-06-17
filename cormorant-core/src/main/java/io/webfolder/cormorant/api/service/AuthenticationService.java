@@ -19,27 +19,30 @@ package io.webfolder.cormorant.api.service;
 
 import io.webfolder.cormorant.api.model.Domain;
 import io.webfolder.cormorant.api.model.Project;
+import io.webfolder.cormorant.api.model.Role;
 import io.webfolder.cormorant.api.model.User;
 
 public interface AuthenticationService {
 
     boolean authenticate(String username, String password);
 
-    boolean isUserInRole(String username, String role);
+    boolean hasPermission(String username, String permission, String method);
 
     String createProject(Project project);
 
     String createUser(User user);
 
-    Domain getDomain();
-
-    void deleteUser(String username);
+    boolean deleteUser(String userId);
 
     boolean containsUser(String username);
 
     boolean containsProject(String projectId);
 
-    void deleteProject(String projectId);
+    boolean deleteProject(String projectId);
 
-    String getRole(String username);
+    Role getRole(String username);
+
+    void assignRole(String userId, String role);
+
+    Domain getDomain();
 }

@@ -17,9 +17,11 @@
  */
 package io.webfolder.cormorant.internal.jaxrs;
 
+import java.lang.reflect.Method;
 import java.security.Principal;
 import java.util.Map;
 
+import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.container.DynamicFeature;
 import javax.ws.rs.container.ResourceInfo;
@@ -58,7 +60,15 @@ public class CormorantAuthenticationFeature<T> implements DynamicFeature {
     public void configure(
                     final ResourceInfo   resourceInfo,
                     final FeatureContext context) {
-        final Class<?> klass = resourceInfo.getResourceClass();
+
+        final Method method = resourceInfo.getResourceMethod();
+
+        if (method.isAnnotationPresent(PermitAll.class)) {
+            return;
+        }
+
+        final Class<?> klass  = resourceInfo.getResourceClass();
+
         if (klass.getPackage()
                 .equals(getClass().getPackage()) &&
                 klass.isAnnotationPresent(RolesAllowed.class)) {

@@ -29,15 +29,19 @@ public class User {
 
     private final boolean enable;
 
+    private final Role role;
+
     public User(final String username,
                 final String password,
                 final String email,
                 final String projectId,
+                final Role   role,
                 final boolean enable) {
         this.username  = username;
         this.password  = password;
         this.email     = email;
         this.projectId = projectId;
+        this.role      = role;
         this.enable    = enable;
     }
 
@@ -61,9 +65,7 @@ public class User {
         return enable;
     }
 
-    @Override
-    public String toString() {
-        return "User [username=" + username + ", password=" + password + ", email=" + email + ", projectId=" + projectId
-                + ", enable=" + enable + "]";
+    public Role getRole() {
+        return role;
     }
 }

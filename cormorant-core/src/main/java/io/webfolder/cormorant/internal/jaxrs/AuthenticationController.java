@@ -37,7 +37,9 @@ import java.util.Map;
 import java.util.Scanner;
 import java.util.concurrent.ThreadLocalRandom;
 
+import javax.annotation.security.DeclareRoles;
 import javax.annotation.security.PermitAll;
+import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -54,11 +56,13 @@ import io.webfolder.cormorant.api.Json;
 import io.webfolder.cormorant.api.exception.CormorantException;
 import io.webfolder.cormorant.api.model.Domain;
 import io.webfolder.cormorant.api.model.Project;
+import io.webfolder.cormorant.api.model.Role;
 import io.webfolder.cormorant.api.model.User;
 import io.webfolder.cormorant.api.service.AuthenticationService;
 
-@PermitAll
 @Path("/")
+@RolesAllowed({ "cormorant-admin" })
+@DeclareRoles({ "cormorant-admin" })
 public class AuthenticationController {
 
     private static final String HEADER_AUTH_TOKEN_PREFIX = "AUTH_";
@@ -125,6 +129,7 @@ public class AuthenticationController {
     }
 
     @POST
+    @PermitAll
     @Path("/v2.0/tokens")
     @Produces(APPLICATION_JSON)
     @Consumes(APPLICATION_JSON)
@@ -158,8 +163,8 @@ public class AuthenticationController {
         response = response.replace("__TENANT_NAME__", "default");
         response = response.replace("__USER_NAME__"  , username);
         response = response.replace("__USER_ID__"    , username);
-        response = response.replace("__ROLE_ID__"    , authenticationService.getRole(username));
-        response = response.replace("__ROLE_NAME__"  , authenticationService.getRole(username));
+        response = response.replace("__ROLE_ID__"    , authenticationService.getRole(username).toString());
+        response = response.replace("__ROLE_NAME__"  , authenticationService.getRole(username).toString());
         response = response.replace("__EXPIRES__"    , expires.toString());
         response = response.replace("__PUBLIC_URL__" , publicUrl);
 
@@ -227,7 +232,7 @@ public class AuthenticationController {
         final String              username  = (String) map.get("name");
         final String              email     = (String) map.get("email");
 
-        final User   user   = new User(username, password, email, projectId, true);
+        final User   user   = new User(username, password, email, projectId, Role.None, true);
         final String id     = authenticationService.createUser(user);
         final Domain domain = authenticationService.getDomain();
 
@@ -241,6 +246,7 @@ public class AuthenticationController {
     }
 
     @POST
+    @PermitAll
     @Path("/v3/auth/tokens")
     @Produces(APPLICATION_JSON)
     @Consumes(APPLICATION_JSON)
@@ -313,8 +319,8 @@ public class AuthenticationController {
         response = response.replace("__EXPIRES_AT__"       , expires.toString());
         response = response.replace("__USER_ID__"          , authUsername);
         response = response.replace("__USER__"             , authUsername);
-        response = response.replace("__ROLE__"             , authenticationService.getRole(authUsername));
-        response = response.replace("__ROLE_ID__"          , authenticationService.getRole(authUsername));
+        response = response.replace("__ROLE__"             , authenticationService.getRole(authUsername).toString());
+        response = response.replace("__ROLE_ID__"          , authenticationService.getRole(authUsername).toString());
         response = response.replace("__AUDIT_ID__"         , auditId);
         response = response.replace("__ISSUED_AT__"        , now().toString());
 
@@ -340,6 +346,7 @@ public class AuthenticationController {
                                     @PathParam("projectId") final String projectId,
                                     @PathParam("userId")    final String userId,
                                     @PathParam("roleId")    final String roleId) {
+        authenticationService.assignRole(userId, roleId);
         return Response.status(Status.NO_CONTENT).build();
     }
 

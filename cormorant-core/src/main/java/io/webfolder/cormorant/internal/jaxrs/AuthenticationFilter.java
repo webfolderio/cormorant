@@ -17,6 +17,7 @@
  */
 package io.webfolder.cormorant.internal.jaxrs;
 
+import static io.webfolder.cormorant.api.model.Permission.ADMIN;
 import static java.lang.Long.parseLong;
 import static java.lang.String.format;
 import static java.lang.System.currentTimeMillis;
@@ -49,7 +50,7 @@ class AuthenticationFilter<T> implements ContainerRequestFilter {
 
     private final AuthenticationService  authenticationService;
 
-    private final String                 role;
+    private final String                 permission;
 
     private final String                 AUTH_TOKEN          = "X-Auth-Token";
 
@@ -69,13 +70,13 @@ class AuthenticationFilter<T> implements ContainerRequestFilter {
 
     public AuthenticationFilter(
                 final Map<String, Principal> tokens,
-                final String                 role,
+                final String                 permission,
                 final AuthenticationService  authenticationService,
                 final MetadataService        accountMetadataService,
                 final ContainerService<T>    containerService,
                 final String                 contextPath) {
         this.tokens                 = tokens;
-        this.role                   = role;
+        this.permission             = permission;
         this.authenticationService  = authenticationService;
         this.accountMetadataService = accountMetadataService;
         this.containerService       = containerService;
@@ -113,11 +114,13 @@ class AuthenticationFilter<T> implements ContainerRequestFilter {
                 return;
             }
         }
+
         final CormorantPrincipal principal = (CormorantPrincipal) tokens.get(authToken);
         if (principal == null) {
             requestContext.abortWith(status(UNAUTHORIZED).entity("401 Unauthorized").build());
             return;
         }
+
         if (now().isAfter(principal.getExpires())) {
             final String error = "Auth token has expired.";
             tokens.remove(authToken);
@@ -127,17 +130,24 @@ class AuthenticationFilter<T> implements ContainerRequestFilter {
                 .entity(error)
                 .build());
         }
-        final boolean authorized = authenticationService.isUserInRole(principal.getName(), role);
-        if ( ! authorized ) {
+
+        // Let the authenticated user delete its own account
+        // This logic is required to pass tempest (TokensV3Test.test_create_token)
+        boolean deleteSelf = ADMIN.equals(permission) &&
+                                "DELETE".equalsIgnoreCase(requestContext.getMethod()) &&
+                                principal.getName().equals(requestContext.getUriInfo().getPathParameters().getFirst("userId"));
+
+        final boolean authorized = authenticationService.hasPermission(principal.getName(), permission, requestContext.getMethod());
+        if ( ! deleteSelf && ! authorized ) {
             final String error = "Insufficient permission.";
             requestContext
-                    .abortWith(status(FORBIDDEN)
+            .abortWith(status(FORBIDDEN)
                     .header(CONTENT_LENGTH, error.length())
                     .entity(error)
                     .build());
         }
 
-        if ("cormorant-object".equals(role)) {
+        if ("cormorant-object".equals(permission)) {
             final String accountName = requestContext.getUriInfo().getPathParameters().getFirst("account");
             final String containerName = requestContext.getUriInfo().getPathParameters().getFirst("container");
             if ( ! containerService.contains(accountName, containerName) ) {
@@ -154,7 +164,8 @@ class AuthenticationFilter<T> implements ContainerRequestFilter {
         SecurityContext securityContext = requestContext.getSecurityContext();
         requestContext.setSecurityContext(new CormorantSecurityContext(securityContext,
                                                     principal,
-                                                    authenticationService));
+                                                    authenticationService,
+                                                    requestContext.getMethod()));
     }
 
     protected String bytesToHex(final byte[] bytes) {
