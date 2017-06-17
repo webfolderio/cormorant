@@ -7,6 +7,21 @@ Object Storage Server
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/d6af9f5df82d4568ba29ea6fceb9d605)](https://www.codacy.com/app/WebFolder/cormorant?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=webfolderio/cormorant&amp;utm_campaign=Badge_Grade)
 [![Coverage Status](https://coveralls.io/repos/github/webfolderio/cormorant/badge.svg?branch=master)](https://coveralls.io/github/webfolderio/cormorant?branch=master)
 
+Features
+--------
+* Authentication with Keystone V2 API
+* Authentication with Keystone V3.0 API
+* Set & get account metadata
+* Set & get container metadata
+* Set & get object metadata
+* List container
+* GET/PUT/HEAD/DELETE/POST/COPY Object
+* Upload & download Static Large Objects
+* Upload & download Dynamic Large Objects
+* Supports TempURL
+* [Passed 84](https://github.com/webfolderio/cormorant/blob/master/tempest.conf) test of tempest
+* Support container quotas
+
 License
 -------
 cormorant is licensed as [AGPL](https://github.com/webfolderio/cormorant/blob/master/LICENSE) software.

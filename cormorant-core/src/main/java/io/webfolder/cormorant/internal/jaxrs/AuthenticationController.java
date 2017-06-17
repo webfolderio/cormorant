@@ -43,14 +43,17 @@ import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
+import javax.ws.rs.HEAD;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.SecurityContext;
 
 import io.webfolder.cormorant.api.Json;
 import io.webfolder.cormorant.api.exception.CormorantException;
@@ -96,6 +99,9 @@ public class AuthenticationController {
     private final String contextPath;
 
     private final String accountName;
+
+    @Context
+    private SecurityContext securityContext;
 
     public AuthenticationController(
                 final Map<String, Principal> tokens,
@@ -173,6 +179,26 @@ public class AuthenticationController {
                     .header(CONTENT_LENGTH, response.length())
                     .entity(response)
                 .build();
+    }
+
+    @DELETE
+    @Path("/v2.0/tokens")
+    public Response revokeTokensV2() {
+        final Principal principal = securityContext.getUserPrincipal();
+        if ( principal != null ) {
+            for (Map.Entry<String, Principal> next : this.tokens.entrySet()) {
+                if (principal.getName().equals(next.getValue().getName())) {
+                    this.tokens.remove(next.getKey());
+                }
+            }
+        }
+        return ok().build();
+    }
+
+    @HEAD
+    @Path("/v2.0/tokens")
+    public Response checkTokensV2() {
+        return Response.status(Status.NO_CONTENT).build();
     }
 
     @GET
@@ -332,6 +358,18 @@ public class AuthenticationController {
                 .build();
     }
 
+    @DELETE
+    @Path("/v3/auth/tokens")
+    public Response revokeTokensV3() {
+        return revokeTokensV2();
+    }
+
+    @HEAD
+    @Path("/v3/auth/tokens")
+    public Response checkTokensV3() {
+        return Response.status(Status.NO_CONTENT).build();
+    }
+
     @GET
     @Path("/v3/roles")
     @Produces(APPLICATION_JSON)
@@ -356,7 +394,10 @@ public class AuthenticationController {
         if ( ! authenticationService.containsUser(userId) ) {
             return Response.status(Status.NOT_FOUND).entity("User [" + userId + "] not found").build();
         }
-        authenticationService.deleteUser(userId);
+        boolean deleted = authenticationService.deleteUser(userId);
+        if (deleted) {
+            revokeTokensV3();
+        }
         return Response.status(Status.NO_CONTENT).build();
     }
 
