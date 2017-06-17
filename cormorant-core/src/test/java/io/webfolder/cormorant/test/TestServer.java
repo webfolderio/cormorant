@@ -23,6 +23,8 @@ import static io.undertow.predicate.Predicates.path;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
 import org.junit.Test;
@@ -31,26 +33,38 @@ import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
 import io.webfolder.cormorant.api.CormorantApplication;
 import io.webfolder.cormorant.api.CormorantServer;
+import io.webfolder.cormorant.api.model.Role;
+import io.webfolder.cormorant.api.model.User;
 import io.webfolder.cormorant.api.service.AccountService;
 import io.webfolder.cormorant.api.service.AuthenticationService;
+import io.webfolder.cormorant.api.service.DefaultAuthenticationService;
 
 public class TestServer {
 
     @Test
     public void startServer() {
+        CormorantServer server = new CormorantServer();
 
         if ( ! "true".equals(System.getProperty("start.server")) ) {
             return;
         }
 
-        CormorantServer server = new CormorantServer();
-
         Path objectStore = Paths.get("mydir");
 
         Path metadataStore = Paths.get("mymetadata");
-        
+
+        Map<String, User> users = new HashMap<>();
+
+        User user = new User("myaccount",
+                            "mypassword",
+                            "test@example.com",
+                            "default",
+                            Role.Admin,
+                            true);
+        users.put("myaccount", user);
+
         AccountService accountService = new TestAccountService(objectStore);
-        AuthenticationService authenticationService = new TestAuthenticationService();
+        AuthenticationService authenticationService = new DefaultAuthenticationService(users);
 
         server.deploy(
                 new CormorantApplication(objectStore,
