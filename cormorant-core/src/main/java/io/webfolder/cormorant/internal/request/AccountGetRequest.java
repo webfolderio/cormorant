@@ -58,6 +58,9 @@ public class AccountGetRequest {
     @HeaderParam("X-Trans-Id-Extra")
     private String transIdExtra;
 
+    @QueryParam("reverse")
+    private Boolean reverse;
+
     /**
      * <p>The unique name for the account. An account is also known as the project or tenant.</p>
      */
@@ -224,5 +227,13 @@ public class AccountGetRequest {
      */
     public void setTransIdExtra(String transIdExtra) {
         this.transIdExtra = transIdExtra;
+    }
+
+    public Boolean getReverse() {
+        return reverse;
+    }
+
+    public void setReverse(Boolean reverse) {
+        this.reverse = reverse;
     }
 }

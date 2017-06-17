@@ -86,6 +86,6 @@ public class Container implements Comparable<Container> {
 
     @Override
     public int compareTo(Container o) {
-        return o.getName().compareTo(getName());
+        return getName().compareTo(o.getName());
     }
 }

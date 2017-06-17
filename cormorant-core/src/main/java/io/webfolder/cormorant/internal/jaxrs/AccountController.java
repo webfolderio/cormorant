@@ -17,6 +17,7 @@
  */
 package io.webfolder.cormorant.internal.jaxrs;
 
+import static java.lang.Boolean.TRUE;
 import static java.util.Collections.emptyNavigableSet;
 import static java.util.Locale.ENGLISH;
 import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
@@ -116,9 +117,12 @@ public class AccountController {
         if ( request.getMarker() != null && request.getEndMarker() != null ) {
             containers = containers.subSet(new Container(request.getMarker()), inclusive, new Container(request.getEndMarker()), inclusive);
         } else if ( request.getMarker() != null && request.getEndMarker() == null ) {
-            containers = containers.headSet(new Container(request.getMarker()), inclusive);
+            containers = containers.tailSet(new Container(request.getMarker()), inclusive);
         } else if ( request.getMarker() == null && request.getEndMarker() != null ) {
-            containers = containers.tailSet(new Container(request.getEndMarker()), inclusive);
+            containers = containers.headSet(new Container(request.getEndMarker()), inclusive);
+        }
+        if (TRUE.equals(request.getReverse())) {
+            containers = containers.descendingSet();
         }
         for (Container next : containers) {
             AccountGetResponseBody body = new AccountGetResponseBody();
