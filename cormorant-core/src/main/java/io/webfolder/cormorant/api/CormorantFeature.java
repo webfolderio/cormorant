@@ -27,6 +27,7 @@ import javax.ws.rs.core.MediaType;
 import org.jboss.resteasy.spi.ResteasyProviderFactory;
 
 import io.webfolder.cormorant.api.exception.CormorantExceptionMapper;
+import io.webfolder.cormorant.api.exception.CormorantGenericExceptionMapper;
 import io.webfolder.cormorant.api.service.AuthenticationService;
 import io.webfolder.cormorant.api.service.ContainerService;
 import io.webfolder.cormorant.api.service.MetadataService;
@@ -65,6 +66,7 @@ public class CormorantFeature<T> implements Feature {
         providerFactory.addHeaderDelegate(MediaType.class, new CormorantMediaTypeHeaderDelegate());
         context.register(new ResponseWriter());
         context.register(new CormorantExceptionMapper());
+        context.register(new CormorantGenericExceptionMapper());
         context.register(new CormorantAuthenticationFeature<>(tokens,
                                                               authenticationService,
                                                               accountMetadataService,

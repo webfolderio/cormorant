@@ -63,6 +63,9 @@ public class AccountHeadResponse implements CormorantResponse {
     @HeaderParam("Content-Type")
     private String contentType;
 
+    @HeaderParam("Accept-Ranges")
+    private String acceptRanges;
+
     /**
      * <p>If the operation succeeds, this value is zero (0) or the length of informational or error text in the response body.</p>
      */
@@ -257,5 +260,13 @@ public class AccountHeadResponse implements CormorantResponse {
      */
     public void setContentType(String contentType) {
         this.contentType = contentType;
+    }
+
+    public String getAcceptRanges() {
+        return acceptRanges;
+    }
+
+    public void setAcceptRanges(String acceptRanges) {
+        this.acceptRanges = acceptRanges;
     }
 }

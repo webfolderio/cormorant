@@ -17,15 +17,16 @@
  */
 package io.webfolder.cormorant.internal.jaxrs;
 
-import static java.util.Collections.emptyList;
+import static java.util.Collections.emptyNavigableSet;
 import static java.util.Locale.ENGLISH;
 import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
 import static javax.ws.rs.core.Response.ok;
 import static javax.ws.rs.core.Response.status;
 import static javax.ws.rs.core.Response.Status.NO_CONTENT;
 
-import java.util.List;
 import java.util.Map;
+import java.util.NavigableSet;
+import java.util.TreeSet;
 
 import javax.annotation.security.DeclareRoles;
 import javax.annotation.security.RolesAllowed;
@@ -93,10 +94,31 @@ public class AccountController {
     @GET
     public AccountGetResponseContext get(@BeanParam final AccountGetRequest request) {
         AccountGetResponseContext context = new AccountGetResponseContext();
-        List<Container> containers = emptyList();
+        NavigableSet<Container> containers = emptyNavigableSet();
         if ( request.getAccount() != null &&
                 ! request.getAccount().trim().isEmpty() ) {
             containers = accountService.listContainers(request.getAccount());
+        }
+        Integer limit = request.getLimit();
+        if ( limit != null && limit.intValue() > 0 ) {
+            TreeSet<Container> set = new TreeSet<>();
+            int count = 0;
+            for (Container container : containers) {
+                if ( limit >= 0 && count >= limit ) {
+                    break;
+                }
+                set.add(container);
+                count += 1;
+            }
+            containers = set;
+        }
+        final boolean inclusive = false;
+        if ( request.getMarker() != null && request.getEndMarker() != null ) {
+            containers = containers.subSet(new Container(request.getMarker()), inclusive, new Container(request.getEndMarker()), inclusive);
+        } else if ( request.getMarker() != null && request.getEndMarker() == null ) {
+            containers = containers.headSet(new Container(request.getMarker()), inclusive);
+        } else if ( request.getMarker() == null && request.getEndMarker() != null ) {
+            containers = containers.tailSet(new Container(request.getEndMarker()), inclusive);
         }
         for (Container next : containers) {
             AccountGetResponseBody body = new AccountGetResponseBody();
@@ -129,6 +151,8 @@ public class AccountController {
     @HEAD
     public Response head(@BeanParam final AccountHeadRequest request) {
         final AccountHeadResponse response = new AccountHeadResponse();
+        response.setContentType(TEXT_PLAIN);
+        response.setAcceptRanges(BYTES_RESPONSE);
         final ResponseBuilder builder = ok().entity(response);
         if ( request.getAccount() != null &&
                 ! request.getAccount().trim().isEmpty() ) {

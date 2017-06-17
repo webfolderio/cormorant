@@ -82,3 +82,6 @@ tempest.api.object_storage.test_object_temp_url.ObjectTempUrlTest.test_get_objec
 tempest.api.object_storage.test_object_temp_url.ObjectTempUrlTest.test_get_object_using_temp_url_key_2[id-671f9583-86bd-4128-a034-be282a68c5d8]
 tempest.api.object_storage.test_object_temp_url.ObjectTempUrlTest.test_head_object_using_temp_url[id-249a0111-5ad3-4534-86a7-1993d55f9185]
 tempest.api.object_storage.test_object_temp_url.ObjectTempUrlTest.test_put_object_using_temp_url[id-9b08dade-3571-4152-8a4f-a4f2a873a735]
+tempest.api.object_storage.test_account_services.AccountTest.test_list_containers_reverse_order[id-b1811cff-d1ed-4c15-a52e-efd8de41cf34]
+tempest.api.object_storage.test_account_services.AccountTest.test_list_account_metadata[id-4894c312-6056-4587-8d6f-86ffbf861f80,smoke]
+tempest.api.object_storage.test_account_services.AccountTest.test_list_containers_with_limit[id-5cfa4ab2-4373-48dd-a41f-a532b12b08b2]

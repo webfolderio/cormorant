@@ -25,9 +25,11 @@ import static java.nio.file.LinkOption.NOFOLLOW_LINKS;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.NavigableSet;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 
 import io.webfolder.cormorant.api.exception.CormorantException;
@@ -46,8 +48,8 @@ public abstract class PathAccountService implements AccountService {
     private Map<String, Container> containers = new ConcurrentHashMap<>();
 
     @Override
-    public List<Container> listContainers(final String accountName) {
-        final List<Container> containers = new ArrayList<>();
+    public NavigableSet<Container> listContainers(final String accountName) {
+        final TreeSet<Container> containers = new TreeSet<>();
         for (final String next : getContainers(accountName)) {
             final Container container = get(accountName, next);
             containers.add(container);
@@ -77,7 +79,7 @@ public abstract class PathAccountService implements AccountService {
 
     @Override
     public Account getAccount(final String accountName) {
-        final List<Container> containers = listContainers(accountName);
+        final SortedSet<Container> containers = listContainers(accountName);
         final Account account  = new Account();
         long  objectCounter    = 0L;
         long  bytesUsedCounter = 0L;

@@ -19,7 +19,7 @@ package io.webfolder.cormorant.api.model;
 
 import java.util.concurrent.atomic.AtomicLong;
 
-public class Container {
+public class Container implements Comparable<Container> {
 
     private String name;
 
@@ -42,6 +42,10 @@ public class Container {
         this.lastModified = lastModified;
         this.objectCount  = new AtomicLong(objectCount);
         this.bytesUsed    = new AtomicLong(bytesUsed);
+    }
+
+    public Container(final String name) {
+        this.name = name;
     }
 
     public String getName() {
@@ -81,8 +85,7 @@ public class Container {
     }
 
     @Override
-    public String toString() {
-        return "Container [name=" + name + ", timestamp=" + timestamp + ", lastModified=" + lastModified
-                + ", objectCount=" + objectCount.get() + ", bytesUsed=" + bytesUsed.get() + "]";
+    public int compareTo(Container o) {
+        return o.getName().compareTo(getName());
     }
 }

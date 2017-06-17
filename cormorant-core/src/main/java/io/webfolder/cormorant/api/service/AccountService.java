@@ -17,14 +17,14 @@
  */
 package io.webfolder.cormorant.api.service;
 
-import java.util.List;
+import java.util.NavigableSet;
 
 import io.webfolder.cormorant.api.model.Account;
 import io.webfolder.cormorant.api.model.Container;
 
 public interface AccountService {
 
-    List<Container> listContainers(String accountName);
+    NavigableSet<Container> listContainers(String accountName);
 
     Container getContainer(String accountName, String containerName);
 
