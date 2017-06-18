@@ -44,7 +44,7 @@ import io.webfolder.cormorant.api.service.AuthenticationService;
 import io.webfolder.cormorant.api.service.ContainerService;
 import io.webfolder.cormorant.api.service.MetadataService;
 
-class AuthenticationFilter<T> implements ContainerRequestFilter {
+class SecurityFilter<T> implements ContainerRequestFilter {
 
     private final Map<String, Principal> tokens;
 
@@ -68,7 +68,7 @@ class AuthenticationFilter<T> implements ContainerRequestFilter {
 
     private final String contextPath;
 
-    public AuthenticationFilter(
+    public SecurityFilter(
                 final Map<String, Principal> tokens,
                 final String                 permission,
                 final AuthenticationService  authenticationService,

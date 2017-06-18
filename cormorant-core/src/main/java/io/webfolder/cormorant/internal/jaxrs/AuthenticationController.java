@@ -21,6 +21,7 @@ import static java.lang.Long.toHexString;
 import static java.lang.String.valueOf;
 import static java.time.Instant.now;
 import static java.time.temporal.ChronoUnit.DAYS;
+import static java.util.concurrent.ThreadLocalRandom.current;
 import static javax.ws.rs.core.HttpHeaders.CONTENT_LENGTH;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.Response.ok;
@@ -31,11 +32,11 @@ import static javax.ws.rs.core.Response.Status.CREATED;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.Principal;
+import java.security.SecureRandom;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
-import java.util.concurrent.ThreadLocalRandom;
 
 import javax.annotation.security.DeclareRoles;
 import javax.annotation.security.PermitAll;
@@ -72,8 +73,6 @@ public class AuthenticationController {
     private static final String HEADER_AUTH_TOKEN_PREFIX = "AUTH_";
 
     private static final String HEADER_SUBJECT_TOKEN     = "X-Subject-Token";
-
-    private final ThreadLocalRandom random = ThreadLocalRandom.current();
 
     private final String infoV2;
 
@@ -153,7 +152,7 @@ public class AuthenticationController {
                             .build();
         }
 
-        final String token = HEADER_AUTH_TOKEN_PREFIX + valueOf(toHexString(random.nextLong()));
+        final String token = HEADER_AUTH_TOKEN_PREFIX + valueOf(toHexString(new SecureRandom().nextLong()));
 
         Instant expires = now().plus(1, DAYS);
 
@@ -322,11 +321,11 @@ public class AuthenticationController {
                         .build();
         }
 
-        final String token = HEADER_AUTH_TOKEN_PREFIX + valueOf(toHexString(random.nextLong()));
+        final String token = HEADER_AUTH_TOKEN_PREFIX + valueOf(toHexString(new SecureRandom().nextLong()));
 
         Instant expires = now().plus(1, DAYS);
 
-        final String auditId = valueOf(toHexString(random.nextLong()));
+        final String auditId = valueOf(toHexString(current().nextLong()));
 
         CormorantPrincipal principal = new CormorantPrincipal(authUsername, token, expires, auditId);
         tokens.put(token, principal);

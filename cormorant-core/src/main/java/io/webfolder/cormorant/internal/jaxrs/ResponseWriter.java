@@ -268,10 +268,9 @@ public class ResponseWriter implements MessageBodyWriter {
             cgr.getResponse().setContentType(contentType);
             cgr.getResponse().setContentLength(valueOf(content.length()));
         } else if (ObjectDeleteResponse.class.isInstance(retValue)) {
-            ((ObjectDeleteResponse) retValue).setContentLength("2");
             ((ObjectDeleteResponse) retValue).setContentType("text/plain");
-            ((ObjectDeleteResponse) retValue).setTransferEncoding("chunked");
             content = "OK";
+            ((ObjectDeleteResponse) retValue).setContentLength(valueOf(content.length()));
         }
 
         final CormorantResponse cormorantResponse = (CormorantResponse) response;
