@@ -270,7 +270,15 @@ public class ResponseWriter implements MessageBodyWriter {
         } else if (ObjectDeleteResponse.class.isInstance(retValue)) {
             ((ObjectDeleteResponse) retValue).setContentType("text/plain");
             content = "OK";
-            ((ObjectDeleteResponse) retValue).setContentLength(valueOf(content.length()));
+            // When deleting SLO using multipart manifest, the response contains
+            // not 'content-length' but 'transfer-encoding' header. This is the
+            // special case, therefore the existence of response headers is checked
+            // @see test_object_slo.py#test_delete_large_object
+            if ("delete".equals(uriInfo.getQueryParameters().getFirst("multipart-manifest"))) {
+                ((ObjectDeleteResponse) retValue).setTransferEncoding("chunked");
+            } else {
+                ((ObjectDeleteResponse) retValue).setContentLength(valueOf(content.length()));
+            }
         }
 
         final CormorantResponse cormorantResponse = (CormorantResponse) response;
