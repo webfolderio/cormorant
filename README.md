@@ -15,8 +15,8 @@ Features
 * [x] GET/PUT/HEAD/DELETE/POST/COPY Object
 * [x] Upload & download Static & Dyanmic Large Objects
 * [x] Supports TempURL
-* [Passed 91](https://github.com/webfolderio/cormorant/blob/master/cormorant-tempest.txt) test of tempest
-* Support container quotas
+* [x] [Passes](https://github.com/webfolderio/cormorant/blob/master/cormorant-tempest.txt) tempest tests
+* [x] Support container quotas
 
 License
 -------
