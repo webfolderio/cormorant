@@ -90,6 +90,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 
+import io.undertow.util.URLUtils;
 import io.webfolder.cormorant.api.Json;
 import io.webfolder.cormorant.api.exception.CormorantException;
 import io.webfolder.cormorant.api.model.Container;
@@ -670,7 +671,7 @@ public class ObjectController<T> {
                                             request.getDestinationAccount().trim().isEmpty() ?
                                             request.getAccount() : request.getDestinationAccount();
 
-        final String targetPath = removeLeadingSlash(request.getDestination());
+        final String targetPath = URLUtils.decode(removeLeadingSlash(request.getDestination()), UTF_8.name(), false, new StringBuilder());
         final int    start      = targetPath.indexOf(CHAR_SLASH);
 
         if (start < 0) {
