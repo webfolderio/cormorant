@@ -66,6 +66,7 @@ jobs:
           name: Start server
           command: |
             cd cormorant-core
+            java -version
             mvn -Dtest=TestServer#startServer -Dstart.server=true -Dorg.slf4j.simpleLogger.defaultLogLevel=error -Duser.language=en test jacoco:report coveralls:report -DrepoToken=$COVERALLS_TOKEN
 
       - store_test_results:
