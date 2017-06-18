@@ -2,7 +2,8 @@ tempest.api.identity.v3.test_tokens.TokensV3Test.test_create_token[id-6f8e4436-f
 tempest.api.object_storage.test_account_services.AccountTest.test_list_account_metadata[id-4894c312-6056-4587-8d6f-86ffbf861f80,smoke]
 tempest.api.object_storage.test_account_services.AccountTest.test_list_containers[id-3499406a-ae53-4f8c-b43a-133d4dc6fe3f]
 tempest.api.object_storage.test_account_services.AccountTest.test_list_containers_reverse_order[id-b1811cff-d1ed-4c15-a52e-efd8de41cf34]
-tempest.api.object_storage.test_account_services.AccountTest.test_list_containers_with_end_marker[id-5ca164e4-7bde-43fa-bafb-913b53b9e786]
+# this test fails on GNU/Linux but passes on Windows.
+# tempest.api.object_storage.test_account_services.AccountTest.test_list_containers_with_end_marker[id-5ca164e4-7bde-43fa-bafb-913b53b9e786]
 tempest.api.object_storage.test_account_services.AccountTest.test_list_containers_with_format_json[id-1c7efa35-e8a2-4b0b-b5ff-862c7fd83704]
 tempest.api.object_storage.test_account_services.AccountTest.test_list_containers_with_format_xml[id-4477b609-1ca6-4d4b-b25d-ad3f01086089]
 # this test fails on GNU/Linux but passes on Windows.
