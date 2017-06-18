@@ -9,17 +9,13 @@ Object Storage Server
 
 Features
 --------
-* Authentication with Keystone V2 API
-* Authentication with Keystone V3.0 API
-* Set & get account metadata
-* Set & get container metadata
-* Set & get object metadata
-* List container
-* GET/PUT/HEAD/DELETE/POST/COPY Object
-* Upload & download Static Large Objects
-* Upload & download Dynamic Large Objects
-* Supports TempURL
-* [Passed 84](https://github.com/webfolderio/cormorant/blob/master/cormorant-tempest.txt) test of tempest
+* [x] Authentication with Keystone V2.0, V3 API
+* [x] Set & get account, container, object metadata
+* [x] List container (supports json, xml, text formats)
+* [x] GET/PUT/HEAD/DELETE/POST/COPY Object
+* [x] Upload & download Static & Dyanmic Large Objects
+* [x] Supports TempURL
+* [Passed 91](https://github.com/webfolderio/cormorant/blob/master/cormorant-tempest.txt) test of tempest
 * Support container quotas
 
 License
