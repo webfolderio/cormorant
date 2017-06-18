@@ -189,9 +189,8 @@ public class ResponseWriter implements MessageBodyWriter {
                 content = builder.toString();
 
                 agr.getResponse().setContentType(applicationJson);
-                agr.getResponse().setContentLength(valueOf(content.length()));
             } else if ("xml".equals(format)) {
-                builder.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+                builder.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>").append("\r\n");
                 builder.append("<account name=\"" + account + "\">");
                 List<AccountGetResponseBody> list = agr.getBody();
                 for (int i = 0; i < list.size(); i++) {
@@ -207,7 +206,6 @@ public class ResponseWriter implements MessageBodyWriter {
                 content = builder.toString();
 
                 agr.getResponse().setContentType(applicationXml);
-                agr.getResponse().setContentLength(valueOf(content.length()));                
             } else {
                 List<AccountGetResponseBody> list = agr.getBody();
                 for (int i = 0; i < list.size(); i++) {
@@ -216,7 +214,6 @@ public class ResponseWriter implements MessageBodyWriter {
                 }
                 content = builder.toString();
                 agr.getResponse().setContentType(textPlain);
-                agr.getResponse().setContentLength(valueOf(content.length()));
             }
         } else if (ContainerGetResponseContext.class.isInstance(retValue)) {
             final ContainerGetResponseContext cgr = (ContainerGetResponseContext) retValue;
@@ -238,7 +235,7 @@ public class ResponseWriter implements MessageBodyWriter {
                 break;
                 case xml:
                     seperator   = "\r\n";
-                    prefix      = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><container name=\"" + container + "\">";
+                    prefix      = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<container name=\"" + container + "\">";
                     contentType = applicationXml;
                 break;
                 default:
@@ -266,7 +263,7 @@ public class ResponseWriter implements MessageBodyWriter {
             content = content.trim();
 
             cgr.getResponse().setContentType(contentType);
-            cgr.getResponse().setContentLength(valueOf(content.length()));
+
         } else if (ObjectDeleteResponse.class.isInstance(retValue)) {
             ((ObjectDeleteResponse) retValue).setContentType("text/plain");
             content = "OK";
@@ -305,6 +302,7 @@ public class ResponseWriter implements MessageBodyWriter {
         if ( content != null && ! content.trim().isEmpty() ) {
             try (OutputStream os = entityStream) {
                 os.write(content.getBytes(UTF_8));
+                os.flush();
             }
         }
     }
