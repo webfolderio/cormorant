@@ -48,6 +48,8 @@ import static javax.ws.rs.core.Response.Status.ACCEPTED;
 import static javax.ws.rs.core.Response.Status.CREATED;
 import static javax.ws.rs.core.Response.Status.LENGTH_REQUIRED;
 import static javax.ws.rs.core.Response.Status.NOT_FOUND;
+import static javax.ws.rs.core.Response.Status.NO_CONTENT;
+import static javax.ws.rs.core.Response.Status.OK;
 import static javax.ws.rs.core.Response.Status.REQUEST_ENTITY_TOO_LARGE;
 
 import java.io.BufferedReader;
@@ -513,6 +515,8 @@ public class ObjectController<T> {
         if (object == null) {
             return status(NOT_FOUND).build();
         }
+        final boolean deleteStaticLargeObject = "delete".equals(request.getMultipartManifest())
+                                                        && objectService.isMultipartManifest(object);
         final boolean emptyDirectory = isDirectory && objectService.isEmptyDirectory(container, object);
         if ( isDirectory && ! emptyDirectory ) {
             return status(NOT_FOUND)
@@ -520,7 +524,7 @@ public class ObjectController<T> {
                                     request.getObject() + "]. Directory must be empty.")
                             .build();
         } else {
-            if ("delete".equals(request.getMultipartManifest()) && objectService.isMultipartManifest(object)) {
+            if (deleteStaticLargeObject) {
                 try {
                     try (ReadableByteChannel channel = objectService.getReadableChannel(object)) {
                         try (Scanner scanner = new Scanner(Channels.newInputStream(channel))) {
@@ -578,6 +582,7 @@ public class ObjectController<T> {
             
             return ok()
                     .entity(new ObjectDeleteResponse())
+                    .status(deleteStaticLargeObject ? OK : NO_CONTENT)
                     .build();
         }
     }
