@@ -96,6 +96,7 @@ public class CormorantServer {
                             final HttpHandler ...httpHandlers) {
 
         deployment = new ResteasyDeployment();
+        deployment.setAddCharset(false);
         deployment.setApplication(application);
 
         final DeploymentInfo deploymentInfo = initDeployment(application);
