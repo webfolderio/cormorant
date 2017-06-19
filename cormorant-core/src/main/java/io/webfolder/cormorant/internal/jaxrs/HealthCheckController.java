@@ -35,7 +35,7 @@ public class HealthCheckController {
     @GET
     @PermitAll
     @Path("/healthcheck")
-    public Response infoV2() {
+    public Response healthcheck() {
         final String part1 = leadingZeros(valueOf(toHexString(current().nextLong())), 21);
         final String part2 = leadingZeros(valueOf(toHexString(current().nextLong())), 10);
         return ok()

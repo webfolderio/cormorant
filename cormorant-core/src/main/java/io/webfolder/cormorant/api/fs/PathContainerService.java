@@ -40,7 +40,7 @@ import io.webfolder.cormorant.api.service.MetadataService;
 
 public class PathContainerService implements ContainerService<Path> {
 
-    private static final String SLASH = "/";
+    private static final String FORWARD_SLASH = "/";
 
     private final Path                  root           ;
 
@@ -88,14 +88,14 @@ public class PathContainerService implements ContainerService<Path> {
              path      != null ) {
             recursive = false;
             if ( path != null ) {
-                for (String next : path.split(SLASH)) {
+                for (String next : path.split(FORWARD_SLASH)) {
                     visitorPath = visitorPath.resolve(next);
                 }
             }
-        } else if (SLASH.equals(delimiter)) {
+        } else if (FORWARD_SLASH.equals(delimiter)) {
             recursive = false;
             if ( prefix != null ) {
-                for (String next : prefix.split(SLASH)) {
+                for (String next : prefix.split(FORWARD_SLASH)) {
                     visitorPath = visitorPath.resolve(next);
                 }
             }

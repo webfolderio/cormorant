@@ -27,6 +27,7 @@ import static io.undertow.util.Methods.GET;
 import static io.undertow.util.Methods.HEAD;
 import static io.undertow.util.Methods.POST;
 import static io.undertow.util.Methods.PUT;
+import static java.util.Collections.singletonMap;
 import static java.util.concurrent.TimeUnit.MINUTES;
 import static javax.servlet.DispatcherType.REQUEST;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -48,6 +49,7 @@ import io.undertow.server.handlers.GracefulShutdownHandler;
 import io.undertow.server.handlers.HttpContinueAcceptingHandler;
 import io.undertow.server.handlers.HttpContinueReadHandler;
 import io.undertow.server.handlers.PathHandler;
+import io.undertow.server.handlers.accesslog.AccessLogHandler;
 import io.undertow.servlet.api.DeploymentInfo;
 import io.undertow.servlet.api.DeploymentManager;
 import io.undertow.servlet.api.FilterInfo;
@@ -123,6 +125,7 @@ public class CormorantServer {
                         .setDisplayName("cormorant")
                         .setAuthenticationMode(CONSTRAINT_DRIVEN)
                         .setServletStackTraces(NONE)
+                        .addInitialHandlerChainWrapper(new AccessLogHandler.Builder().build(singletonMap("format", "combined")))
                         .setClassLoader(deployment.getApplication().getClass().getClassLoader());
     }
 
@@ -144,6 +147,7 @@ public class CormorantServer {
                                                                        HEAD  , GET,
                                                                        POST  , PUT,
                                                                        DELETE, COPY);
+
         server = Undertow
                     .builder()
                     .addHttpListener(port, host)
