@@ -238,11 +238,9 @@ public class ObjectController<T> {
         // static large object
         final boolean manifest = objectService.isMultipartManifest(object);
 
-        if ("get".equalsIgnoreCase(request.getMultipartManifest())) {
-            if ( ! manifest ) {
-                throw new CormorantException("Invalid multipart manifest request. Object [" +
-                                request.getObject() + "] is not a multipart manifest.");
-            }
+        if ( "get".equalsIgnoreCase(request.getMultipartManifest()) && ! manifest ) {
+            throw new CormorantException("Invalid multipart manifest request. Object [" +
+                            request.getObject() + "] is not a multipart manifest.");
         }
 
         final String  namespace          = objectService.getNamespace(container, object);

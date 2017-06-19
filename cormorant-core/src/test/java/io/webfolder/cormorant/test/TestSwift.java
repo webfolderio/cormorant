@@ -48,6 +48,7 @@ import com.google.inject.Module;
 import io.undertow.Handlers;
 import io.webfolder.cormorant.api.CormorantApplication;
 import io.webfolder.cormorant.api.CormorantServer;
+import io.webfolder.cormorant.api.exception.CormorantException;
 import io.webfolder.cormorant.api.model.Role;
 import io.webfolder.cormorant.api.model.User;
 import io.webfolder.cormorant.api.service.AccountService;
@@ -146,7 +147,7 @@ public class TestSwift {
             Files.createDirectory(objectStore);
             Files.createDirectory(metadataStore);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new CormorantException(e);
         }
 
         accountApi = swiftApi.getAccountApi(region);

@@ -55,6 +55,7 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.ext.MessageBodyWriter;
 
+import io.webfolder.cormorant.api.exception.CormorantException;
 import io.webfolder.cormorant.api.resource.ContentFormat;
 import io.webfolder.cormorant.api.resource.ResourceStream;
 import io.webfolder.cormorant.internal.response.AccountGetResponse;
@@ -289,7 +290,7 @@ public class ResponseWriter implements MessageBodyWriter {
             try {
                 value = field.get(response);
             } catch (IllegalArgumentException | IllegalAccessException e) {
-                throw new RuntimeException(e);
+                throw new CormorantException(e);
             }
             if ( value != null ) {
                 final String name = field.getAnnotation(HeaderParam.class).value();

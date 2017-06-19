@@ -272,11 +272,7 @@ public class PathObjectService implements ObjectService<Path> {
 
     @Override
     public boolean isValidPath(Path container, String objectPath) {
-        final Path path = container.resolve(objectPath);
-        if ( ! path.startsWith(container) ) {
-            return false;
-        }
-        return true;
+        return container.resolve(objectPath).startsWith(container);
     }
 
     @Override

@@ -27,9 +27,10 @@ class ContentTypeInfo {
 
     ContentTypeInfo(String header, String charset, String contentType) {
         if (header.contains(";charset=")) {
-            header = header.replaceFirst(";charset=", "; charset=");
+            this.header = header.replaceFirst(";charset=", "; charset=");
+        } else {
+            this.header = header;
         }
-        this.header = header;
         this.charset = charset;
         this.contentType = contentType;
     }
