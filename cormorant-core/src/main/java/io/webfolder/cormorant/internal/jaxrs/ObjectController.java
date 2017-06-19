@@ -310,11 +310,9 @@ public class ObjectController<T> {
         final boolean isLargeObject = dynamicLargeObject || manifest;
         final String objectEtag;
         if (isLargeObject) {
-            objectEtag = "\"" + etag + "\"";
-        } else if (size == 0L) {
-            objectEtag = MD5_OF_EMPTY_STRING;
+            objectEtag = "\"" + (size == 0L ? MD5_OF_EMPTY_STRING : etag) + "\"";
         } else {
-            objectEtag = etag;
+            objectEtag = size == 0L ? MD5_OF_EMPTY_STRING : etag;
         }
 
         final Resource<T> resource = new Resource<>(object              , size  ,
@@ -472,7 +470,9 @@ public class ObjectController<T> {
             }
 
             if ( "0".equals(properties.get(CONTENT_LENGTH)) || ! properties.containsKey(CONTENT_LENGTH) ) {
-                properties.put(ETAG, MD5_OF_EMPTY_STRING);
+                properties.put(ETAG,
+                        (properties.containsKey("\"") ? "\"" : "") + MD5_OF_EMPTY_STRING +
+                        (properties.containsKey("\"") ? "\"" : ""));
             }
 
             for (Map.Entry<String, Object> entry : properties.entrySet()) {
