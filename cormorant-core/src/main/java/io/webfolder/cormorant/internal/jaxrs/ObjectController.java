@@ -155,6 +155,8 @@ public class ObjectController<T> {
 
     private static final String BYTES_RESPONSE          = "bytes";
 
+    private static final String MD5_OF_EMPTY_STRING     = "d41d8cd98f00b204e9800998ecf8427e";
+
     private final AccountService      accountService;
 
     private final ContainerService<T> containerService;
@@ -309,6 +311,8 @@ public class ObjectController<T> {
         final String objectEtag;
         if (isLargeObject) {
             objectEtag = "\"" + etag + "\"";
+        } else if (size == 0L) {
+            objectEtag = MD5_OF_EMPTY_STRING;
         } else {
             objectEtag = etag;
         }
@@ -465,6 +469,10 @@ public class ObjectController<T> {
                         ! etag.endsWith("\"") ) {
                     properties.put(ETAG, "\"" + etag + "\"");
                 }
+            }
+
+            if ( "0".equals(properties.get(CONTENT_LENGTH)) || ! properties.containsKey(CONTENT_LENGTH) ) {
+                properties.put(ETAG, MD5_OF_EMPTY_STRING);
             }
 
             for (Map.Entry<String, Object> entry : properties.entrySet()) {
@@ -1038,7 +1046,11 @@ public class ObjectController<T> {
             systemMetadata.remove(CONTENT_LENGTH);
             systemMetadata.remove(ETAG);
         }
-        
+
+        if ( "0".equals(systemMetadata.get(CONTENT_LENGTH)) ||  ! systemMetadata.containsKey(CONTENT_LENGTH) ) {
+            systemMetadata.put(ETAG, MD5_OF_EMPTY_STRING);
+        }
+
         updateMetadata(targetNamespace);
 
         systemMetadataService.setProperties(targetNamespace, systemMetadata);
