@@ -471,8 +471,8 @@ public class ObjectController<T> {
 
             if ( "0".equals(properties.get(CONTENT_LENGTH)) || ! properties.containsKey(CONTENT_LENGTH) ) {
                 properties.put(ETAG,
-                        (properties.containsKey("\"") ? "\"" : "") + MD5_OF_EMPTY_STRING +
-                        (properties.containsKey("\"") ? "\"" : ""));
+                        (properties.get(ETAG).toString().contains("\"") ? "\"" : "") + MD5_OF_EMPTY_STRING +
+                        (properties.get(ETAG).toString().contains("\"") ? "\"" : ""));
             }
 
             for (Map.Entry<String, Object> entry : properties.entrySet()) {
