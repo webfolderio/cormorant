@@ -63,20 +63,20 @@ import io.webfolder.cormorant.api.exception.CormorantException;
 public class TestContainer extends TestSwift {
 
     @Test
-    public void t01_create_container() {
+    public void t01CreateContainer() {
         containerApi.create("container1");
         assertTrue(exists(objectStore.resolve("container1")));
         assertTrue(isDirectory(objectStore.resolve("container1")));
     }
 
     @Test
-    public void t02_create_container_overwrite() {
+    public void t02CreateContainerOverwrite() {
         containerApi.create("container1");
         assertTrue(exists(objectStore.resolve("container1")));
     }
 
     @Test
-    public void t03_list_container() {
+    public void t03ListContainer() {
         Iterator<Container> iter = containerApi.list().iterator();
         assertTrue(iter.hasNext());
         Container container = iter.next();
@@ -86,13 +86,13 @@ public class TestContainer extends TestSwift {
     }
 
     @Test
-    public void t04_get_empty_metadata() {
+    public void t04GetEmptyMetadata() {
         Container container = containerApi.get("container1");
         assertTrue(container.getMetadata().isEmpty());
     }
 
     @Test
-    public void t05_set_metadata() {
+    public void t05SetMetadata() {
         Map<String, String> metadata = new HashMap<>();
         metadata.put("foo", "bar");
         metadata.put("bar", "foo");
@@ -100,7 +100,7 @@ public class TestContainer extends TestSwift {
     }
 
     @Test
-    public void t06_get_metadata() {
+    public void t06GetMetadata() {
         Container container = containerApi.get("container1");
         Map<String, String> metadata = container.getMetadata();
         assertFalse(metadata.isEmpty());
@@ -109,7 +109,7 @@ public class TestContainer extends TestSwift {
     }
 
     @Test
-    public void t07_delete_metadata() {
+    public void t07DeleteMetadata() {
         Map<String, String> metadata = new HashMap<>();
         metadata.put("bar", "");
         containerApi.deleteMetadata("container1", metadata);
@@ -122,7 +122,7 @@ public class TestContainer extends TestSwift {
     }
 
     @Test
-    public void t08_upload() {
+    public void t08Upload() {
         ObjectApi objectApi = swiftApi.getObjectApi(region, "container1");
         Payload payload = Payloads.newStringPayload("hello, world!");
         PutOptions options = new PutOptions();
@@ -136,7 +136,7 @@ public class TestContainer extends TestSwift {
     }
 
     @Test
-    public void t09_multipart() {
+    public void t09Multipart() {
         String data = "foo bar xyz fooo test-2 fooo fi fo foo fu fu";
         Payload p = Payloads.newStringPayload(data);
         p.getContentMetadata().setContentType("text/plain");
@@ -147,13 +147,13 @@ public class TestContainer extends TestSwift {
     }
 
     @Test
-    public void t10_delete_container() {
+    public void t10DeleteContainer() {
         boolean delete = containerApi.deleteIfEmpty("container1");
         assertFalse(delete);
     }
 
     @Test
-    public void t11_update_object_metadata() {
+    public void t11UpdateObjectMetadata() {
         ObjectApi objectApi = swiftApi.getObjectApi(region, "container1");
         Map<String, String> metadata = new HashMap<>();
         metadata.put("foo", "bar");
@@ -166,7 +166,7 @@ public class TestContainer extends TestSwift {
     }
 
     @Test
-    public void t12_copy_object_with_put() {
+    public void t12CopyObjectWithPut() {
         ObjectApi objectApi = swiftApi.getObjectApi(region, "container1");
         CopyOptions options = new CopyOptions();
         objectApi.copy("newfolder/myobject.txt", "container1", "test-2/hi.txt", options);
@@ -179,7 +179,7 @@ public class TestContainer extends TestSwift {
     }
 
     @Test
-    public void t13_delete_object() {
+    public void t13DeleteObject() {
         ObjectApi objectApi = swiftApi.getObjectApi(region, "container1");
         try {
             objectApi.delete("test-2");
@@ -196,7 +196,7 @@ public class TestContainer extends TestSwift {
     }
 
     @Test
-    public void t14_chunked_object_upload() {
+    public void t14ChunkedObjectUpload() {
         ObjectApi objectApi = swiftApi.getObjectApi(region, "container1");
         Payload payload = Payloads.newPayload(new ByteArrayInputStream("foo1 foo2 foo3 foo4".getBytes()));
         payload.getContentMetadata().setContentType("text/plain");
@@ -207,7 +207,7 @@ public class TestContainer extends TestSwift {
 
     @Test
     @SuppressWarnings("resource")
-    public void t15_get_with_body() throws IOException {
+    public void t15GetWithBody() throws IOException {
         ObjectApi objectApi = swiftApi.getObjectApi(region, "container1");
         SwiftObject object = objectApi.get("myfolder/chunked.txt");
         String response = new Scanner(object.getPayload().openStream()).nextLine();
@@ -215,7 +215,7 @@ public class TestContainer extends TestSwift {
     }
 
     @Test
-    public void t16_get_with_body_range_request() throws IOException {
+    public void t16GetWithBodyRangeRequest() throws IOException {
         ObjectApi objectApi = swiftApi.getObjectApi(region, "container1");
 
         GetOptions options = new GetOptions();
@@ -262,14 +262,14 @@ public class TestContainer extends TestSwift {
     }
 
     @Test
-    public void t17_get_with_body_range_request() throws IOException {
+    public void t17GetWithBodyRangeRequest() throws IOException {
         ObjectApi objectApi = swiftApi.getObjectApi(region, "container1");
         SwiftObject swiftObject = objectApi.get("hello.manifest");
         assertNotNull(swiftObject);
     }
 
     @Test
-    public void t18_temporary_url() {
+    public void t18TemporaryUrl() {
         Map<String, String> metadata = new HashMap<>();
         metadata.put(SwiftHeaders.ACCOUNT_TEMPORARY_URL_KEY, "test-2test-3");
         swiftApi.getAccountApi("default").updateMetadata(metadata);
@@ -285,7 +285,7 @@ public class TestContainer extends TestSwift {
     }
 
     @Test
-    public void t19_delete_container() {
+    public void t19DeleteContainer() {
         containerApi.create("container2");
         Container container = containerApi.get("container2");
         assertNotNull(container);

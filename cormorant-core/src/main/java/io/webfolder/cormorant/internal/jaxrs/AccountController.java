@@ -198,8 +198,6 @@ public class AccountController {
                         if (metadataService.containsProperty(account, name)) {
                             // The API removes the metadata item from the account.
                             metadataService.removeProperty(account, name);
-                        } else {
-                            // The API ignores the metadata key.
                         }
                     } else {
                         // A metadata key value.

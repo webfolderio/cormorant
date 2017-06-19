@@ -33,7 +33,7 @@ import org.junit.Test;
 public class TestAccount extends TestSwift {
 
     @Test
-    public void t1_account() {
+    public void t1Account() {
         Account account = accountApi.get();
 
         assertEquals(0L, account.getContainerCount());
@@ -50,7 +50,7 @@ public class TestAccount extends TestSwift {
     }
 
     @Test
-    public void t2_metadata() {
+    public void t2Metadata() {
         Map<String, String> metadata = accountApi.get().getMetadata();
         assertTrue(metadata.isEmpty());
 

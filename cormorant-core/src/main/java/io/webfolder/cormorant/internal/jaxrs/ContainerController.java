@@ -184,8 +184,6 @@ public class ContainerController<T> {
                         if (metadataService.containsProperty(container, name)) {
                             // The API removes the metadata item from the account.
                             metadataService.removeProperty(container, name);
-                        } else {
-                            // The API ignores the metadata key.
                         }
                     } else {
                         // A metadata key value.

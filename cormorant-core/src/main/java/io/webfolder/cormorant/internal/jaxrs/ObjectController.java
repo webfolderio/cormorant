@@ -842,8 +842,6 @@ public class ObjectController<T> {
                     if (metadataService.containsProperty(namespace, name)) {
                         // The API removes the metadata item from the account.
                         metadataService.removeProperty(namespace, name);
-                    } else {
-                        // The API ignores the metadata key.
                     }
                 } else {
                     // A metadata key value.
