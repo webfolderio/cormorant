@@ -38,6 +38,9 @@ import org.jclouds.openstack.swift.v1.features.AccountApi;
 import org.jclouds.openstack.swift.v1.features.ContainerApi;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.pmw.tinylog.Configurator;
+import org.pmw.tinylog.Level;
+import org.pmw.tinylog.writers.ConsoleWriter;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Module;
@@ -71,7 +74,14 @@ public class TestSwift {
 
     @BeforeClass
     public static void start() {
-        System.setProperty("org.slf4j.simpleLogger.defaultLogLevel", "debug");
+        System.setProperty("org.jboss.logging.provider", "slf4j");
+
+        Configurator
+                .defaultConfig()
+                .writer(new ConsoleWriter())
+                .level(Level.ERROR)
+                .formatPattern("{{level}|min-size=8} {date} {message}")
+                .activate();
 
         Locale.setDefault(ENGLISH);
 

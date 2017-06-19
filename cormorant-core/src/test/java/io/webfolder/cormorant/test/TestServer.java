@@ -28,6 +28,9 @@ import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
 import org.junit.Test;
+import org.pmw.tinylog.Configurator;
+import org.pmw.tinylog.Level;
+import org.pmw.tinylog.writers.ConsoleWriter;
 
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
@@ -48,6 +51,13 @@ public class TestServer {
         if ( ! "true".equals(System.getProperty("start.server")) ) {
             return;
         }
+
+        Configurator
+                .defaultConfig()
+                .writer(new ConsoleWriter())
+                .level(Level.ERROR)
+                .formatPattern("{{level}|min-size=8} {date} {message}")
+                .activate();
 
         Path objectStore = Paths.get("mydir");
 
