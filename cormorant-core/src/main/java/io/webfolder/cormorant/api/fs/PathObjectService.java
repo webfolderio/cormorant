@@ -17,6 +17,7 @@
  */
 package io.webfolder.cormorant.api.fs;
 
+import static java.nio.file.Files.*;
 import static io.webfolder.cormorant.api.property.MetadataServiceFactory.MANIFEST_EXTENSION;
 import static java.nio.channels.FileChannel.open;
 import static java.nio.file.Files.createTempFile;
@@ -58,9 +59,7 @@ public class PathObjectService implements ObjectService<Path> {
 
     private final ContainerService<Path> containerService;
 
-    public PathObjectService(
-                            final String                 fileSystemSeperator,
-                            final ContainerService<Path> containerService) {
+    public PathObjectService(final ContainerService<Path> containerService) {
         this.containerService = containerService;
     }
 
@@ -91,10 +90,10 @@ public class PathObjectService implements ObjectService<Path> {
         try {
             final Path target       = targetContainer.resolve(targetObjectPath).toAbsolutePath().normalize();
             final Path targetParent = target.getParent();
-            if ( ! Files.exists(targetParent, NOFOLLOW_LINKS) ) {
-                Files.createDirectories(targetParent);
+            if ( ! exists(targetParent, NOFOLLOW_LINKS) ) {
+                createDirectories(targetParent);
             }
-            return Files.move(tempObject, target, ATOMIC_MOVE);
+            return move(tempObject, target, ATOMIC_MOVE);
         } catch (IOException e) {
             throw new CormorantException(e);
         }
@@ -196,7 +195,7 @@ public class PathObjectService implements ObjectService<Path> {
             throw new CormorantException("Invalid directory path.");
         }
         try {
-            return Files.createDirectories(directory);
+            return createDirectories(directory);
         } catch (IOException e) {
             throw new CormorantException("Unable to create folder.", e);
         }

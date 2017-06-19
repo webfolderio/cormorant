@@ -184,14 +184,14 @@ public class AuthenticationController {
     @DELETE
     @Path("/v2.0/tokens")
     public Response revokeTokensV2(@HeaderParam("AUTH_TOKEN") final String authToken) {
-        return Response.status(tokens.remove(authToken) != null ?
+        return status(tokens.remove(authToken) != null ?
                     Status.NO_CONTENT : Status.BAD_REQUEST).build();
     }
 
     @HEAD
     @Path("/v2.0/tokens")
     public Response checkTokensV2() {
-        return Response.status(Status.NO_CONTENT).build();
+        return status(Status.NO_CONTENT).build();
     }
 
     @GET
@@ -360,7 +360,7 @@ public class AuthenticationController {
     @HEAD
     @Path("/v3/auth/tokens")
     public Response checkTokensV3() {
-        return Response.status(Status.NO_CONTENT).build();
+        return status(Status.NO_CONTENT).build();
     }
 
     @GET
@@ -368,7 +368,7 @@ public class AuthenticationController {
     @Produces(APPLICATION_JSON)
     public Response listRoles() {
         String roles = rolesTemplateV3;
-        return Response.ok().entity(roles).build();
+        return ok().entity(roles).build();
     }
 
     @PUT
@@ -378,27 +378,27 @@ public class AuthenticationController {
                                     @PathParam("userId")    final String userId,
                                     @PathParam("roleId")    final String roleId) {
         authenticationService.assignRole(userId, roleId);
-        return Response.status(Status.NO_CONTENT).build();
+        return status(Status.NO_CONTENT).build();
     }
 
     @DELETE
     @Path("/v3/users/{userId}")
     public Response deleteUser(@PathParam("userId")  final String userId) {
         if ( ! authenticationService.containsUser(userId) ) {
-            return Response.status(Status.NOT_FOUND).entity("User [" + userId + "] not found").build();
+            return status(Status.NOT_FOUND).entity("User [" + userId + "] not found").build();
         }
         boolean deleted = authenticationService.deleteUser(userId);
-        return Response.status(deleted ? Status.NO_CONTENT : Status.BAD_REQUEST).build();
+        return status(deleted ? Status.NO_CONTENT : Status.BAD_REQUEST).build();
     }
 
     @DELETE
     @Path("/v3/projects/{projectId}")
     public Response deleteProject(@PathParam("projectId") final String projectId) {
         if ( ! authenticationService.containsProject(projectId) ) {
-            return Response.status(Status.NOT_FOUND).entity("Project [" + projectId + "] not found").build();   
+            return status(Status.NOT_FOUND).entity("Project [" + projectId + "] not found").build();   
         }
         boolean deleted = authenticationService.deleteProject(projectId);
-        return Response.status(deleted ? Status.NO_CONTENT : Status.BAD_REQUEST).build();
+        return status(deleted ? Status.NO_CONTENT : Status.BAD_REQUEST).build();
     }
 
     protected String loadResource(final String name) {

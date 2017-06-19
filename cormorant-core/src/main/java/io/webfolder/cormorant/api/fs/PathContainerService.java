@@ -28,7 +28,6 @@ import static java.nio.file.LinkOption.NOFOLLOW_LINKS;
 import static java.util.Collections.emptySet;
 
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 
 import io.webfolder.cormorant.api.exception.CormorantException;
@@ -149,14 +148,14 @@ public class PathContainerService implements ContainerService<Path> {
                 isDirectory(path, NOFOLLOW_LINKS) ) {
             FileSizeVisitor visitor = new FileSizeVisitor(2, false);
             try {
-                Files.walkFileTree(path, visitor);
+                walkFileTree(path, visitor);
             } catch (IOException e) {
                 throw new CormorantException(e);
             }
             final boolean empty = visitor.getObjectCount() == 0;
             if (empty) {
                 try {
-                    Files.walkFileTree(path, new DirectoryDeleteVisitor());
+                    walkFileTree(path, new DirectoryDeleteVisitor());
                     return true;
                 } catch (IOException e) {
                     throw new CormorantException("Unable to delete container [" + containerName + "].", e);

@@ -41,7 +41,6 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
-import javax.ws.rs.core.UriInfo;
 
 import io.webfolder.cormorant.api.model.Account;
 import io.webfolder.cormorant.api.model.Container;
@@ -74,9 +73,6 @@ public class AccountController {
     private final AccountService accountService;
 
     private final MetadataService metadataService;
-
-    @Context
-    private UriInfo uriInfo;
 
     @Context
     private HttpHeaders httpHeaders;

@@ -111,7 +111,7 @@ import io.webfolder.cormorant.internal.response.ObjectHeadResponse;
 import io.webfolder.cormorant.internal.response.ObjectPostResponse;
 import io.webfolder.cormorant.internal.response.ObjectPutResponse;
 
-@javax.ws.rs.Path("/v1/{account}/{container}")
+@Path("/v1/{account}/{container}")
 @RolesAllowed({ "cormorant-object" })
 @DeclareRoles({ "cormorant-object" })
 public class ObjectController<T> {
@@ -346,7 +346,7 @@ public class ObjectController<T> {
             while ( ( line = reader.readLine() ) != null ) {
                 builder.append(line);
             }
-            final Json json = Json.read(builder.toString());
+            final Json json = read(builder.toString());
             final List<Object> list = json.asList();
             for (Object next : list) {
                 final Map<String, Object> foo = (Map<String, Object>) next;
@@ -532,7 +532,7 @@ public class ObjectController<T> {
                             scanner.useDelimiter("\\A");
                             if (scanner.hasNext()) {
                                 String content = scanner.next();
-                                Json json = Json.read(content);
+                                Json json = read(content);
                                 List<Object> list = json.asList();
                                 for (Object next : list) {
                                     Map<String, Object> map = (Map<String, Object>) next;
