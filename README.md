@@ -1,26 +1,24 @@
 Object Storage Server
 =====================
 
+cormorant is an object storage server released under AGPL. It is compatible with swift API.
+
 [![License](https://img.shields.io/badge/license-AGPL-blue.svg)](https://opensource.org/licenses/AGPL-3.0)
 [![circleci](https://img.shields.io/circleci/project/github/webfolderio/cdp4j.svg?label=linux)](https://circleci.com/gh/webfolderio/cormorant)
 [![AppVeyor](https://img.shields.io/appveyor/ci/WebFolder/cormorant.svg?label=windows)](https://ci.appveyor.com/project/WebFolder/cormorant)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/d6af9f5df82d4568ba29ea6fceb9d605)](https://www.codacy.com/app/WebFolder/cormorant?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=webfolderio/cormorant&amp;utm_campaign=Badge_Grade)
 [![Coverage Status](https://coveralls.io/repos/github/webfolderio/cormorant/badge.svg?branch=master)](https://coveralls.io/github/webfolderio/cormorant?branch=master)
 
-Features
---------
-* Authentication with Keystone V2 API
-* Authentication with Keystone V3.0 API
-* Set & get account metadata
-* Set & get container metadata
-* Set & get object metadata
-* List container
-* GET/PUT/HEAD/DELETE/POST/COPY Object
-* Upload & download Static Large Objects
-* Upload & download Dynamic Large Objects
-* Supports TempURL
-* [Passed 84](https://github.com/webfolderio/cormorant/blob/master/cormorant-tempest.txt) test of tempest
-* Support container quotas
+Key Features
+------------
+* [x] Authentication with Keystone V2.0, V3 API
+* [x] Set & get account, container, object metadata
+* [x] List container (supports json, xml, text formats)
+* [x] GET/PUT/HEAD/DELETE/POST/COPY Object
+* [x] Upload & download Static & Dyanmic Large Objects
+* [x] Supports TempURL
+* [x] [Passes](https://github.com/webfolderio/cormorant/blob/master/cormorant-tempest.txt) tempest tests
+* [x] Support container quotas
 
 License
 -------
