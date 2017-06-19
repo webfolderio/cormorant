@@ -123,7 +123,7 @@ public class DefaultAuthenticationService implements AuthenticationService {
     public Role getRole(String username) {
         final User user = users.get(username);
         if (user == null) {
-            return Role.None;
+            return None;
         }
         return user.getRole();
     }

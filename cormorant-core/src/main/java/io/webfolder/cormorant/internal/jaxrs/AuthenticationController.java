@@ -28,6 +28,8 @@ import static javax.ws.rs.core.Response.ok;
 import static javax.ws.rs.core.Response.status;
 import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
 import static javax.ws.rs.core.Response.Status.CREATED;
+import static javax.ws.rs.core.Response.Status.NOT_FOUND;
+import static javax.ws.rs.core.Response.Status.NO_CONTENT;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -51,11 +53,8 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
-import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.core.SecurityContext;
 
 import io.webfolder.cormorant.api.Json;
 import io.webfolder.cormorant.api.exception.CormorantException;
@@ -99,9 +98,6 @@ public class AuthenticationController {
     private final String contextPath;
 
     private final String accountName;
-
-    @Context
-    private SecurityContext securityContext;
 
     public AuthenticationController(
                 final Map<String, Principal> tokens,
@@ -185,13 +181,13 @@ public class AuthenticationController {
     @Path("/v2.0/tokens")
     public Response revokeTokensV2(@HeaderParam("AUTH_TOKEN") final String authToken) {
         return status(tokens.remove(authToken) != null ?
-                    Status.NO_CONTENT : Status.BAD_REQUEST).build();
+                    NO_CONTENT : BAD_REQUEST).build();
     }
 
     @HEAD
     @Path("/v2.0/tokens")
     public Response checkTokensV2() {
-        return status(Status.NO_CONTENT).build();
+        return status(NO_CONTENT).build();
     }
 
     @GET
@@ -360,7 +356,7 @@ public class AuthenticationController {
     @HEAD
     @Path("/v3/auth/tokens")
     public Response checkTokensV3() {
-        return status(Status.NO_CONTENT).build();
+        return status(NO_CONTENT).build();
     }
 
     @GET
@@ -378,27 +374,27 @@ public class AuthenticationController {
                                     @PathParam("userId")    final String userId,
                                     @PathParam("roleId")    final String roleId) {
         authenticationService.assignRole(userId, roleId);
-        return status(Status.NO_CONTENT).build();
+        return status(NO_CONTENT).build();
     }
 
     @DELETE
     @Path("/v3/users/{userId}")
     public Response deleteUser(@PathParam("userId")  final String userId) {
         if ( ! authenticationService.containsUser(userId) ) {
-            return status(Status.NOT_FOUND).entity("User [" + userId + "] not found").build();
+            return status(NOT_FOUND).entity("User [" + userId + "] not found").build();
         }
         boolean deleted = authenticationService.deleteUser(userId);
-        return status(deleted ? Status.NO_CONTENT : Status.BAD_REQUEST).build();
+        return status(deleted ? NO_CONTENT : BAD_REQUEST).build();
     }
 
     @DELETE
     @Path("/v3/projects/{projectId}")
     public Response deleteProject(@PathParam("projectId") final String projectId) {
         if ( ! authenticationService.containsProject(projectId) ) {
-            return status(Status.NOT_FOUND).entity("Project [" + projectId + "] not found").build();   
+            return status(NOT_FOUND).entity("Project [" + projectId + "] not found").build();   
         }
         boolean deleted = authenticationService.deleteProject(projectId);
-        return status(deleted ? Status.NO_CONTENT : Status.BAD_REQUEST).build();
+        return status(deleted ? NO_CONTENT : BAD_REQUEST).build();
     }
 
     protected String loadResource(final String name) {

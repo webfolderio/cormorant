@@ -316,7 +316,7 @@ public class PathObjectService implements ObjectService<Path> {
         if ( ! Files.isDirectory(object) ) {
             return 0L;
         }
-        FileSizeVisitor visitor = new FileSizeVisitor(true);
+        FileSizeVisitor visitor = new FileSizeVisitor(false);
         try {
             Files.walkFileTree(object, visitor);
         } catch (IOException e) {

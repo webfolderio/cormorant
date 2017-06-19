@@ -45,7 +45,7 @@ public class FileSizeVisitor implements FileVisitor<Path> {
     }
 
     public FileSizeVisitor(final boolean recursive) {
-        this(0L, 0L, MAX_VALUE, false, false);
+        this(0L, 0L, MAX_VALUE, false, recursive);
     }
 
     public FileSizeVisitor(final long limit, final boolean countDirectory) {
