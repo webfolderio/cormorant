@@ -209,27 +209,17 @@ public class ObjectController<T> {
         boolean dynamicLargeObject = false;
         String dynamicLargeObjectEtag = null;
 
-        // dynamic large object
-        if (object == null && objectService.isValidPath(container, request.getObject())) {
-            final T directory = objectService.getDirectory(container, request.getObject());
-            if ( directory != null ) {
-                final String  namespace     = objectService.getNamespace(container, directory);
-                final String objectManifest = systemMetadataService.getProperty(namespace, X_OBJECT_MANIFEST);
-                if ( objectManifest != null ) {
-                    final String directoryPath = removeLeadingSlash(objectManifest);
-                    final String containerName = directoryPath.indexOf(CHAR_SLASH) > 0 ? directoryPath.substring(0, directoryPath.indexOf(CHAR_SLASH)) : null;
-                    if ( containerName != null ) {
-                        T dynamicLargeObjectContainer = containerService.getContainer(request.getAccount(), containerName);
-                        if (objectService.isValidPath(dynamicLargeObjectContainer, directoryPath)) {
-                            final String objectPath = directoryPath.substring(directoryPath.indexOf(CHAR_SLASH) + 1, directoryPath.length());
-                            object = objectService.getDirectory(dynamicLargeObjectContainer, objectPath);
-                            container = dynamicLargeObjectContainer;
-                            dynamicLargeObject = true;
-                            final List<T> objects  = objectService.listDynamicLargeObject(object);
-                            dynamicLargeObjectEtag = checksumService.calculateChecksum(objects);
-                        }
-                    }
-                }
+        // dynamic large object which has X_OBJECT_MANIFEST
+        if ( object != null ) {
+            final String namespace = objectService.getNamespace(container, object);
+            final String objectManifest = removeLeadingSlash(systemMetadataService.getProperty(namespace, X_OBJECT_MANIFEST));
+            if ( objectManifest != null ) {
+                container = containerService.getContainer(request.getAccount(), objectManifest.substring(0, objectManifest.indexOf(CHAR_SLASH)));
+                T directory = objectService.getDirectory(container, objectManifest.substring(objectManifest.indexOf(CHAR_SLASH) + 1, objectManifest.length()));
+                object = directory;
+                dynamicLargeObject = true;
+                final List<T> objects  = objectService.listDynamicLargeObject(object);
+                dynamicLargeObjectEtag = checksumService.calculateChecksum(objects);
             }
         }
 
@@ -305,6 +295,10 @@ public class ObjectController<T> {
             segments = emptyList();
             contentType = systemMetadataService.getProperty(namespace, CONTENT_TYPE);
             size = dynamicLargeObject ? objectService.getDyanmicObjectSize(object) : objectService.getSize(object);
+        }
+
+        if (dynamicLargeObject) {
+            headers.put(X_OBJECT_MANIFEST, "True");
         }
 
         final boolean isLargeObject = dynamicLargeObject || manifest;
@@ -433,7 +427,7 @@ public class ObjectController<T> {
         } else {
             final ObjectHeadResponse response  = new ObjectHeadResponse();
             final ResponseBuilder    builder   = ok().entity(response);
-            final T                  container = containerService.getContainer(request.getAccount(), request.getContainer());
+                  T                  container = containerService.getContainer(request.getAccount(), request.getContainer());
             final String             namespace = objectService.getNamespace(container, object);
             for (Map.Entry<String, Object> entry : metadataService.getProperties(namespace).entrySet()) {
                 final String key         = entry.getKey();
@@ -451,9 +445,18 @@ public class ObjectController<T> {
             if (largeObject) {
                 String etag = (String) properties.get(ETAG);
                 if (dynamicLargeObject) {
+                    if ( object != null ) {
+                        final String objectManifest = removeLeadingSlash(systemMetadataService.getProperty(namespace, X_OBJECT_MANIFEST));
+                        if ( objectManifest != null ) {
+                            container = containerService.getContainer(request.getAccount(), objectManifest.substring(0, objectManifest.indexOf(CHAR_SLASH)));
+                            T directory = objectService.getDirectory(container, objectManifest.substring(objectManifest.indexOf(CHAR_SLASH) + 1, objectManifest.length()));
+                            object = directory;
+                        }
+                    }
                     final List<T> objects = objectService.listDynamicLargeObject(object);
                     if ( ! objects.isEmpty() ) {
                         etag = checksumService.calculateChecksum(objects);
+                        properties.put(X_OBJECT_MANIFEST, "True");
                     }
                     final long size = objectService.getDyanmicObjectSize(object);
                     properties.put(CONTENT_LENGTH, size);
