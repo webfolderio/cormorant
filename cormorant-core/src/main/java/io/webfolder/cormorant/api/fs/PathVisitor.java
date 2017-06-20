@@ -48,8 +48,6 @@ class PathVisitor implements FileVisitor<Path>, DirectoryStream<Path> {
 
     private final String prefix;
 
-    private final String fileSystemSeperator;
-
     private final AtomicLong count = new AtomicLong();
 
     private final Integer limit;
@@ -66,7 +64,6 @@ class PathVisitor implements FileVisitor<Path>, DirectoryStream<Path> {
                     final int pathMaxCount) {
         this.delimiter           = options.getDelimiter();
         this.prefix              = options.getPrefix();
-        this.fileSystemSeperator = root.getFileSystem().getSeparator();
         this.root                = root;
         this.limit               = options.getLimit()     == null ? pathMaxCount           : options.getLimit();
         this.marker              = options.getMarker()    != null ? options.getMarker()    : null;
@@ -107,11 +104,7 @@ class PathVisitor implements FileVisitor<Path>, DirectoryStream<Path> {
     }
 
     protected String getRelative(final Path file) {
-        String relative = root.relativize(file).toString();
-        if (BACKSLASH.equals(fileSystemSeperator)) {
-            relative = relative.replace(BACKSLASH, SLASH);
-        }
-        return relative;
+        return root.relativize(file).toString().replace(BACKSLASH, SLASH);
     }
 
     @Override

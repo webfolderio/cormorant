@@ -471,8 +471,8 @@ public class ObjectController<T> {
 
             if ( "0".equals(properties.get(CONTENT_LENGTH)) || ! properties.containsKey(CONTENT_LENGTH) ) {
                 properties.put(ETAG,
-                        (properties.get(ETAG).toString().contains("\"") ? "\"" : "") + MD5_OF_EMPTY_STRING +
-                        (properties.get(ETAG).toString().contains("\"") ? "\"" : ""));
+                        (properties.containsKey(ETAG) && properties.get(ETAG).toString().contains("\"") ? "\"" : "") + MD5_OF_EMPTY_STRING +
+                        (properties.containsKey(ETAG) && properties.get(ETAG).toString().contains("\"") ? "\"" : ""));
             }
 
             for (Map.Entry<String, Object> entry : properties.entrySet()) {
@@ -711,7 +711,7 @@ public class ObjectController<T> {
                             targetPath + "]. Invalid source path [" + request.getObject() + "].");
         }
 
-        final T       sourceObject    = objectService.getObject(request.getAccount(), request.getContainer(), request.getObject());
+        final T sourceObject = objectService.getObject(request.getAccount(), request.getContainer(), request.getObject());
 
         if (sourceObject == null) {
             T sourceDirectory = objectService.getDirectory(sourceContainer, request.getObject());
@@ -753,10 +753,8 @@ public class ObjectController<T> {
         systemMetadataService.delete(targetNamespace);
         metadataService.delete(targetNamespace);
 
-        final Map<String, Object> systemMetadata  = systemMetadataService.getProperties(sourceNamespace);
+        final Map<String, Object> systemMetadata = systemMetadataService.getProperties(sourceNamespace);
         systemMetadataService.setProperties(targetNamespace, systemMetadata);
-
-        updateMetadata(targetNamespace);
 
         if ( request.getFreshMetadata() == null || ! TRUE.equals(request.getFreshMetadata()) ) {
             final Map<String, Object> sourceMetadata = metadataService.getProperties(sourceNamespace);
@@ -766,6 +764,8 @@ public class ObjectController<T> {
                 metadataService.setProperties(targetNamespace, targetAllMetadata);
             }
         }
+
+        updateMetadata(targetNamespace);
 
         final String checksum           = checksumService.calculateChecksum(targetContainer, targetObject);
         final String sourceLastModified = FORMATTER.format(ofInstant(ofEpochMilli(objectService.getLastModified(sourceObject)), GMT));
@@ -777,6 +777,12 @@ public class ObjectController<T> {
         response.setCopiedFromLastModified(sourceLastModified);
         response.setETag(checksum);
         response.setLastModified(targetLastModified);
+
+        final String contentType = httpHeaders.getHeaderString(CONTENT_TYPE);
+        if ( contentType != null ) {
+            systemMetadata.put(CONTENT_TYPE, contentType);
+            systemMetadataService.updateProperty(targetNamespace, CONTENT_TYPE, contentType);
+        }
 
         final ResponseBuilder builder = status(CREATED).entity(response);
 

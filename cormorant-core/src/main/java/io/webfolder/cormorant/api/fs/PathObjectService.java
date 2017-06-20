@@ -38,6 +38,7 @@ import java.io.IOException;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
 import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributeView;
 import java.nio.file.attribute.BasicFileAttributes;
@@ -272,7 +273,11 @@ public class PathObjectService implements ObjectService<Path> {
 
     @Override
     public boolean isValidPath(Path container, String objectPath) {
-        return container.resolve(objectPath).startsWith(container);
+        try {
+            return container.resolve(objectPath).startsWith(container);
+        } catch (InvalidPathException e) {
+            return false;
+        }
     }
 
     @Override
