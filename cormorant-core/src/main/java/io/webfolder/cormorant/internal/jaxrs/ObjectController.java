@@ -1100,6 +1100,7 @@ public class ObjectController<T> {
                         final InputStream       is) {
         final T container = containerService.getContainer(request.getAccount(), request.getContainer());
         objectService.createDirectory(request.getAccount(), container, request.getObject());
+        response.setETag(MD5_OF_EMPTY_STRING);
     }
 
     protected void uploadManifest(
