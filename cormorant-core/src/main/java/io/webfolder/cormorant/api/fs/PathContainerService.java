@@ -82,7 +82,6 @@ public class PathContainerService implements ContainerService<Path> {
         final String path      = options.getPath();
 
         if ( prefix    == null &&
-             delimiter == null &&
              prefix    == null &&
              path      != null ) {
             recursive = false;
