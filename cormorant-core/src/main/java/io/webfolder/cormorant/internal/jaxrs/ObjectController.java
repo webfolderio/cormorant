@@ -463,6 +463,8 @@ public class ObjectController<T> {
             final boolean staticLargeObject  = objectService.isMultipartManifest(object);
             final boolean largeObject        = dynamicLargeObject || staticLargeObject;
 
+            properties.put(CONTENT_LENGTH, objectService.getSize(object));
+
             // Etag value of a large object is enclosed in double-quotations.
             if (largeObject) {
                 String etag = (String) properties.get(ETAG);
@@ -989,7 +991,7 @@ public class ObjectController<T> {
             } catch (IOException e) {
                 throw new CormorantException(e);
             }
-
+            
             sourceObject    = tempObject;
             targetContainer = sourceContainer;
         }
