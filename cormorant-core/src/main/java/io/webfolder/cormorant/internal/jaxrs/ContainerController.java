@@ -154,6 +154,7 @@ public class ContainerController<T> {
         }
         containerService.create(request.getAccount(), request.getContainer());
         final ContainerPutResponse response = new ContainerPutResponse();
+        updateMetadata(request.getContainer());
         response.setContentType(TEXT_PLAIN);
         return status(CREATED)
                     .entity(response)
@@ -171,41 +172,7 @@ public class ContainerController<T> {
         final String container = request.getContainer();
         final boolean foundContainer = accountService.containsContainer(account, container);
         if ( account != null && container != null && foundContainer ) {
-            MultivaluedMap<String, String> headers = httpHeaders.getRequestHeaders();
-            for (String key : headers.keySet()) {
-                // Metadata keys (the name of the metadata) must be treated as case-insensitive at all times.
-                key = key.toLowerCase(ENGLISH);
-                if (key.startsWith(META_PREFIX)) {
-                    final String name  = key.substring(META_PREFIX.length(), key.length());
-                    final String value = headers.getFirst(key);
-                    // A metadata key without a value.
-                    // The metadata key already exists for the account.
-                    if (value == null || value.isEmpty()) {
-                        if (metadataService.containsProperty(container, name)) {
-                            // The API removes the metadata item from the account.
-                            metadataService.removeProperty(container, name);
-                        }
-                    } else {
-                        // A metadata key value.
-                        // The metadata key already exists for the account.
-                        if (metadataService.containsProperty(container, name)) {
-                            // The API updates the metadata key value for the account.
-                            metadataService.updateProperty(container, name, value);
-                        } else {
-                            // A metadata key value.
-                            // The metadata key does not already exist for the account.
-                            // The API adds the metadata key and value pair, or item, to the account.
-                            metadataService.addProperty(container, name, value);
-                        }
-                    }
-                }
-                if (key.startsWith(META_REMOVE_PREFIX)) {
-                    String name = key.substring(META_REMOVE_PREFIX.length(), key.length());
-                    if (metadataService.containsProperty(container, name)) {
-                        metadataService.removeProperty(container, name);
-                    }
-                }
-            }
+            updateMetadata(container);
         }
         ContainerPostResponse response = new ContainerPostResponse();
         response.setContentType(TEXT_PLAIN);
@@ -238,6 +205,44 @@ public class ContainerController<T> {
         } else {
             final ResponseBuilder builder = status(NOT_FOUND);
             return builder.build();
+        }
+    }
+
+    protected void updateMetadata(final String container) {
+        MultivaluedMap<String, String> headers = httpHeaders.getRequestHeaders();
+        for (String key : headers.keySet()) {
+            // Metadata keys (the name of the metadata) must be treated as case-insensitive at all times.
+            key = key.toLowerCase(ENGLISH);
+            if (key.startsWith(META_PREFIX)) {
+                final String name  = key.substring(META_PREFIX.length(), key.length());
+                final String value = headers.getFirst(key);
+                // A metadata key without a value.
+                // The metadata key already exists for the account.
+                if (value == null || value.isEmpty()) {
+                    if (metadataService.containsProperty(container, name)) {
+                        // The API removes the metadata item from the account.
+                        metadataService.removeProperty(container, name);
+                    }
+                } else {
+                    // A metadata key value.
+                    // The metadata key already exists for the account.
+                    if (metadataService.containsProperty(container, name)) {
+                        // The API updates the metadata key value for the account.
+                        metadataService.updateProperty(container, name, value);
+                    } else {
+                        // A metadata key value.
+                        // The metadata key does not already exist for the account.
+                        // The API adds the metadata key and value pair, or item, to the account.
+                        metadataService.addProperty(container, name, value);
+                    }
+                }
+            }
+            if (key.startsWith(META_REMOVE_PREFIX)) {
+                String name = key.substring(META_REMOVE_PREFIX.length(), key.length());
+                if (metadataService.containsProperty(container, name)) {
+                    metadataService.removeProperty(container, name);
+                }
+            }
         }
     }
 
