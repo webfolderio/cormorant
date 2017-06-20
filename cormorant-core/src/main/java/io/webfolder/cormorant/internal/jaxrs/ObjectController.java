@@ -538,7 +538,7 @@ public class ObjectController<T> {
     public Response delete(@BeanParam final ObjectDeleteRequest request) {
         final T container = containerService.getContainer(request.getAccount(), request.getContainer());
         if (container == null) {
-            return status(NOT_FOUND).build();
+            return status(NO_CONTENT).build();
         }
         T object = objectService.getObject(request.getAccount(), request.getContainer(), request.getObject());
         boolean isDirectory = false;
@@ -583,8 +583,8 @@ public class ObjectController<T> {
 
                 return status(NO_CONTENT).build();
             } else {
-                return status(NOT_FOUND)
-                        .header("X-Message", "Failed to delete object [" +
+                return status(NO_CONTENT)
+                        .header("X-Cormorant-Message", "Failed to delete object [" +
                                 request.getObject() + "]. Directory must be empty.")
                         .build();
             }
