@@ -183,14 +183,14 @@ public class ObjectController<T> {
                     final ContainerService<T> containerService,
                     final ObjectService<T>    objectService   ,
                     final ChecksumService<T>  checksumService ,
-                    final MetadataService     systemMetadata  ,
-                    final MetadataService     metadataService ) {
+                    final MetadataService     metadataService ,
+                    final MetadataService     systemMetadata  ) {
         this.accountService        = accountService  ;
         this.containerService      = containerService;
         this.objectService         = objectService   ;
         this.checksumService       = checksumService ;
-        this.systemMetadataService = systemMetadata  ;
         this.metadataService       = metadataService ;
+        this.systemMetadataService = systemMetadata  ;
     }
 
     @GET
@@ -750,8 +750,13 @@ public class ObjectController<T> {
 
         final String  sourceNamespace = objectService.getNamespace(sourceContainer, sourceObject);
         final String targetNamespace  = objectService.getNamespace(targetContainer, targetObject);
-        systemMetadataService.delete(targetNamespace);
-        metadataService.delete(targetNamespace);
+
+        final boolean copySelf = targetObject.equals(sourceObject);
+
+        if ( ! copySelf ) {
+            systemMetadataService.delete(targetNamespace);
+            metadataService.delete(targetNamespace);
+        }
 
         final Map<String, Object> systemMetadata = systemMetadataService.getProperties(sourceNamespace);
         systemMetadataService.setProperties(targetNamespace, systemMetadata);
@@ -994,6 +999,7 @@ public class ObjectController<T> {
             final String              sourceNamespace      = objectService.getNamespace(sourceContainer, sourceObject);
             final Map<String, Object> sourceMetadata       = metadataService.getProperties(sourceNamespace);
                                       sourceSystemMetadata = systemMetadataService.getProperties(sourceNamespace);
+
             systemMetadataService.delete(targetNamespace);
             metadataService.delete(targetNamespace);
             if ( ! sourceMetadata.isEmpty() ) {

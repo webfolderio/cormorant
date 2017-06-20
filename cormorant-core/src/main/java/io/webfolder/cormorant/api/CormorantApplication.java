@@ -101,6 +101,7 @@ public class CormorantApplication extends Application {
         final MetadataService accountMetadataService   = propertyServiceFactory.create(ACCOUNT  , METADATA       , cacheable);
         final MetadataService containerMetadataService = propertyServiceFactory.create(CONTAINER, METADATA       , cacheable);
         final MetadataService objectMetadataService    = propertyServiceFactory.create(OBJECT   , METADATA       , false);
+        final MetadataService systemMetadataService    = propertyServiceFactory.create(OBJECT   , SYSTEM_METADATA, false);
 
         final FileChecksumService     checksumService  = new FileChecksumService(objectMetadataService);
         final ContainerService<Path>  containerService = new PathContainerService(objectStore, pathMaxCount, checksumService, containerMetadataService);
@@ -129,7 +130,6 @@ public class CormorantApplication extends Application {
                                                     containerService,
                                                     containerMetadataService));
 
-        final MetadataService systemMetadataService = propertyServiceFactory.create(OBJECT, SYSTEM_METADATA, false);
         singletons.add(new ObjectController<Path>(accountService,
                                                     containerService,
                                                     objectService,
