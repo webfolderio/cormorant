@@ -264,6 +264,7 @@ public class ContainerController<T> {
         } else {
             final ContainerDeleteResponse response = new ContainerDeleteResponse();
             response.setContentType(TEXT_PLAIN);
+            metadataService.delete(request.getContainer());
             return status(NO_CONTENT).entity(response).build();
         }
     }

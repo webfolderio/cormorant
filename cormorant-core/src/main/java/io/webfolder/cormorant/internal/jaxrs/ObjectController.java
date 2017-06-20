@@ -224,7 +224,33 @@ public class ObjectController<T> {
         }
 
         if (object == null) {
-            return status(NOT_FOUND).build();
+
+            if (objectService.isValidPath(container, request.getObject())) {
+                final T directory = objectService.getDirectory(container, request.getObject());
+                if ( directory != null ) {
+                    final String  namespace     = objectService.getNamespace(container, directory);
+                    final String objectManifest = systemMetadataService.getProperty(namespace, X_OBJECT_MANIFEST);
+                    if ( objectManifest != null ) {
+                        final String directoryPath = removeLeadingSlash(objectManifest);
+                        final String containerName = directoryPath.indexOf(CHAR_SLASH) > 0 ? directoryPath.substring(0, directoryPath.indexOf(CHAR_SLASH)) : null;
+                        if ( containerName != null ) {
+                            T dynamicLargeObjectContainer = containerService.getContainer(request.getAccount(), containerName);
+                            if (objectService.isValidPath(dynamicLargeObjectContainer, directoryPath)) {
+                                final String objectPath = directoryPath.substring(directoryPath.indexOf(CHAR_SLASH) + 1, directoryPath.length());
+                                object = objectService.getDirectory(dynamicLargeObjectContainer, objectPath);
+                                container = dynamicLargeObjectContainer;
+                                dynamicLargeObject = true;
+                                final List<T> objects  = objectService.listDynamicLargeObject(object);
+                                dynamicLargeObjectEtag = checksumService.calculateChecksum(objects);
+                            }
+                        }
+                    }
+                }
+            }
+
+            if ( ! dynamicLargeObject ) {
+                return status(NOT_FOUND).build();
+            }
         }
 
         // static large object
@@ -295,10 +321,6 @@ public class ObjectController<T> {
             segments = emptyList();
             contentType = systemMetadataService.getProperty(namespace, CONTENT_TYPE);
             size = dynamicLargeObject ? objectService.getDyanmicObjectSize(object) : objectService.getSize(object);
-        }
-
-        if (dynamicLargeObject) {
-            headers.put(X_OBJECT_MANIFEST, "True");
         }
 
         final boolean isLargeObject = dynamicLargeObject || manifest;
@@ -450,13 +472,16 @@ public class ObjectController<T> {
                         if ( objectManifest != null ) {
                             container = containerService.getContainer(request.getAccount(), objectManifest.substring(0, objectManifest.indexOf(CHAR_SLASH)));
                             T directory = objectService.getDirectory(container, objectManifest.substring(objectManifest.indexOf(CHAR_SLASH) + 1, objectManifest.length()));
+                            final String ns = objectService.getNamespace(container, directory);
+                            systemMetadataService.addProperty(ns, X_OBJECT_MANIFEST, objectManifest);
+                            systemMetadataService.addProperty(ns, "X-Cormorant-DLO-Container", request.getContainer());
+                            systemMetadataService.addProperty(ns, "X-Cormorant-DLO-Object", request.getObject());
                             object = directory;
                         }
                     }
                     final List<T> objects = objectService.listDynamicLargeObject(object);
                     if ( ! objects.isEmpty() ) {
                         etag = checksumService.calculateChecksum(objects);
-                        properties.put(X_OBJECT_MANIFEST, "True");
                     }
                     final long size = objectService.getDyanmicObjectSize(object);
                     properties.put(CONTENT_LENGTH, size);
@@ -523,16 +548,45 @@ public class ObjectController<T> {
             }
         }
         if (object == null) {
-            return status(NOT_FOUND).build();
+            return status(NO_CONTENT).build();
         }
         final boolean deleteStaticLargeObject = "delete".equals(request.getMultipartManifest())
                                                         && objectService.isMultipartManifest(object);
         final boolean emptyDirectory = isDirectory && objectService.isEmptyDirectory(container, object);
         if ( isDirectory && ! emptyDirectory ) {
-            return status(NOT_FOUND)
-                            .header("X-Message", "Failed to delete object [" +
-                                    request.getObject() + "]. Directory must be empty.")
-                            .build();
+            final String namespace = objectService.getNamespace(container, object);
+            final String objectManifest = systemMetadataService.getProperty(namespace, X_OBJECT_MANIFEST);
+            if ( objectManifest != null ) {
+
+                final String mc = systemMetadataService.getProperty(namespace, "X-Cormorant-DLO-Container");
+                final String mo = systemMetadataService.getProperty(namespace, "X-Cormorant-DLO-Object");
+
+                if (  mc != null && mo != null ) {
+                    final T manifestContainer = containerService.getContainer(request.getAccount(), mc);
+                    if ( mc != null ) {
+                        if ( mc != null && mo != null ) {
+                            T staticLargeObject = objectService.getObject(request.getAccount(), mc, mo);
+                            if ( staticLargeObject != null ) {
+                                objectService.delete(containerService.getContainer(request.getAccount(), mc), staticLargeObject);
+                                String ns = objectService.getNamespace(manifestContainer, staticLargeObject);
+                                metadataService.delete(ns);
+                                systemMetadataService.delete(ns);
+
+                                metadataService.delete(namespace);
+                                systemMetadataService.delete(namespace);
+                            }
+                        }
+                    }
+                }
+
+                return status(NO_CONTENT).build();
+            } else {
+                return status(NOT_FOUND)
+                        .header("X-Message", "Failed to delete object [" +
+                                request.getObject() + "]. Directory must be empty.")
+                        .build();
+            }
+
         } else {
             if (deleteStaticLargeObject) {
                 try {

@@ -37,7 +37,7 @@ public interface ObjectService<T> {
 
     long getSize(T object);
 
-    void delete(T root, T object);
+    void delete(T container, T object);
 
     String relativize(T container, T object);
 

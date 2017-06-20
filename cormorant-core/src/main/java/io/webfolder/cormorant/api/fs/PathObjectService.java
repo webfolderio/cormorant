@@ -153,7 +153,7 @@ public class PathObjectService implements ObjectService<Path> {
     }
 
     @Override
-    public void delete(final Path root, final Path object) {
+    public void delete(final Path container, final Path object) {
         try {
             Files.delete(object);
         } catch (IOException e) {
