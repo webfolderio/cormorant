@@ -38,7 +38,7 @@ public abstract class AbstractResourceStream<T> implements ResourceStream<T> {
     }
 
     @Override
-    public String convert(final T o, final ContentFormat contentFormat) {
-        return resourceAdapter.convert(o, contentFormat);
+    public String convert(final T o, final ContentFormat contentFormat, final Boolean appendForwardSlash) {
+        return resourceAdapter.convert(o, contentFormat, appendForwardSlash);
     }
 }

@@ -17,6 +17,8 @@
  */
 package io.webfolder.cormorant.internal.jaxrs;
 
+import static java.lang.Boolean.FALSE;
+import static java.lang.Boolean.TRUE;
 import static java.lang.Long.toHexString;
 import static java.lang.String.valueOf;
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -29,6 +31,7 @@ import static java.util.Collections.unmodifiableSet;
 import static java.util.Locale.ENGLISH;
 import static java.util.concurrent.ThreadLocalRandom.current;
 import static javax.ws.rs.core.HttpHeaders.CONTENT_TYPE;
+import static javax.ws.rs.core.HttpHeaders.USER_AGENT;
 import static javax.ws.rs.core.HttpHeaders.VARY;
 import static javax.ws.rs.core.Response.Status.UNSUPPORTED_MEDIA_TYPE;
 
@@ -247,9 +250,14 @@ public class ResponseWriter implements MessageBodyWriter {
 
             final StringJoiner joiner = new StringJoiner(seperator, prefix, suffix);
 
+            final String userAgent = requestHeaders.getHeaderString(USER_AGENT);
+            // ncw/swift/blob/master/swift_test.go#TestObjectsDirectory fails if dir name ends with /
+            // @see https://github.com/ncw/swift/blob/master/swift_test.go#L1355
+            final Boolean appendForwardSlash = "goswift/1.0".equals(userAgent) ? FALSE : TRUE;
+
             ResourceStream stream = cgr.getBody();
             for (Object next : stream) {
-                String json = stream.convert(next, contentFormat);
+                String json = stream.convert(next, contentFormat, appendForwardSlash);
                 if ( json != null ) {
                     joiner.add(json);
                 }

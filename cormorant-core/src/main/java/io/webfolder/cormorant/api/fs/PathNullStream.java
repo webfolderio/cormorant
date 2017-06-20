@@ -48,7 +48,7 @@ public final class PathNullStream implements ResourceStream<Path> {
     }
 
     @Override
-    public String convert(Path o, ContentFormat contentFormat) {
+    public String convert(Path o, ContentFormat contentFormat, Boolean appendForwardSlash) {
         return null;
     }
 }

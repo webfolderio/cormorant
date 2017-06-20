@@ -17,6 +17,7 @@
  */
 package io.webfolder.cormorant.api.fs;
 
+import static java.lang.Boolean.*;
 import static io.webfolder.cormorant.api.property.MetadataServiceFactory.MANIFEST_EXTENSION;
 import static io.webfolder.cormorant.api.resource.ContentFormat.json;
 import static io.webfolder.cormorant.api.resource.ContentFormat.plain;
@@ -48,6 +49,8 @@ public class PathAdapter implements ResourceAdapter<Path> {
 
     private static final int    DIR_SIZE = 0;
 
+    private static final String MD5_OF_EMPTY_STRING  = "d41d8cd98f00b204e9800998ecf8427e";
+
     private final Path root;
 
     private final ChecksumService<Path> checksumService;
@@ -62,7 +65,8 @@ public class PathAdapter implements ResourceAdapter<Path> {
     @Override
     public String convert(
                     final Path          path,
-                    final ContentFormat contentFormat) {
+                    final ContentFormat contentFormat,
+                    final Boolean       appendForwardSlash) {
         final StringBuilder builder        = new StringBuilder();
         final String        location       = root.relativize(path).toString();
         final boolean       isdir          = isDirectory(path, NOFOLLOW_LINKS);
@@ -82,10 +86,10 @@ public class PathAdapter implements ResourceAdapter<Path> {
         } catch (IOException e) {
             throw new CormorantException(e);
         }
-        final String hash = calculateChecksum(path, lastModified, isdir);
+        final String hash = isdir ? MD5_OF_EMPTY_STRING : calculateChecksum(path, lastModified, isdir);
         if (json.equals(contentFormat)) {
             builder.append("{")
-                   .append("\"name\":\"").append(isdir ? normalizedName + FORWARD_SLASH : normalizedName).append("\"").append(",")
+                   .append("\"name\":\"").append(isdir && TRUE.equals(appendForwardSlash) ? normalizedName + FORWARD_SLASH : normalizedName).append("\"").append(",")
                    .append("\"hash\":\"").append(hash).append("\"").append(",")
                    .append("\"content_type\":\"").append(mimeType).append("\",")
                    .append("\"bytes\":").append(size).append(",")
@@ -93,7 +97,7 @@ public class PathAdapter implements ResourceAdapter<Path> {
                    .append("}");
         } else if (xml.equals(contentFormat)) {
             builder.append("<object>")
-                   .append("<name>").append(isdir ? normalizedName + FORWARD_SLASH : normalizedName).append("</name>")
+                   .append("<name>").append(isdir && TRUE.equals(appendForwardSlash) ? normalizedName + FORWARD_SLASH : normalizedName).append("</name>")
                    .append("<hash>").append(hash).append("</hash>")
                    .append("<content_type>").append(mimeType).append("</content_type>")
                    .append("<bytes>").append(size).append("</bytes>")

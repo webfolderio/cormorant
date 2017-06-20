@@ -19,5 +19,5 @@ package io.webfolder.cormorant.api.resource;
 
 public interface ResourceAdapter<T> {
 
-    String convert(T o, ContentFormat contentFormat);
+    String convert(T o, ContentFormat contentFormat, Boolean appendForwardSlash);
 }
