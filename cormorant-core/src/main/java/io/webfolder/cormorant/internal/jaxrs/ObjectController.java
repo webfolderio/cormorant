@@ -157,6 +157,8 @@ public class ObjectController<T> {
 
     private static final String MD5_OF_EMPTY_STRING     = "d41d8cd98f00b204e9800998ecf8427e";
 
+    private static final String DIRECTORY               = "application/directory";
+
     private final AccountService      accountService;
 
     private final ContainerService<T> containerService;
@@ -435,12 +437,14 @@ public class ObjectController<T> {
     @Path("/{object: .*}")
     public Response head(@BeanParam final ObjectHeadRequest request) {
         T object = objectService.getObject(request.getAccount(), request.getContainer(), request.getObject());
+        boolean dir = false;
         if (object == null) {
             final T container = containerService.getContainer(request.getAccount(), request.getContainer());
             if ( container != null ) {
                 final T directory = objectService.getDirectory(container, request.getObject());
                 if ( directory != null ) {
                     object = directory;
+                    dir = true;
                 }
             }
         }
@@ -515,6 +519,10 @@ public class ObjectController<T> {
                 response.setContentType((String) properties.get(CONTENT_TYPE));
             }
 
+            if (dir) {
+                response.setContentType(DIRECTORY);
+            }
+
             final long timestamp = objectService.getCreationTime(object);
             response.setTimestamp(timestamp);
 
@@ -528,7 +536,7 @@ public class ObjectController<T> {
             final String lastModified = FORMATTER.format(ofInstant(ofEpochMilli(objectService.getLastModified(object)), GMT));
             builder.header(HttpHeaders.LAST_MODIFIED, lastModified);
             builder.header(ACCEPT_RANGES, BYTES_RESPONSE);
-            return builder.build();
+            return builder.entity(response).build();
         }
     }
 
