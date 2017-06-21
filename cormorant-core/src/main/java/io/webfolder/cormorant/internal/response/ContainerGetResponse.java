@@ -222,28 +222,28 @@ public class ContainerGetResponse implements CormorantResponse {
     }
 
     /**
-     * <p>The ACL that grants read access. If there is no ACL, this header is not returned by this operation. See <a href="http://docs.openstack.org/developer/swift/overview_acl.html#container-acls">Container ACLs</a> for more information.</p>
+     * <p>The ACL that grants read access. If there is no ACL, this header is not returned by this operation.</p>
      */
     public String getContainerRead() {
         return containerRead;
     }
 
     /**
-     * <p>The ACL that grants read access. If there is no ACL, this header is not returned by this operation. See <a href="http://docs.openstack.org/developer/swift/overview_acl.html#container-acls">Container ACLs</a> for more information.</p>
+     * <p>The ACL that grants read access. If there is no ACL, this header is not returned by this operation.</p>
      */
     public void setContainerRead(String containerRead) {
         this.containerRead = containerRead;
     }
 
     /**
-     * <p>The ACL that grants write access. If there is no ACL, this header is not returned by this operation. See <a href="http://docs.openstack.org/developer/swift/overview_acl.html#container-acls">Container ACLs</a> for more information.</p>
+     * <p>The ACL that grants write access. If there is no ACL, this header is not returned by this operation.</p>
      */
     public String getContainerWrite() {
         return containerWrite;
     }
 
     /**
-     * <p>The ACL that grants write access. If there is no ACL, this header is not returned by this operation. See <a href="http://docs.openstack.org/developer/swift/overview_acl.html#container-acls">Container ACLs</a> for more information.</p>
+     * <p>The ACL that grants write access. If there is no ACL, this header is not returned by this operation.</p>
      */
     public void setContainerWrite(String containerWrite) {
         this.containerWrite = containerWrite;
@@ -278,28 +278,28 @@ public class ContainerGetResponse implements CormorantResponse {
     }
 
     /**
-     * <p>If present, this container has versioning enabled and the value is the UTF-8 encoded name of another container. For more information about object versioning, see `Object versioning &lt;<a href="http://docs.openstack.org/developer">http://docs.openstack.org/developer</a>/ swift/api/object_versioning.html&gt;`_.</p>
+     * <p>If present, this container has versioning enabled and the value is the UTF-8 encoded name of another container.</p>
      */
     public String getVersionsLocation() {
         return versionsLocation;
     }
 
     /**
-     * <p>If present, this container has versioning enabled and the value is the UTF-8 encoded name of another container. For more information about object versioning, see `Object versioning &lt;<a href="http://docs.openstack.org/developer">http://docs.openstack.org/developer</a>/ swift/api/object_versioning.html&gt;`_.</p>
+     * <p>If present, this container has versioning enabled and the value is the UTF-8 encoded name of another container.</p>
      */
     public void setVersionsLocation(String versionsLocation) {
         this.versionsLocation = versionsLocation;
     }
 
     /**
-     * <p>If present, this container has versioning enabled and the value is the UTF-8 encoded name of another container. For more information about object versioning, see `Object versioning &lt;<a href="http://docs.openstack.org/developer">http://docs.openstack.org/developer</a>/ swift/api/object_versioning.html&gt;`_.</p>
+     * <p>If present, this container has versioning enabled and the value is the UTF-8 encoded name of another container.</p>
      */
     public String getHistoryLocation() {
         return historyLocation;
     }
 
     /**
-     * <p>If present, this container has versioning enabled and the value is the UTF-8 encoded name of another container. For more information about object versioning, see `Object versioning &lt;<a href="http://docs.openstack.org/developer">http://docs.openstack.org/developer</a>/ swift/api/object_versioning.html&gt;`_.</p>
+     * <p>If present, this container has versioning enabled and the value is the UTF-8 encoded name of another container.</p>
      */
     public void setHistoryLocation(String historyLocation) {
         this.historyLocation = historyLocation;

@@ -147,14 +147,14 @@ public class ContainerHeadResponse implements CormorantResponse {
     }
 
     /**
-     * <p>The ACL that grants write access. If there is no ACL, this header is not returned by this operation. See <a href="http://docs.openstack.org/developer/swift/overview_acl.html#container-acls">Container ACLs</a> for more information.</p>
+     * <p>The ACL that grants write access. If there is no ACL, this header is not returned by this operation.</p>
      */
     public String getContainerWrite() {
         return containerWrite;
     }
 
     /**
-     * <p>The ACL that grants write access. If there is no ACL, this header is not returned by this operation. See <a href="http://docs.openstack.org/developer/swift/overview_acl.html#container-acls">Container ACLs</a> for more information.</p>
+     * <p>The ACL that grants write access. If there is no ACL, this header is not returned by this operation.</p>
      */
     public void setContainerWrite(String containerWrite) {
         this.containerWrite = containerWrite;
@@ -203,14 +203,14 @@ public class ContainerHeadResponse implements CormorantResponse {
     }
 
     /**
-     * <p>The ACL that grants read access. If there is no ACL, this header is not returned by this operation. See <a href="http://docs.openstack.org/developer/swift/overview_acl.html#container-acls">Container ACLs</a> for more information.</p>
+     * <p>The ACL that grants read access. If there is no ACL, this header is not returned by this operation.</p>
      */
     public String getContainerRead() {
         return containerRead;
     }
 
     /**
-     * <p>The ACL that grants read access. If there is no ACL, this header is not returned by this operation. See <a href="http://docs.openstack.org/developer/swift/overview_acl.html#container-acls">Container ACLs</a> for more information.</p>
+     * <p>The ACL that grants read access. If there is no ACL, this header is not returned by this operation.</p>
      */
     public void setContainerRead(String containerRead) {
         this.containerRead = containerRead;
@@ -219,7 +219,7 @@ public class ContainerHeadResponse implements CormorantResponse {
     /**
      * <p>Headers the Object Storage service exposes to the browser (technically, through the {@literal user-agent} setting), in the request response, separated by spaces.  By default the Object Storage service returns the following headers:</p>
      * <bullet_list bullet="-"><list_item><p>All “simple response headers” as listed on <a href="http://www.w3.org/TR/cors/#simple-response-header">http://www.w3.org/TR/cors/#simple-response-header</a>.</p>
-     * </list_item><list_item><p>The headers {@literal etag}, {@literal x-timestamp}, {@literal x-trans-id}, {@literal x-openstack-request-id}.</p>
+     * </list_item><list_item><p>The headers {@literal etag}, {@literal x-timestamp}, {@literal x-trans-id}.</p>
      * </list_item><list_item><p>All metadata headers ({@literal X-Container-Meta-*} for containers and {@literal X-Object-Meta-*} for objects).</p>
      * </list_item><list_item><p>headers listed in {@literal X-Container-Meta-Access-Control-Expose-Headers}.</p>
      * </list_item></bullet_list> */
@@ -230,7 +230,7 @@ public class ContainerHeadResponse implements CormorantResponse {
     /**
      * <p>Headers the Object Storage service exposes to the browser (technically, through the {@literal user-agent} setting), in the request response, separated by spaces.  By default the Object Storage service returns the following headers:</p>
      * <bullet_list bullet="-"><list_item><p>All “simple response headers” as listed on <a href="http://www.w3.org/TR/cors/#simple-response-header">http://www.w3.org/TR/cors/#simple-response-header</a>.</p>
-     * </list_item><list_item><p>The headers {@literal etag}, {@literal x-timestamp}, {@literal x-trans-id}, {@literal x-openstack-request-id}.</p>
+     * </list_item><list_item><p>The headers {@literal etag}, {@literal x-timestamp}, {@literal x-trans-id}.</p>
      * </list_item><list_item><p>All metadata headers ({@literal X-Container-Meta-*} for containers and {@literal X-Object-Meta-*} for objects).</p>
      * </list_item><list_item><p>headers listed in {@literal X-Container-Meta-Access-Control-Expose-Headers}.</p>
      * </list_item></bullet_list> */
@@ -379,28 +379,28 @@ public class ContainerHeadResponse implements CormorantResponse {
     }
 
     /**
-     * <p>If present, this container has versioning enabled and the value is the UTF-8 encoded name of another container. For more information about object versioning, see `Object versioning &lt;<a href="http://docs.openstack.org/developer">http://docs.openstack.org/developer</a>/ swift/api/object_versioning.html&gt;`_.</p>
+     * <p>If present, this container has versioning enabled and the value is the UTF-8 encoded name of another container.</p>
      */
     public String getVersionsLocation() {
         return versionsLocation;
     }
 
     /**
-     * <p>If present, this container has versioning enabled and the value is the UTF-8 encoded name of another container. For more information about object versioning, see `Object versioning &lt;<a href="http://docs.openstack.org/developer">http://docs.openstack.org/developer</a>/ swift/api/object_versioning.html&gt;`_.</p>
+     * <p>If present, this container has versioning enabled and the value is the UTF-8 encoded name of another container.</p>
      */
     public void setVersionsLocation(String versionsLocation) {
         this.versionsLocation = versionsLocation;
     }
 
     /**
-     * <p>If present, this container has versioning enabled and the value is the UTF-8 encoded name of another container. For more information about object versioning, see `Object versioning &lt;<a href="http://docs.openstack.org/developer">http://docs.openstack.org/developer</a>/ swift/api/object_versioning.html&gt;`_.</p>
+     * <p>If present, this container has versioning enabled and the value is the UTF-8 encoded name of another container.</p>
      */
     public String getHistoryLocation() {
         return historyLocation;
     }
 
     /**
-     * <p>If present, this container has versioning enabled and the value is the UTF-8 encoded name of another container. For more information about object versioning, see `Object versioning &lt;<a href="http://docs.openstack.org/developer">http://docs.openstack.org/developer</a>/ swift/api/object_versioning.html&gt;`_.</p>
+     * <p>If present, this container has versioning enabled and the value is the UTF-8 encoded name of another container.</p>
      */
     public void setHistoryLocation(String historyLocation) {
         this.historyLocation = historyLocation;

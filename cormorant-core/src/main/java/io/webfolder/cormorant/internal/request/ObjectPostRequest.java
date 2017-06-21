@@ -110,28 +110,28 @@ public class ObjectPostRequest {
     }
 
     /**
-     * <p>When the {@literal bulk-delete} query parameter is present in the POST request, multiple objects or containers can be deleted with a single request. See `Bulk Delete &lt;<a href="http://docs.openstack.org/developer/swift/middleware.html">http://docs.openstack.org/developer/swift/middleware.html</a>?highlight= bulk#bulk-delete&gt;`_ for how this feature is used.</p>
+     * <p>When the {@literal bulk-delete} query parameter is present in the POST request, multiple objects or containers can be deleted with a single request.</p>
      */
     public String getBulkDelete() {
         return bulkDelete;
     }
 
     /**
-     * <p>When the {@literal bulk-delete} query parameter is present in the POST request, multiple objects or containers can be deleted with a single request. See `Bulk Delete &lt;<a href="http://docs.openstack.org/developer/swift/middleware.html">http://docs.openstack.org/developer/swift/middleware.html</a>?highlight= bulk#bulk-delete&gt;`_ for how this feature is used.</p>
+     * <p>When the {@literal bulk-delete} query parameter is present in the POST request, multiple objects or containers can be deleted with a single request.</p>
      */
     public void setBulkDelete(String bulkDelete) {
         this.bulkDelete = bulkDelete;
     }
 
     /**
-     * <p>When the {@literal extract-archive} query parameter is present in the POST request, an archive (tar file) is uploaded and extracted to create multiple objects. See `Extract Archive &lt;<a href="http://docs.openstack.org/developer/swift/middleware.html">http://docs.openstack.org/developer/swift/middleware.html</a>?highlight= bulk#extract-archive&gt;`_ for how this feature is used.</p>
+     * <p>When the {@literal extract-archive} query parameter is present in the POST request, an archive (tar file) is uploaded and extracted to create multiple objects.</p>
      */
     public String getExtractArchive() {
         return extractArchive;
     }
 
     /**
-     * <p>When the {@literal extract-archive} query parameter is present in the POST request, an archive (tar file) is uploaded and extracted to create multiple objects. See `Extract Archive &lt;<a href="http://docs.openstack.org/developer/swift/middleware.html">http://docs.openstack.org/developer/swift/middleware.html</a>?highlight= bulk#extract-archive&gt;`_ for how this feature is used.</p>
+     * <p>When the {@literal extract-archive} query parameter is present in the POST request, an archive (tar file) is uploaded and extracted to create multiple objects.</p>
      */
     public void setExtractArchive(String extractArchive) {
         this.extractArchive = extractArchive;
@@ -152,14 +152,14 @@ public class ObjectPostRequest {
     }
 
     /**
-     * <p>A service token. See `OpenStack Service Using Composite Tokens &lt;<a href="http://docs.openstack.org/developer/swift/overview_auth.html#openstack">http://docs.openstack.org/developer/swift/overview_auth.html#openstack</a>- service-using-composite-tokens&gt;`_ for more information.</p>
+     * <p>A service token.</p>
      */
     public String getServiceToken() {
         return serviceToken;
     }
 
     /**
-     * <p>A service token. See `OpenStack Service Using Composite Tokens &lt;<a href="http://docs.openstack.org/developer/swift/overview_auth.html#openstack">http://docs.openstack.org/developer/swift/overview_auth.html#openstack</a>- service-using-composite-tokens&gt;`_ for more information.</p>
+     * <p>A service token.</p>
      */
     public void setServiceToken(String serviceToken) {
         this.serviceToken = serviceToken;
@@ -250,14 +250,14 @@ public class ObjectPostRequest {
     }
 
     /**
-     * <p>Extra transaction information. Use the {@literal X-Trans-Id-Extra} request header to include extra information to help you debug any errors that might occur with large object upload and other Object Storage transactions.  The server appends the first 32 characters of the {@literal X-Trans-Id-Extra} request header value to the transaction ID value in the generated {@literal X-Trans-Id} response header. You must UTF-8-encode and then URL-encode the extra transaction information before you include it in the {@literal X-Trans-Id-Extra} request header.  For example, you can include extra transaction information when you upload <a href="http://docs.openstack.org/developer/swift/api/large_objects.html">large objects</a> such as images. When you upload each segment and the manifest, include the same value in the {@literal X-Trans-Id-Extra} request header. If an error occurs, you can find all requests that are related to the large object upload in the Object Storage logs.  You can also use {@literal X-Trans-Id-Extra} strings to help operators debug requests that fail to receive responses. The operator can search for the extra information in the logs.</p>
+     * <p>Extra transaction information. Use the {@literal X-Trans-Id-Extra} request header to include extra information to help you debug any errors that might occur with large object upload and other Object Storage transactions.  The server appends the first 32 characters of the {@literal X-Trans-Id-Extra} request header value to the transaction ID value in the generated {@literal X-Trans-Id} response header. You must UTF-8-encode and then URL-encode the extra transaction information before you include it in the {@literal X-Trans-Id-Extra} request header.</p>
      */
     public String getTransIdExtra() {
         return transIdExtra;
     }
 
     /**
-     * <p>Extra transaction information. Use the {@literal X-Trans-Id-Extra} request header to include extra information to help you debug any errors that might occur with large object upload and other Object Storage transactions.  The server appends the first 32 characters of the {@literal X-Trans-Id-Extra} request header value to the transaction ID value in the generated {@literal X-Trans-Id} response header. You must UTF-8-encode and then URL-encode the extra transaction information before you include it in the {@literal X-Trans-Id-Extra} request header.  For example, you can include extra transaction information when you upload <a href="http://docs.openstack.org/developer/swift/api/large_objects.html">large objects</a> such as images. When you upload each segment and the manifest, include the same value in the {@literal X-Trans-Id-Extra} request header. If an error occurs, you can find all requests that are related to the large object upload in the Object Storage logs.  You can also use {@literal X-Trans-Id-Extra} strings to help operators debug requests that fail to receive responses. The operator can search for the extra information in the logs.</p>
+     * <p>Extra transaction information. Use the {@literal X-Trans-Id-Extra} request header to include extra information to help you debug any errors that might occur with large object upload and other Object Storage transactions.  The server appends the first 32 characters of the {@literal X-Trans-Id-Extra} request header value to the transaction ID value in the generated {@literal X-Trans-Id} response header. You must UTF-8-encode and then URL-encode the extra transaction information before you include it in the {@literal X-Trans-Id-Extra} request header.</p>
      */
     public void setTransIdExtra(String transIdExtra) {
         this.transIdExtra = transIdExtra;

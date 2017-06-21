@@ -148,28 +148,28 @@ public class ObjectPutRequest {
     }
 
     /**
-     * <p>Used with temporary URLs to sign the request with an HMAC-SHA1 cryptographic signature that defines the allowed HTTP method, expiration date, full path to the object, and the secret key for the temporary URL. For more information about temporary URLs, see `Temporary URL middleware &lt;<a href="http://docs.openstack.org/developer/swif">http://docs.openstack.org/developer/swif</a> t/api/temporary_url_middleware.html&gt;`_.</p>
+     * <p>Used with temporary URLs to sign the request with an HMAC-SHA1 cryptographic signature that defines the allowed HTTP method, expiration date, full path to the object, and the secret key for the temporary URL.</p>
      */
     public String getTempUrlSig() {
         return tempUrlSig;
     }
 
     /**
-     * <p>Used with temporary URLs to sign the request with an HMAC-SHA1 cryptographic signature that defines the allowed HTTP method, expiration date, full path to the object, and the secret key for the temporary URL. For more information about temporary URLs, see `Temporary URL middleware &lt;<a href="http://docs.openstack.org/developer/swif">http://docs.openstack.org/developer/swif</a> t/api/temporary_url_middleware.html&gt;`_.</p>
+     * <p>Used with temporary URLs to sign the request with an HMAC-SHA1 cryptographic signature that defines the allowed HTTP method, expiration date, full path to the object, and the secret key for the temporary URL.</p>
      */
     public void setTempUrlSig(String tempUrlSig) {
         this.tempUrlSig = tempUrlSig;
     }
 
     /**
-     * <p>The date and time in <a href="https://en.wikipedia.org/wiki/Unix_time">UNIX Epoch time stamp format</a> or <a href="https://en.wikipedia.org/wiki/ISO_8601">ISO 8601 UTC timestamp</a> when the signature for temporary URLs expires. For example, {@literal 1440619048} or {@literal 2015-08-26T19:57:28Z} is equivalent to {@literal Mon, Wed, 26 Aug 2015 19:57:28 GMT}.  For more information about temporary URLs, see `Temporary URL middleware &lt;<a href="http://docs.openstack.org/developer/swift/api/temporary">http://docs.openstack.org/developer/swift/api/temporary</a> _url_middleware.html&gt;`_.</p>
+     * <p>The date and time in <a href="https://en.wikipedia.org/wiki/Unix_time">UNIX Epoch time stamp format</a> or <a href="https://en.wikipedia.org/wiki/ISO_8601">ISO 8601 UTC timestamp</a> when the signature for temporary URLs expires. For example, {@literal 1440619048} or {@literal 2015-08-26T19:57:28Z} is equivalent to {@literal Mon, Wed, 26 Aug 2015 19:57:28 GMT}.</p>
      */
     public Integer getTempUrlExpires() {
         return tempUrlExpires;
     }
 
     /**
-     * <p>The date and time in <a href="https://en.wikipedia.org/wiki/Unix_time">UNIX Epoch time stamp format</a> or <a href="https://en.wikipedia.org/wiki/ISO_8601">ISO 8601 UTC timestamp</a> when the signature for temporary URLs expires. For example, {@literal 1440619048} or {@literal 2015-08-26T19:57:28Z} is equivalent to {@literal Mon, Wed, 26 Aug 2015 19:57:28 GMT}.  For more information about temporary URLs, see `Temporary URL middleware &lt;<a href="http://docs.openstack.org/developer/swift/api/temporary">http://docs.openstack.org/developer/swift/api/temporary</a> _url_middleware.html&gt;`_.</p>
+     * <p>The date and time in <a href="https://en.wikipedia.org/wiki/Unix_time">UNIX Epoch time stamp format</a> or <a href="https://en.wikipedia.org/wiki/ISO_8601">ISO 8601 UTC timestamp</a> when the signature for temporary URLs expires. For example, {@literal 1440619048} or {@literal 2015-08-26T19:57:28Z} is equivalent to {@literal Mon, Wed, 26 Aug 2015 19:57:28 GMT}.</p>
      */
     public void setTempUrlExpires(Integer tempUrlExpires) {
         this.tempUrlExpires = tempUrlExpires;
@@ -204,14 +204,14 @@ public class ObjectPutRequest {
     }
 
     /**
-     * <p>A service token. See `OpenStack Service Using Composite Tokens &lt;<a href="http://docs.openstack.org/developer/swift/overview_auth.html#openstack">http://docs.openstack.org/developer/swift/overview_auth.html#openstack</a>- service-using-composite-tokens&gt;`_ for more information.</p>
+     * <p>A service token.</p>
      */
     public String getServiceToken() {
         return serviceToken;
     }
 
     /**
-     * <p>A service token. See `OpenStack Service Using Composite Tokens &lt;<a href="http://docs.openstack.org/developer/swift/overview_auth.html#openstack">http://docs.openstack.org/developer/swift/overview_auth.html#openstack</a>- service-using-composite-tokens&gt;`_ for more information.</p>
+     * <p>A service token.</p>
      */
     public void setServiceToken(String serviceToken) {
         this.serviceToken = serviceToken;
@@ -386,14 +386,14 @@ public class ObjectPutRequest {
     }
 
     /**
-     * <p>Extra transaction information. Use the {@literal X-Trans-Id-Extra} request header to include extra information to help you debug any errors that might occur with large object upload and other Object Storage transactions.  The server appends the first 32 characters of the {@literal X-Trans-Id-Extra} request header value to the transaction ID value in the generated {@literal X-Trans-Id} response header. You must UTF-8-encode and then URL-encode the extra transaction information before you include it in the {@literal X-Trans-Id-Extra} request header.  For example, you can include extra transaction information when you upload <a href="http://docs.openstack.org/developer/swift/api/large_objects.html">large objects</a> such as images. When you upload each segment and the manifest, include the same value in the {@literal X-Trans-Id-Extra} request header. If an error occurs, you can find all requests that are related to the large object upload in the Object Storage logs.  You can also use {@literal X-Trans-Id-Extra} strings to help operators debug requests that fail to receive responses. The operator can search for the extra information in the logs.</p>
+     * <p>Extra transaction information. Use the {@literal X-Trans-Id-Extra} request header to include extra information to help you debug any errors that might occur with large object upload and other Object Storage transactions.  The server appends the first 32 characters of the {@literal X-Trans-Id-Extra} request header value to the transaction ID value in the generated {@literal X-Trans-Id} response header. You must UTF-8-encode and then URL-encode the extra transaction information before you include it in the {@literal X-Trans-Id-Extra} request header.</p>
      */
     public String getTransIdExtra() {
         return transIdExtra;
     }
 
     /**
-     * <p>Extra transaction information. Use the {@literal X-Trans-Id-Extra} request header to include extra information to help you debug any errors that might occur with large object upload and other Object Storage transactions.  The server appends the first 32 characters of the {@literal X-Trans-Id-Extra} request header value to the transaction ID value in the generated {@literal X-Trans-Id} response header. You must UTF-8-encode and then URL-encode the extra transaction information before you include it in the {@literal X-Trans-Id-Extra} request header.  For example, you can include extra transaction information when you upload <a href="http://docs.openstack.org/developer/swift/api/large_objects.html">large objects</a> such as images. When you upload each segment and the manifest, include the same value in the {@literal X-Trans-Id-Extra} request header. If an error occurs, you can find all requests that are related to the large object upload in the Object Storage logs.  You can also use {@literal X-Trans-Id-Extra} strings to help operators debug requests that fail to receive responses. The operator can search for the extra information in the logs.</p>
+     * <p>Extra transaction information. Use the {@literal X-Trans-Id-Extra} request header to include extra information to help you debug any errors that might occur with large object upload and other Object Storage transactions.  The server appends the first 32 characters of the {@literal X-Trans-Id-Extra} request header value to the transaction ID value in the generated {@literal X-Trans-Id} response header. You must UTF-8-encode and then URL-encode the extra transaction information before you include it in the {@literal X-Trans-Id-Extra} request header.</p>
      */
     public void setTransIdExtra(String transIdExtra) {
         this.transIdExtra = transIdExtra;

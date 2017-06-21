@@ -124,14 +124,14 @@ public class ContainerPutRequest {
     }
 
     /**
-     * <p>A service token. See `OpenStack Service Using Composite Tokens &lt;<a href="http://docs.openstack.org/developer/swift/overview_auth.html#openstack">http://docs.openstack.org/developer/swift/overview_auth.html#openstack</a>- service-using-composite-tokens&gt;`_ for more information.</p>
+     * <p>A service token.</p>
      */
     public String getServiceToken() {
         return serviceToken;
     }
 
     /**
-     * <p>A service token. See `OpenStack Service Using Composite Tokens &lt;<a href="http://docs.openstack.org/developer/swift/overview_auth.html#openstack">http://docs.openstack.org/developer/swift/overview_auth.html#openstack</a>- service-using-composite-tokens&gt;`_ for more information.</p>
+     * <p>A service token.</p>
      */
     public void setServiceToken(String serviceToken) {
         this.serviceToken = serviceToken;
@@ -139,7 +139,7 @@ public class ContainerPutRequest {
 
     /**
      * <p>Sets a container access control list (ACL) that grants read access. The scope of the access is specific to the container. The ACL grants the ability to perform GET or HEAD operations on objects in the container or to perform a GET or HEAD operation on the container itself.</p>
-     * <p>The format and scope of the ACL is dependent on the authorization system used by the Object Storage service. See <a href="http://docs.openstack.org/developer/swift/overview_acl.html#container-acls">Container ACLs</a> for more information.</p>
+     * <p>The format and scope of the ACL is dependent on the authorization system used by the Object Storage service.</p>
      */
     public String getContainerRead() {
         return containerRead;
@@ -147,7 +147,7 @@ public class ContainerPutRequest {
 
     /**
      * <p>Sets a container access control list (ACL) that grants read access. The scope of the access is specific to the container. The ACL grants the ability to perform GET or HEAD operations on objects in the container or to perform a GET or HEAD operation on the container itself.</p>
-     * <p>The format and scope of the ACL is dependent on the authorization system used by the Object Storage service. See <a href="http://docs.openstack.org/developer/swift/overview_acl.html#container-acls">Container ACLs</a> for more information.</p>
+     * <p>The format and scope of the ACL is dependent on the authorization system used by the Object Storage service.</p>
      */
     public void setContainerRead(String containerRead) {
         this.containerRead = containerRead;
@@ -155,7 +155,7 @@ public class ContainerPutRequest {
 
     /**
      * <p>Sets a container access control list (ACL) that grants write access. The scope of the access is specific to the container. The ACL grants the ability to perform PUT, POST and DELETE operations on objects in the container. It does not grant write access to the container metadata.</p>
-     * <p>The format of the ACL is dependent on the authorization system used by the Object Storage service.  See <a href="http://docs.openstack.org/developer/swift/overview_acl.html#container-acls">Container ACLs</a> for more information.</p>
+     * <p>The format of the ACL is dependent on the authorization system used by the Object Storage service.</p>
      */
     public String getContainerWrite() {
         return containerWrite;
@@ -163,7 +163,7 @@ public class ContainerPutRequest {
 
     /**
      * <p>Sets a container access control list (ACL) that grants write access. The scope of the access is specific to the container. The ACL grants the ability to perform PUT, POST and DELETE operations on objects in the container. It does not grant write access to the container metadata.</p>
-     * <p>The format of the ACL is dependent on the authorization system used by the Object Storage service.  See <a href="http://docs.openstack.org/developer/swift/overview_acl.html#container-acls">Container ACLs</a> for more information.</p>
+     * <p>The format of the ACL is dependent on the authorization system used by the Object Storage service.</p>
      */
     public void setContainerWrite(String containerWrite) {
         this.containerWrite = containerWrite;
@@ -184,42 +184,42 @@ public class ContainerPutRequest {
     }
 
     /**
-     * <p>Sets the secret key for container synchronization. If you remove the secret key, synchronization is halted. For more information, see `Container to Container Synchronization &lt;http://docs.openstack.org/developer/swift/overview_ container_sync.html&gt;`_</p>
+     * <p>Sets the secret key for container synchronization. If you remove the secret key, synchronization is halted.</p>
      */
     public String getContainerSyncKey() {
         return containerSyncKey;
     }
 
     /**
-     * <p>Sets the secret key for container synchronization. If you remove the secret key, synchronization is halted. For more information, see `Container to Container Synchronization &lt;http://docs.openstack.org/developer/swift/overview_ container_sync.html&gt;`_</p>
+     * <p>Sets the secret key for container synchronization. If you remove the secret key, synchronization is halted.</p>
      */
     public void setContainerSyncKey(String containerSyncKey) {
         this.containerSyncKey = containerSyncKey;
     }
 
     /**
-     * <p>The URL-encoded UTF-8 representation of the container that stores previous versions of objects. If neither this nor {@literal X-History-Location} is set, versioning is disabled for this container. {@literal X-Versions-Location} and {@literal X-History-Location} cannot both be set at the same time. For more information about object versioning, see `Object versioning &lt;<a href="http://docs.openstack.org">http://docs.openstack.org</a>/ developer/swift/api/object_versioning.html&gt;`_.</p>
+     * <p>The URL-encoded UTF-8 representation of the container that stores previous versions of objects. If neither this nor {@literal X-History-Location} is set, versioning is disabled for this container. {@literal X-Versions-Location} and {@literal X-History-Location} cannot both be set at the same time.</p>
      */
     public String getVersionsLocation() {
         return versionsLocation;
     }
 
     /**
-     * <p>The URL-encoded UTF-8 representation of the container that stores previous versions of objects. If neither this nor {@literal X-History-Location} is set, versioning is disabled for this container. {@literal X-Versions-Location} and {@literal X-History-Location} cannot both be set at the same time. For more information about object versioning, see `Object versioning &lt;<a href="http://docs.openstack.org">http://docs.openstack.org</a>/ developer/swift/api/object_versioning.html&gt;`_.</p>
+     * <p>The URL-encoded UTF-8 representation of the container that stores previous versions of objects. If neither this nor {@literal X-History-Location} is set, versioning is disabled for this container. {@literal X-Versions-Location} and {@literal X-History-Location} cannot both be set at the same time.</p>
      */
     public void setVersionsLocation(String versionsLocation) {
         this.versionsLocation = versionsLocation;
     }
 
     /**
-     * <p>The URL-encoded UTF-8 representation of the container that stores previous versions of objects. If neither this nor {@literal X-Versions-Location} is set, versioning is disabled for this container. {@literal X-History-Location} and {@literal X-Versions-Location} cannot both be set at the same time. For more information about object versioning, see `Object versioning &lt;<a href="http://docs.openstack.org">http://docs.openstack.org</a>/ developer/swift/api/object_versioning.html&gt;`_.</p>
+     * <p>The URL-encoded UTF-8 representation of the container that stores previous versions of objects. If neither this nor {@literal X-Versions-Location} is set, versioning is disabled for this container. {@literal X-History-Location} and {@literal X-Versions-Location} cannot both be set at the same time.</p>
      */
     public String getHistoryLocation() {
         return historyLocation;
     }
 
     /**
-     * <p>The URL-encoded UTF-8 representation of the container that stores previous versions of objects. If neither this nor {@literal X-Versions-Location} is set, versioning is disabled for this container. {@literal X-History-Location} and {@literal X-Versions-Location} cannot both be set at the same time. For more information about object versioning, see `Object versioning &lt;<a href="http://docs.openstack.org">http://docs.openstack.org</a>/ developer/swift/api/object_versioning.html&gt;`_.</p>
+     * <p>The URL-encoded UTF-8 representation of the container that stores previous versions of objects. If neither this nor {@literal X-Versions-Location} is set, versioning is disabled for this container. {@literal X-History-Location} and {@literal X-Versions-Location} cannot both be set at the same time.</p>
      */
     public void setHistoryLocation(String historyLocation) {
         this.historyLocation = historyLocation;
@@ -270,7 +270,7 @@ public class ContainerPutRequest {
     /**
      * <p>Headers the Object Storage service exposes to the browser (technically, through the {@literal user-agent} setting), in the request response, separated by spaces.  By default the Object Storage service returns the following headers:</p>
      * <bullet_list bullet="-"><list_item><p>All “simple response headers” as listed on <a href="http://www.w3.org/TR/cors/#simple-response-header">http://www.w3.org/TR/cors/#simple-response-header</a>.</p>
-     * </list_item><list_item><p>The headers {@literal etag}, {@literal x-timestamp}, {@literal x-trans-id}, {@literal x-openstack-request-id}.</p>
+     * </list_item><list_item><p>The headers {@literal etag}, {@literal x-timestamp}, {@literal x-trans-id}.</p>
      * </list_item><list_item><p>All metadata headers ({@literal X-Container-Meta-*} for containers and {@literal X-Object-Meta-*} for objects).</p>
      * </list_item><list_item><p>headers listed in {@literal X-Container-Meta-Access-Control-Expose-Headers}.</p>
      * </list_item></bullet_list> */
@@ -281,7 +281,7 @@ public class ContainerPutRequest {
     /**
      * <p>Headers the Object Storage service exposes to the browser (technically, through the {@literal user-agent} setting), in the request response, separated by spaces.  By default the Object Storage service returns the following headers:</p>
      * <bullet_list bullet="-"><list_item><p>All “simple response headers” as listed on <a href="http://www.w3.org/TR/cors/#simple-response-header">http://www.w3.org/TR/cors/#simple-response-header</a>.</p>
-     * </list_item><list_item><p>The headers {@literal etag}, {@literal x-timestamp}, {@literal x-trans-id}, {@literal x-openstack-request-id}.</p>
+     * </list_item><list_item><p>The headers {@literal etag}, {@literal x-timestamp}, {@literal x-trans-id}.</p>
      * </list_item><list_item><p>All metadata headers ({@literal X-Container-Meta-*} for containers and {@literal X-Object-Meta-*} for objects).</p>
      * </list_item><list_item><p>headers listed in {@literal X-Container-Meta-Access-Control-Expose-Headers}.</p>
      * </list_item></bullet_list> */
@@ -290,28 +290,28 @@ public class ContainerPutRequest {
     }
 
     /**
-     * <p>Sets maximum size of the container, in bytes. Typically these values are set by an administrator. Returns a 413 response (request entity too large) when an object PUT operation exceeds this quota value. This value does not take effect immediately. see <a href="http://docs.openstack.org/developer/swift/api/container_quotas.html">Container Quotas</a> for more information.</p>
+     * <p>Sets maximum size of the container, in bytes. Typically these values are set by an administrator. Returns a 413 response (request entity too large) when an object PUT operation exceeds this quota value. This value does not take effect immediately.</p>
      */
     public String getContainerMetaQuotaBytes() {
         return containerMetaQuotaBytes;
     }
 
     /**
-     * <p>Sets maximum size of the container, in bytes. Typically these values are set by an administrator. Returns a 413 response (request entity too large) when an object PUT operation exceeds this quota value. This value does not take effect immediately. see <a href="http://docs.openstack.org/developer/swift/api/container_quotas.html">Container Quotas</a> for more information.</p>
+     * <p>Sets maximum size of the container, in bytes. Typically these values are set by an administrator. Returns a 413 response (request entity too large) when an object PUT operation exceeds this quota value. This value does not take effect immediately.</p>
      */
     public void setContainerMetaQuotaBytes(String containerMetaQuotaBytes) {
         this.containerMetaQuotaBytes = containerMetaQuotaBytes;
     }
 
     /**
-     * <p>Sets maximum object count of the container. Typically these values are set by an administrator. Returns a 413 response (request entity too large) when an object PUT operation exceeds this quota value. This value does not take effect immediately. see <a href="http://docs.openstack.org/developer/swift/api/container_quotas.html">Container Quotas</a> for more information.</p>
+     * <p>Sets maximum object count of the container. Typically these values are set by an administrator. Returns a 413 response (request entity too large) when an object PUT operation exceeds this quota value. This value does not take effect immediately.</p>
      */
     public String getContainerMetaQuotaCount() {
         return containerMetaQuotaCount;
     }
 
     /**
-     * <p>Sets maximum object count of the container. Typically these values are set by an administrator. Returns a 413 response (request entity too large) when an object PUT operation exceeds this quota value. This value does not take effect immediately. see <a href="http://docs.openstack.org/developer/swift/api/container_quotas.html">Container Quotas</a> for more information.</p>
+     * <p>Sets maximum object count of the container. Typically these values are set by an administrator. Returns a 413 response (request entity too large) when an object PUT operation exceeds this quota value. This value does not take effect immediately.</p>
      */
     public void setContainerMetaQuotaCount(String containerMetaQuotaCount) {
         this.containerMetaQuotaCount = containerMetaQuotaCount;
@@ -346,14 +346,14 @@ public class ContainerPutRequest {
     }
 
     /**
-     * <p>Extra transaction information. Use the {@literal X-Trans-Id-Extra} request header to include extra information to help you debug any errors that might occur with large object upload and other Object Storage transactions.  The server appends the first 32 characters of the {@literal X-Trans-Id-Extra} request header value to the transaction ID value in the generated {@literal X-Trans-Id} response header. You must UTF-8-encode and then URL-encode the extra transaction information before you include it in the {@literal X-Trans-Id-Extra} request header.  For example, you can include extra transaction information when you upload <a href="http://docs.openstack.org/developer/swift/api/large_objects.html">large objects</a> such as images. When you upload each segment and the manifest, include the same value in the {@literal X-Trans-Id-Extra} request header. If an error occurs, you can find all requests that are related to the large object upload in the Object Storage logs.  You can also use {@literal X-Trans-Id-Extra} strings to help operators debug requests that fail to receive responses. The operator can search for the extra information in the logs.</p>
+     * <p>Extra transaction information. Use the {@literal X-Trans-Id-Extra} request header to include extra information to help you debug any errors that might occur with large object upload and other Object Storage transactions.  The server appends the first 32 characters of the {@literal X-Trans-Id-Extra} request header value to the transaction ID value in the generated {@literal X-Trans-Id} response header. You must UTF-8-encode and then URL-encode the extra transaction information before you include it in the {@literal X-Trans-Id-Extra} request header.  For example, you can include extra transaction information when you upload large objects such as images. When you upload each segment and the manifest, include the same value in the {@literal X-Trans-Id-Extra} request header. If an error occurs, you can find all requests that are related to the large object upload in the Object Storage logs.  You can also use {@literal X-Trans-Id-Extra} strings to help operators debug requests that fail to receive responses. The operator can search for the extra information in the logs.</p>
      */
     public String getTransIdExtra() {
         return transIdExtra;
     }
 
     /**
-     * <p>Extra transaction information. Use the {@literal X-Trans-Id-Extra} request header to include extra information to help you debug any errors that might occur with large object upload and other Object Storage transactions.  The server appends the first 32 characters of the {@literal X-Trans-Id-Extra} request header value to the transaction ID value in the generated {@literal X-Trans-Id} response header. You must UTF-8-encode and then URL-encode the extra transaction information before you include it in the {@literal X-Trans-Id-Extra} request header.  For example, you can include extra transaction information when you upload <a href="http://docs.openstack.org/developer/swift/api/large_objects.html">large objects</a> such as images. When you upload each segment and the manifest, include the same value in the {@literal X-Trans-Id-Extra} request header. If an error occurs, you can find all requests that are related to the large object upload in the Object Storage logs.  You can also use {@literal X-Trans-Id-Extra} strings to help operators debug requests that fail to receive responses. The operator can search for the extra information in the logs.</p>
+     * <p>Extra transaction information. Use the {@literal X-Trans-Id-Extra} request header to include extra information to help you debug any errors that might occur with large object upload and other Object Storage transactions.  The server appends the first 32 characters of the {@literal X-Trans-Id-Extra} request header value to the transaction ID value in the generated {@literal X-Trans-Id} response header. You must UTF-8-encode and then URL-encode the extra transaction information before you include it in the {@literal X-Trans-Id-Extra} request header.  For example, you can include extra transaction information when you upload large objects such as images. When you upload each segment and the manifest, include the same value in the {@literal X-Trans-Id-Extra} request header. If an error occurs, you can find all requests that are related to the large object upload in the Object Storage logs.  You can also use {@literal X-Trans-Id-Extra} strings to help operators debug requests that fail to receive responses. The operator can search for the extra information in the logs.</p>
      */
     public void setTransIdExtra(String transIdExtra) {
         this.transIdExtra = transIdExtra;
