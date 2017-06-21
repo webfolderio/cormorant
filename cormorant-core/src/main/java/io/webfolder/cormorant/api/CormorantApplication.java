@@ -55,23 +55,23 @@ import io.webfolder.cormorant.internal.jaxrs.ObjectController;
 
 public class CormorantApplication extends Application {
 
-    private final int pathMaxCount = getPathMaxCount();
+    private final int pathMaxCount     = getPathMaxCount();
 
-    private final Path objectStore;
+    private final Path                   objectStore;
 
-    private final AccountService accountService;
+    private final AccountService         accountService;
 
-    private final AuthenticationService authenticationService;
+    private final AuthenticationService  authenticationService;
 
-    private final MetadataServiceFactory propertyServiceFactory;
+    private final MetadataServiceFactory metadataServiceFactory;
 
-    private final String host;
+    private final String                 host;
 
-    private final int port;
+    private final int                    port;
 
-    private final String contextPath;
+    private final String                 contextPath;
 
-    private final String accountName;
+    private final String                 accountName;
 
     public CormorantApplication(
                 final Path objectStore,
@@ -85,7 +85,7 @@ public class CormorantApplication extends Application {
         this.objectStore            = objectStore;
         this.accountService         = accountService;
         this.authenticationService  = authenticationService;
-        this.propertyServiceFactory = createPropertyServiceFactory(propertyStore);
+        this.metadataServiceFactory = createPropertyServiceFactory(propertyStore);
         this.host                   = host;
         this.port                   = port;
         this.contextPath            = contextPath;
@@ -96,16 +96,14 @@ public class CormorantApplication extends Application {
     public Set<Object> getSingletons() {
         final Set<Object> singletons = new HashSet<>();
 
-        final boolean cacheable = true;
+        final MetadataService accountMetadataService   = metadataServiceFactory.create(ACCOUNT  , METADATA       , isCacheable(ACCOUNT));
+        final MetadataService containerMetadataService = metadataServiceFactory.create(CONTAINER, METADATA       , isCacheable(CONTAINER));
+        final MetadataService objectMetadataService    = metadataServiceFactory.create(OBJECT   , METADATA       , isCacheable(OBJECT));
+        final MetadataService systemMetadataService    = metadataServiceFactory.create(OBJECT   , SYSTEM_METADATA, isCacheable(OBJECT));
 
-        final MetadataService accountMetadataService   = propertyServiceFactory.create(ACCOUNT  , METADATA       , cacheable);
-        final MetadataService containerMetadataService = propertyServiceFactory.create(CONTAINER, METADATA       , cacheable);
-        final MetadataService objectMetadataService    = propertyServiceFactory.create(OBJECT   , METADATA       , false);
-        final MetadataService systemMetadataService    = propertyServiceFactory.create(OBJECT   , SYSTEM_METADATA, false);
-
-        final FileChecksumService     checksumService  = new FileChecksumService(objectMetadataService);
-        final ContainerService<Path>  containerService = new PathContainerService(objectStore, pathMaxCount, checksumService, containerMetadataService);
-        final ObjectService<Path>     objectService    = new PathObjectService(containerService);
+        final FileChecksumService    checksumService  = new FileChecksumService(objectMetadataService);
+        final ContainerService<Path> containerService = new PathContainerService(objectStore, pathMaxCount, checksumService, containerMetadataService);
+        final ObjectService<Path>    objectService    = new PathObjectService(containerService);
 
         checksumService.setObjectService(objectService);
 
@@ -140,6 +138,10 @@ public class CormorantApplication extends Application {
         return singletons;
     }
 
+    public String getContextPath() {
+        return contextPath;
+    }
+
     protected MetadataServiceFactory createPropertyServiceFactory(final Path propertyStore) {
         return new DefaultMetadataServiceFactory(propertyStore);
     }
@@ -148,7 +150,7 @@ public class CormorantApplication extends Application {
         return 10_000;
     }
 
-    public String getContextPath() {
-        return contextPath;
+    protected boolean isCacheable(final String cacheName) {
+        return true;
     }
 }

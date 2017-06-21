@@ -22,9 +22,11 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static net.jodah.expiringmap.ExpirationPolicy.CREATED;
 import static net.jodah.expiringmap.ExpiringMap.builder;
 
+import java.lang.ref.WeakReference;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.ServiceLoader;
+import java.util.WeakHashMap;
 
 public class DefaultCacheFactory implements CacheFactory {
 
@@ -32,20 +34,38 @@ public class DefaultCacheFactory implements CacheFactory {
 
     public static final int CACHE_DURATION = 60 * 60 * 24;
 
+    @SuppressWarnings("rawtypes")
+    private final Map<String, WeakReference<Map>> cacheMappings = new WeakHashMap<>();
+
+    @SuppressWarnings({ "rawtypes" })
+    private final CacheLoader cacheLoader;
+
+    @SuppressWarnings("rawtypes")
+    public DefaultCacheFactory() {
+        final ServiceLoader<CacheLoader> loader   = load(CacheLoader.class, getClass().getClassLoader());
+        final Iterator<CacheLoader>      iterator = loader.iterator();
+        if (iterator.hasNext()) {
+            cacheLoader = iterator.next();
+        } else {
+            cacheLoader = null;
+        }
+    }
+
     @Override
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    public <K, V> Map<K, V> create(String name) {
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    public <K, V> Map<K, V> create(final String name) {
+        if (cacheMappings.containsKey(name)) {
+            return cacheMappings.get(name).get();
+        }
         final Map<K, V> cache = builder()
                                     .expirationPolicy(CREATED)
                                     .expiration(CACHE_DURATION, SECONDS)
                                     .maxSize(CACHE_MAX_SIZE)
                                 .build();
-        final ServiceLoader<CacheLoader> loader   = load(CacheLoader.class, getClass().getClassLoader());
-        final Iterator<CacheLoader>      iterator = loader.iterator();
-        if (iterator.hasNext()) {
-            final CacheLoader cacheLoader = iterator.next();
+        if ( cacheLoader != null ) {
             cacheLoader.load(name, cache);
         }
+        cacheMappings.put(name, new WeakReference<Map>(cache));
         return (Map<K, V>) cache;
     }
 }

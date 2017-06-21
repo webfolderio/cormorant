@@ -62,13 +62,13 @@ class PathVisitor implements FileVisitor<Path>, DirectoryStream<Path> {
                     final ListContainerOptions options,
                     final Path root,
                     final int pathMaxCount) {
-        this.delimiter           = options.getDelimiter();
-        this.prefix              = options.getPrefix();
-        this.root                = root;
-        this.limit               = options.getLimit()     == null ? pathMaxCount           : options.getLimit();
-        this.marker              = options.getMarker()    != null ? options.getMarker()    : null;
-        this.endMarker           = options.getEndMarker() != null ? options.getEndMarker() : null;
-        this.reverse             = TRUE.equals(options.getReverse());
+        this.delimiter = options.getDelimiter();
+        this.prefix    = options.getPrefix();
+        this.root      = root;
+        this.limit     = options.getLimit()     == null ? pathMaxCount           : options.getLimit();
+        this.marker    = options.getMarker()    != null ? options.getMarker()    : null;
+        this.endMarker = options.getEndMarker() != null ? options.getEndMarker() : null;
+        this.reverse   = TRUE.equals(options.getReverse());
     }
 
     @Override

@@ -37,41 +37,45 @@ import io.webfolder.cormorant.api.service.MetadataService;
 
 public class DefaultMetadataServiceFactory implements MetadataServiceFactory {
 
-    private final Path root;
+    private final Path         root;
+
+    private final CacheFactory cacheFactory;
 
     public DefaultMetadataServiceFactory(final Path root) {
-        this.root = root;
+        this.root                                       = root;
+        final ServiceLoader<CacheFactory> cacheLoader   = load(CacheFactory.class, getClass().getClassLoader());
+        final Iterator<CacheFactory>      cacheIterator = cacheLoader.iterator();
+        this.cacheFactory                               = cacheIterator.hasNext()  ?
+                                                          cacheIterator.next()     :
+                                                          new DefaultCacheFactory();
     }
 
     @Override
     public MetadataService create(
-                                final String  namespace,
+                                final String  cacheName,
                                 final String  groupName,
                                 final boolean cacheable) {
-        final ServiceLoader<MetadataService>       psLoader = load(MetadataService.class, getClass().getClassLoader());
-        final Iterator<MetadataService>          psIterator = psLoader.iterator();
-        final Path                             absolutePath = root.toAbsolutePath().normalize().resolve(namespace);
+        final ServiceLoader<MetadataService> psLoader     = load(MetadataService.class, getClass().getClassLoader());
+        final Iterator<MetadataService>      psIterator   = psLoader.iterator();
+        final Path                           absolutePath = root.toAbsolutePath().normalize().resolve(cacheName);
         if ( ! exists(absolutePath, NOFOLLOW_LINKS) ) {
             try {
                 createDirectories(absolutePath);
             } catch (IOException e) {
-                throw new CormorantException("Unable to create property directory [" + absolutePath + "], namespace [" + namespace + "].", e);
+                throw new CormorantException("Unable to create property directory [" + absolutePath + "], namespace [" + cacheName + "].", e);
             }
         } else if ( ! isDirectory(absolutePath, NOFOLLOW_LINKS) ) {
-            throw new CormorantException("Invalid property directory [" + absolutePath + "], namespace [" + namespace + "].");
+            throw new CormorantException("Invalid property directory [" + absolutePath + "], namespace [" + cacheName + "].");
         }
-        Map<String, Object> cache = emptyMap();
+        final Map<String, Object> cache;
         if (cacheable) {
-            final ServiceLoader<CacheFactory> cacheLoader = load(CacheFactory.class, getClass().getClassLoader());
-            final Iterator<CacheFactory>    cacheIterator = cacheLoader.iterator();
-            final CacheFactory               cacheFactory = cacheIterator.hasNext()  ?
-                                                                    cacheIterator.next() :
-                                                                    new DefaultCacheFactory();
-            cache = cacheFactory.create(namespace);
+            cache = cacheFactory.create(cacheName);
+        } else {
+            cache = emptyMap();
         }
         final MetadataService propertyService = psIterator.hasNext()      ?
                                                         psIterator.next() :
-                                                        new FileMetadataService(absolutePath, groupName,cacheable, cache);
+                                                        new FileMetadataService(absolutePath, groupName, cacheable, cache);
         return propertyService;
     }
 }

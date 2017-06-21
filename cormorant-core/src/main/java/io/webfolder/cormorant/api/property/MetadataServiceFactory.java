@@ -30,7 +30,7 @@ public interface MetadataServiceFactory {
     String METADATA_EXTENSION  = ".metadata"      ;
 
     MetadataService create(
-                        final String  namespace,
+                        final String  cacheName,
                         final String  groupName,
                         final boolean cacheable);
 }
