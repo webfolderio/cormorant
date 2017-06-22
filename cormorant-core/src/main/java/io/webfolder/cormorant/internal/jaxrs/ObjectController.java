@@ -632,16 +632,33 @@ public class ObjectController<T> {
             }
 
             final String namespace = objectService.getNamespace(container, object);
+
             final long size = objectService.getSize(object);
+
+            final String objectManifest = systemMetadataService.getProperty(namespace, X_OBJECT_MANIFEST);
+            final boolean dynamicLargeObject = objectManifest != null;
+            if (dynamicLargeObject && size == 0) {
+                final String manifestContainerName = objectManifest.substring(objectManifest.indexOf(CHAR_SLASH) + 1, objectManifest.length());
+                final T manifestContainer = containerService.getContainer(request.getAccount(), manifestContainerName);
+                for (T next : objectService.listDynamicLargeObject(manifestContainer, object)) {
+                    objectService.delete(manifestContainer, next);
+                    objectService.getNamespace(manifestContainer, object);
+                    final String nextNamespace = objectService.getNamespace(manifestContainer, next);
+                    systemMetadataService.delete(nextNamespace);
+                    metadataService.delete(nextNamespace);
+                }
+            }
+
             objectService.delete(container, object);
             systemMetadataService.delete(namespace);
             metadataService.delete(namespace);
+
             if ( ! isDirectory && ! objectService.isMultipartManifest(object) ) {
                 Container containerInfo = accountService.getContainer(request.getAccount(), request.getContainer());
                 containerInfo.decrementObjectCount();
                 containerInfo.removeBytesUsed(size);
             }
-            
+
             return ok()
                     .entity(new ObjectDeleteResponse())
                     .status(deleteStaticLargeObject ? OK : NO_CONTENT)
