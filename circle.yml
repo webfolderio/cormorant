@@ -62,8 +62,6 @@ jobs:
           background: true
           command: |
             sleep 5
-            source ./refstack-client/.venv/bin/activate
-            ./refstack-client/refstack-client test -c tempest.conf -v --test-list cormorant-tempest.txt
             go get github.com/ncw/swift
             git clone https://github.com/ncw/swift.git swift
             cd swift
@@ -120,6 +118,9 @@ jobs:
             go test -run TestObjectCopy
             go test -run TestObjectCopyWithMetadata
             go test -run TestObjectDelete
+            cd ..
+            source ./refstack-client/.venv/bin/activate
+            ./refstack-client/refstack-client test -c tempest.conf -v --test-list cormorant-tempest.txt
             wget http://localhost:5000/shutdown
 
       - run:
