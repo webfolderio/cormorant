@@ -54,6 +54,6 @@ build_script:
 
 test_script:
   - mvn -Dmaven.javadoc.skip=true -B -V -q package
-  - start /MIN mvn -Dtest=TestServer#startServer -Dstart.server=true -Dorg.slf4j.simpleLogger.defaultLogLevel=error -Duser.language=en test
+  - start /B mvn -Dtest=TestServer#startServer -Dstart.server=true -Dorg.slf4j.simpleLogger.defaultLogLevel=error -Duser.language=en test
   - cd swift
   - go test -run TestObjectsAll
