@@ -64,62 +64,62 @@ jobs:
             sleep 5
             source ./refstack-client/.venv/bin/activate
             ./refstack-client/refstack-client test -c tempest.conf -v --test-list cormorant-tempest.txt
-            go get github.com/ncw/swift
+            GOPATH=$PWD/go go get github.com/ncw/swift
             git clone https://github.com/ncw/swift.git swift
             cd swift
-            go test -run TestObjectsAll
-            go test -run TestObjectsAllWithLimit
-            go test -run TestObjectNamesWithPath
-            go test -run TestObjectCopy
-            go test -run TestObjectCopyWithMetadata
-            go test -run TestObjectMove
-            go test -run TestObjectUpdateContentType
-            go test -run TestTempUrl
-            go test -run TestQueryInfo
-            go test -run TestTransport
-            go test -run TestV1V2Authenticate
-            go test -run TestV3TrustWithTrustId
-            go test -run TestV3AuthenticateWithDomainIdAndTenantId
-            go test -run TestV3AuthenticateWithDomainNameAndTenantName
-            go test -run TestV3AuthenticateWithDomainIdAndTenantName
-            go test -run TestAuthenticateRace
-            go test -run TestSerializeConnectionJson
-            go test -run TestSerializeConnectionXml
-            go test -run TestOnReAuth
-            go test -run TestAccount
-            go test -run TestAccountUpdate
-            go test -run TestContainer
-            go test -run TestContainerCreate
-            go test -run TestContainersAll
-            go test -run TestContainersAllWithLimit
-            go test -run TestContainerUpdate
-            go test -run TestContainerNames
-            go test -run TestContainerNamesAll
-            go test -run TestContainerNamesAllWithLimit
-            go test -run TestObjectPutString
-            go test -run TestObjectPut
-            go test -run TestObjectEmpty
-            go test -run TestObjectPutBytes
-            go test -run TestObjectPutMimeType
-            go test -run TestObjectCreate
-            go test -run TestObjectGetString
-            go test -run TestObjectGetBytes
-            go test -run TestObjectOpen
-            go test -run TestObjectOpenPartial
-            go test -run TestObjectOpenLength
-            go test -run TestObjectOpenSeek
-            go test -run TestObjectOpenSeekEnd
-            go test -run TestObjectUpdate
-            go test -run TestObjectUpdate2
-            go test -run TestContainers
-            go test -run TestObjectNames
-            go test -run TestObjectNamesAll
-            go test -run TestObjectNamesAllWithLimit
-            go test -run TestObjectsWalk
-            go test -run TestObjectsDirectory
-            go test -run TestObjectCopy
-            go test -run TestObjectCopyWithMetadata
-            go test -run TestObjectDelete
+            GOPATH=../go go test -run TestObjectsAll
+            GOPATH=../go go test -run TestObjectsAllWithLimit
+            GOPATH=../go go test -run TestObjectNamesWithPath
+            GOPATH=../go go test -run TestObjectCopy
+            GOPATH=../go go test -run TestObjectCopyWithMetadata
+            GOPATH=../go go test -run TestObjectMove
+            GOPATH=../go go test -run TestObjectUpdateContentType
+            GOPATH=../go go test -run TestTempUrl
+            GOPATH=../go go test -run TestQueryInfo
+            GOPATH=../go go test -run TestTransport
+            GOPATH=../go go test -run TestV1V2Authenticate
+            GOPATH=../go go test -run TestV3TrustWithTrustId
+            GOPATH=../go go test -run TestV3AuthenticateWithDomainIdAndTenantId
+            GOPATH=../go go test -run TestV3AuthenticateWithDomainNameAndTenantName
+            GOPATH=../go go test -run TestV3AuthenticateWithDomainIdAndTenantName
+            GOPATH=../go go test -run TestAuthenticateRace
+            GOPATH=../go go test -run TestSerializeConnectionJson
+            GOPATH=../go go test -run TestSerializeConnectionXml
+            GOPATH=../go go test -run TestOnReAuth
+            GOPATH=../go go test -run TestAccount
+            GOPATH=../go go test -run TestAccountUpdate
+            GOPATH=../go go test -run TestContainer
+            GOPATH=../go go test -run TestContainerCreate
+            GOPATH=../go go test -run TestContainersAll
+            GOPATH=../go go test -run TestContainersAllWithLimit
+            GOPATH=../go go test -run TestContainerUpdate
+            GOPATH=../go go test -run TestContainerNames
+            GOPATH=../go go test -run TestContainerNamesAll
+            GOPATH=../go go test -run TestContainerNamesAllWithLimit
+            GOPATH=../go go test -run TestObjectPutString
+            GOPATH=../go go test -run TestObjectPut
+            GOPATH=../go go test -run TestObjectEmpty
+            GOPATH=../go go test -run TestObjectPutBytes
+            GOPATH=../go go test -run TestObjectPutMimeType
+            GOPATH=../go go test -run TestObjectCreate
+            GOPATH=../go go test -run TestObjectGetString
+            GOPATH=../go go test -run TestObjectGetBytes
+            GOPATH=../go go test -run TestObjectOpen
+            GOPATH=../go go test -run TestObjectOpenPartial
+            GOPATH=../go go test -run TestObjectOpenLength
+            GOPATH=../go go test -run TestObjectOpenSeek
+            GOPATH=../go go test -run TestObjectOpenSeekEnd
+            GOPATH=../go go test -run TestObjectUpdate
+            GOPATH=../go go test -run TestObjectUpdate2
+            GOPATH=../go go test -run TestContainers
+            GOPATH=../go go test -run TestObjectNames
+            GOPATH=../go go test -run TestObjectNamesAll
+            GOPATH=../go go test -run TestObjectNamesAllWithLimit
+            GOPATH=../go go test -run TestObjectsWalk
+            GOPATH=../go go test -run TestObjectsDirectory
+            GOPATH=../go go test -run TestObjectCopy
+            GOPATH=../go go test -run TestObjectCopyWithMetadata
+            GOPATH=../go go test -run TestObjectDelete
             wget http://localhost:5000/shutdown
 
       - run:
