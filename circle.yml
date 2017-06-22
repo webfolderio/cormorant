@@ -46,6 +46,10 @@ jobs:
           command: sudo apt-get install git -y
 
       - run:
+          name: Install go
+          command: sudo apt-get install golang -y
+
+      - run:
           name: Checkout refstack
           command: git clone https://github.com/openstack/refstack-client.git refstack-client
 
