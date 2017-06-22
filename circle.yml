@@ -107,7 +107,6 @@ jobs:
             go test -run "(TestObjectOpenSeekEnd)"
             go test -run "(TestObjectUpdate)"
             go test -run "(TestObjectUpdate2)"
-            go test -run "(TestContainers)"
             go test -run "(TestObjectNames)"
             go test -run "(TestObjectNamesAll)"
             go test -run "(TestObjectNamesAllWithLimit)"
