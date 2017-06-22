@@ -38,8 +38,8 @@ jobs:
           key: cormorant-{{ checksum "pom.xml" }}
 
       - run:
-          name: Test
-          command: mvn -q test
+          name: mvn package
+          command: mvn -q package
 
       - run:
           name: Install git client
@@ -118,6 +118,10 @@ jobs:
             source ./refstack-client/.venv/bin/activate
             ./refstack-client/refstack-client test -c tempest.conf -v --test-list cormorant-tempest.txt
             wget http://localhost:5000/shutdown
+
+      - run:
+          name: mvn test
+          command: mvn -q test
 
       - run:
           name: Start server
