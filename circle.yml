@@ -89,11 +89,9 @@ jobs:
             go test -run TestContainer
             go test -run TestContainerCreate
             go test -run TestContainersAll
-            go test -run TestContainersAllWithLimit
             go test -run TestContainerUpdate
             go test -run TestContainerNames
             go test -run TestContainerNamesAll
-            go test -run TestContainerNamesAllWithLimit
             go test -run TestObjectPutString
             go test -run TestObjectPut
             go test -run TestObjectEmpty
