@@ -39,7 +39,12 @@ jobs:
 
       - run:
           name: mvn package
-          command: mvn -DskipTests -q package
+          command: |
+              mvn -q test
+              rm -rf mydir
+              rm -rf mymetadata
+              mkdir mydir
+              mkdir mymetadata
 
       - run:
           name: Install git client
@@ -118,10 +123,6 @@ jobs:
             source ./refstack-client/.venv/bin/activate
             ./refstack-client/refstack-client test -c tempest.conf -v --test-list cormorant-tempest.txt
             wget http://localhost:5000/shutdown
-
-      - run:
-          name: mvn test
-          command: mvn -q test
 
       - run:
           name: Start server
