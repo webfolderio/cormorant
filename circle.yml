@@ -86,7 +86,6 @@ jobs:
             go test -run "(TestOnReAuth)"
             go test -run "(TestAccount)"
             go test -run "(TestAccountUpdate)"
-            go test -run "(TestContainer)"
             go test -run "(TestContainerCreate)"
             go test -run "(TestContainersAll)"
             go test -run "(TestContainerUpdate)"
