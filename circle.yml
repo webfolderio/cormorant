@@ -38,7 +38,7 @@ jobs:
           key: cormorant-{{ checksum "pom.xml" }}
 
       - run:
-          name: mvn package
+          name: mvn test
           command: |
               mvn -q test
               rm -rf mydir
@@ -91,11 +91,6 @@ jobs:
             go test -run "(TestOnReAuth)"
             go test -run "(TestAccount)"
             go test -run "(TestAccountUpdate)"
-            go test -run "(TestContainerCreate)"
-            go test -run "(TestContainersAll)"
-            go test -run "(TestContainerUpdate)"
-            go test -run "(TestContainerNames)"
-            go test -run "(TestContainerNamesAll)"
             go test -run "(TestObjectPutString)"
             go test -run "(TestObjectPut)"
             go test -run "(TestObjectEmpty)"
