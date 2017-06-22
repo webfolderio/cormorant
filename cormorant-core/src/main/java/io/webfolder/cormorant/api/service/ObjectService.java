@@ -61,8 +61,6 @@ public interface ObjectService<T> {
 
     boolean isMultipartManifest(T object);
 
-    boolean isFile(T object);
-
     long getCreationTime(T object);
 
     List<T> listDynamicLargeObject(T container, T object);

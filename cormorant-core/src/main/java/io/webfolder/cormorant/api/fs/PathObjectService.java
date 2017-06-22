@@ -296,11 +296,6 @@ public class PathObjectService implements ObjectService<Path> {
     }
 
     @Override
-    public boolean isFile(Path object) {
-        return true;
-    }
-
-    @Override
     public long getCreationTime(Path object) {
         BasicFileAttributeView attributeView = Files.getFileAttributeView(object, BasicFileAttributeView.class, NOFOLLOW_LINKS);
         try {

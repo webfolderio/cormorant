@@ -246,80 +246,77 @@ class ResourceHandler<T> {
                         final List<Range>         ranges,
                         final String              contentType)
             throws IOException {
-        final boolean file = objectService.isFile(resource.getObject());
-        if (file) {
-            if (ranges.size() == 1) {
-                final Range range = ranges.get(0);
-                if ( ! resource.isManifest() && ! resource.isDynamicLargeObject() ) {
-                    try (final FileChannel readableChannel = (FileChannel) objectService.getReadableChannel(resource.getObject());
-                            final WritableByteChannel writableChannel = newChannel(response.getOutputStream())) {
-                        readableChannel.transferTo(range.getStart(), range.getLength(), writableChannel);
-                    }
-                } else {
-                    List<T> objects = new ArrayList<>();
-
-                    if (resource.isDynamicLargeObject()) {
-                        objects = objectService.listDynamicLargeObject(resource.getContainer(), resource.getObject());
-                    } else {
-                        for (Segment<T> next : resource.getSegments()) {
-                            objects.add(next.getObject());
-                        }
-                    }
-
-                    try (final WritableByteChannel writableChannel = newChannel(response.getOutputStream())) {
-
-                        objectService.sortLexicographically(objects);
-
-                        for (T next : objects) {
-                            try (FileChannel readableChannel = (FileChannel) objectService.getReadableChannel(next)) {
-                                long size = objectService.getSize(next);
-                                readableChannel.transferTo(0L, size, writableChannel);
-                            }
-                        }
-                    }
-                }
-            } else {
+        if (ranges.size() == 1) {
+            final Range range = ranges.get(0);
+            if ( ! resource.isManifest() && ! resource.isDynamicLargeObject() ) {
                 try (final FileChannel readableChannel = (FileChannel) objectService.getReadableChannel(resource.getObject());
                         final WritableByteChannel writableChannel = newChannel(response.getOutputStream())) {
-                    ByteBuffer NL = wrap(NEW_LINE);
-                    for (final Range range : ranges) {
-                        NL.clear();
-                        writableChannel.write(NL);
-                        writableChannel.write(wrap(("--" + range.getBoundary()).getBytes(UTF_8)));
-                        NL.clear();
-                        writableChannel.write(NL);
-                        writableChannel.write(wrap(("Content-Type: " + contentType).getBytes(UTF_8)));
-                        NL.clear();
-                        writableChannel.write(NL);
-                        writableChannel.write(wrap(("Content-Range: bytes " + range.getStart() + '-' + range.getEnd() + '/' + range.getLength()).getBytes(UTF_8)));
-                        NL.clear();
-                        writableChannel.write(NL);
-                        NL.clear();
-                        writableChannel.write(NL);
-                        NL.clear();
+                    readableChannel.transferTo(range.getStart(), range.getLength(), writableChannel);
+                }
+            } else {
+                List<T> objects = new ArrayList<>();
 
-                        readableChannel.position(0L);
+                if (resource.isDynamicLargeObject()) {
+                    objects = objectService.listDynamicLargeObject(resource.getContainer(), resource.getObject());
+                } else {
+                    for (Segment<T> next : resource.getSegments()) {
+                        objects.add(next.getObject());
+                    }
+                }
 
-                        final ByteBuffer buffer = allocateDirect(BUFFER_SIZE);
-                        long size = 0;
-                        while ( readableChannel.read(buffer, range.getStart() + size) != -1 ) {
-                            buffer.flip();
-                            if (size + buffer.limit() > range.getLength()) {
-                                buffer.limit((int) (range.getLength() - size));
-                            }
-                            size += writableChannel.write(buffer);
-                            if (size >= range.getLength()) {
-                                break;
-                            }
-                            buffer.clear();
+                try (final WritableByteChannel writableChannel = newChannel(response.getOutputStream())) {
+
+                    objectService.sortLexicographically(objects);
+
+                    for (T next : objects) {
+                        try (FileChannel readableChannel = (FileChannel) objectService.getReadableChannel(next)) {
+                            long size = objectService.getSize(next);
+                            readableChannel.transferTo(0L, size, writableChannel);
                         }
                     }
-
+                }
+            }
+        } else {
+            try (final FileChannel readableChannel = (FileChannel) objectService.getReadableChannel(resource.getObject());
+                    final WritableByteChannel writableChannel = newChannel(response.getOutputStream())) {
+                ByteBuffer NL = wrap(NEW_LINE);
+                for (final Range range : ranges) {
+                    NL.clear();
+                    writableChannel.write(NL);
+                    writableChannel.write(wrap(("--" + range.getBoundary()).getBytes(UTF_8)));
+                    NL.clear();
+                    writableChannel.write(NL);
+                    writableChannel.write(wrap(("Content-Type: " + contentType).getBytes(UTF_8)));
+                    NL.clear();
+                    writableChannel.write(NL);
+                    writableChannel.write(wrap(("Content-Range: bytes " + range.getStart() + '-' + range.getEnd() + '/' + range.getLength()).getBytes(UTF_8)));
+                    NL.clear();
                     writableChannel.write(NL);
                     NL.clear();
-                    writableChannel.write(wrap(("--" + ranges.get(0).getBoundary() + "--").getBytes(UTF_8)));
                     writableChannel.write(NL);
+                    NL.clear();
+
+                    readableChannel.position(0L);
+
+                    final ByteBuffer buffer = allocateDirect(BUFFER_SIZE);
+                    long size = 0;
+                    while ( readableChannel.read(buffer, range.getStart() + size) != -1 ) {
+                        buffer.flip();
+                        if (size + buffer.limit() > range.getLength()) {
+                            buffer.limit((int) (range.getLength() - size));
+                        }
+                        size += writableChannel.write(buffer);
+                        if (size >= range.getLength()) {
+                            break;
+                        }
+                        buffer.clear();
+                    }
                 }
+
+                writableChannel.write(NL);
+                NL.clear();
+                writableChannel.write(wrap(("--" + ranges.get(0).getBoundary() + "--").getBytes(UTF_8)));
+                writableChannel.write(NL);
             }
         }
     }
