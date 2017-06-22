@@ -122,6 +122,7 @@ public class ObjectController<T> {
                                                                 .withLocale(ENGLISH)
                                                                 .withZone(GMT);
 
+
     private static final char    CHAR_SLASH             = '/';
 
     private static final String  META_PREFIX            = "x-object-meta-";
@@ -210,7 +211,7 @@ public class ObjectController<T> {
         boolean dynamicLargeObject = false;
         String dynamicLargeObjectEtag = null;
 
-        // dynamic large object with X_OBJECT_MANIFEST metadata key
+        // dynamic large object which has X_OBJECT_MANIFEST
         if ( object != null ) {
             final String namespace = objectService.getNamespace(container, object);
             final String objectManifest = removeLeadingSlash(systemMetadataService.getProperty(namespace, X_OBJECT_MANIFEST));
@@ -226,7 +227,6 @@ public class ObjectController<T> {
 
         if (object == null) {
 
-            // dynamic large object without X_OBJECT_MANIFEST metadata key
             if (objectService.isValidPath(container, request.getObject())) {
                 final T directory = objectService.getDirectory(container, request.getObject());
                 if ( directory != null ) {
@@ -1017,6 +1017,24 @@ public class ObjectController<T> {
         final Container           containerInfo  = accountService.getContainer(request.getAccount(), request.getContainer());
         final Map<String, Object> systemMetadata = new HashMap<>();
         final String              etag           = checksumService.calculateChecksum(sourceObject);
+        final String              requestETag    = httpHeaders.getHeaderString(ETAG);
+        // ----------------------------------------------------------------------------------
+        // Ensure object integrity
+        // ----------------------------------------------------------------------------------
+        // When client include ETag header in a a request to store an object,
+        // cormorant calculates checksum (MD5) hash of the data it receives and
+        // compares that to the header value. If the values do not match, cormorant returns a
+        // 422 (Uprocessable Entity) status code and does not store the object.
+        // ----------------------------------------------------------------------------------
+        if ( requestETag != null &&
+                ! requestETag.trim().isEmpty() &&
+                ! requestETag.equalsIgnoreCase(etag) ) {
+            if ( ! copy ) {
+                objectService.deleteTempObject(request.getAccount(), sourceContainer, sourceObject);
+            }
+            throw new CormorantException("ETag request header [" + requestETag + "] does not match with [" + etag + "].",
+                            UNPROCESSABLE_ENTITY);
+        }
 
         final long    tempObjectSize = objectService.getSize(sourceObject);
         final T       directory      = objectService.getDirectory(targetContainer, request.getObject());
