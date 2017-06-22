@@ -53,7 +53,9 @@ build_script:
   - git clone https://github.com/ncw/swift.git swift
 
 test_script:
-  - mvn -Dmaven.javadoc.skip=true -B -V -q package
-  - start /B mvn -Dtest=TestServer#startServer -Dstart.server=true -Dorg.slf4j.simpleLogger.defaultLogLevel=error -Duser.language=en test
-  - cd swift
-  - go test -run TestObjectsAll
+  - ps: |
+      mvn -Dmaven.javadoc.skip=true -B -V -q package
+      $MyProcess = Start-Process "mvn -Dtest=TestServer#startServer -Dstart.server=true -Dorg.slf4j.simpleLogger.defaultLogLevel=error -Duser.language=en test" -PassThru
+      cd swift
+      go test -run TestObjectsAll
+      Stop-Process -Id $MyProcess.Id
