@@ -266,6 +266,7 @@ public class FileMetadataService implements MetadataService {
                 exists(dataFile, NOFOLLOW_LINKS) &&
                 isRegularFile(dataFile, NOFOLLOW_LINKS) ) {
             try {
+                cache.remove(namespace);
                 Files.delete(dataFile);
             } catch (IOException e) {
                 throw new CormorantException("Unable to delete metadata file.", e);

@@ -549,7 +549,6 @@ public class ObjectController<T> {
     @DELETE
     @Path("/{object: .*}")
     public Response delete(@BeanParam final ObjectDeleteRequest request) {
-        System.out.println(request.getObject());
         final T container = containerService.getContainer(request.getAccount(), request.getContainer());
         if (container == null) {
             return status(NO_CONTENT).build();
