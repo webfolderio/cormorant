@@ -39,7 +39,7 @@ jobs:
 
       - run:
           name: mvn package
-          command: mvn -q package
+          command: mvn -DskipTests -q package
 
       - run:
           name: Install git client
