@@ -51,10 +51,10 @@ build_script:
   - mvn -q clean package -DskipTests=true -Dmaven.javadoc.skip=true -B -V
   - go get github.com/ncw/swift
   - git clone https://github.com/ncw/swift.git swift
+  - mvn -Dmaven.javadoc.skip=true -B -V -q package
 
 test_script:
   - ps: |
-      C:\maven\apache-maven-3.5.0\bin\mvn.cmd -Dmaven.javadoc.skip=true -B -V -q package
       $MyProcess = Start-Process "C:\maven\apache-maven-3.5.0\bin\mvn.cmd -Dtest=TestServer#startServer -Dstart.server=true -Dorg.slf4j.simpleLogger.defaultLogLevel=error -Duser.language=en test" -PassThru
       cd swift
       go test -run TestObjectsAll
