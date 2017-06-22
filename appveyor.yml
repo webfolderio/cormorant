@@ -25,7 +25,7 @@ environment:
     - SWIFT_API_KEY: mypassword
     - SWIFT_AUTH_URL: http://localhost:5000/v2.0
     - SWIFT_TENANT: default
-    SWIFT_TENANT_ID: default
+    - SWIFT_TENANT_ID: default
 
 # Do not build on tags
 skip_tags: true
