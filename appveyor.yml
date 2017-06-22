@@ -32,7 +32,6 @@ init:
 # Install scripts--runs after repo cloning
 install:
   - ps: |
-      choco install -y --no-progress golang
       choco install -y --no-progress git
       Add-Type -AssemblyName System.IO.Compression.FileSystem
       if (!(Test-Path -Path "C:\maven")) {
@@ -49,16 +48,6 @@ cache:
 
 build_script:
   - mvn -q clean package -DskipTests=true -Dmaven.javadoc.skip=true -B -V
-  - go get github.com/ncw/swift
-  - git clone https://github.com/ncw/swift.git swift
 
 test_script:
   - mvn -Dmaven.javadoc.skip=true -B -V -q package
-  - start /b mvn -Dtest=TestServer#startServer -Dstart.server=true -Dorg.slf4j.simpleLogger.defaultLogLevel=error -Duser.language=en test
-  - set SWIFT_API_USER=myaccount
-  - set SWIFT_API_KEY=mypassword
-  - set SWIFT_AUTH_URL=http://localhost:5000/v2.0
-  - set SWIFT_TENANT=default
-  - set SWIFT_TENANT_ID=default
-  - go test -run TestObjectsAll
-  - taskkill /im java.exe
