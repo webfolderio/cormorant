@@ -21,11 +21,6 @@ version: '{build}'
 environment:
   matrix:
     - JAVA_HOME: C:\Program Files\Java\jdk1.8.0
-    - SWIFT_API_USER: myaccount
-    - SWIFT_API_KEY: mypassword
-    - SWIFT_AUTH_URL: http://localhost:5000/v2.0
-    - SWIFT_TENANT: default
-    - SWIFT_TENANT_ID: default
 
 # Do not build on tags
 skip_tags: true
@@ -60,5 +55,10 @@ build_script:
 test_script:
   - mvn -Dmaven.javadoc.skip=true -B -V -q package
   - start /b mvn -Dtest=TestServer#startServer -Dstart.server=true -Dorg.slf4j.simpleLogger.defaultLogLevel=error -Duser.language=en test
+  - set SWIFT_API_USER=myaccount
+  - set SWIFT_API_KEY=mypassword
+  - set SWIFT_AUTH_URL=http://localhost:5000/v2.0
+  - set SWIFT_TENANT=default
+  - set SWIFT_TENANT_ID=default
   - go test -run TestObjectsAll
   - taskkill /im java.exe
