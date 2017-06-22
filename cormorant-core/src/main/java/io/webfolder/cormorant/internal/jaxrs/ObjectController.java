@@ -448,102 +448,108 @@ public class ObjectController<T> {
                 }
             }
         }
+        T container = containerService.getContainer(request.getAccount(), request.getContainer());
         if (object == null) {
             return status(NOT_FOUND).build();
-        } else {
-            final ObjectHeadResponse response  = new ObjectHeadResponse();
-            final ResponseBuilder    builder   = ok().entity(response);
-                  T                  container = containerService.getContainer(request.getAccount(), request.getContainer());
-            final String             namespace = objectService.getNamespace(container, object);
-            for (Map.Entry<String, Object> entry : metadataService.getProperties(namespace).entrySet()) {
-                final String key         = entry.getKey();
-                final Object headerValue = entry.getValue();
-                final String headerName  = "X-Object-Meta-" + key;
-                builder.header(headerName, headerValue);
-            }
-            final Map<String, Object> properties = systemMetadataService.getProperties(namespace);
-
-            final boolean dynamicLargeObject = properties.containsKey(X_OBJECT_MANIFEST);
-            final boolean staticLargeObject  = objectService.isMultipartManifest(object);
-            final boolean largeObject        = dynamicLargeObject || staticLargeObject;
-
-            properties.put(CONTENT_LENGTH, objectService.getSize(object));
-
-            // Etag value of a large object is enclosed in double-quotations.
-            if (largeObject) {
-                String etag = (String) properties.get(ETAG);
-                if (dynamicLargeObject) {
-                    if ( object != null ) {
-                        final String objectManifest = removeLeadingSlash(systemMetadataService.getProperty(namespace, X_OBJECT_MANIFEST));
-                        if ( objectManifest != null ) {
-                            container = containerService.getContainer(request.getAccount(), objectManifest.substring(0, objectManifest.indexOf(CHAR_SLASH)));
-                            T directory = objectService.getDirectory(container, objectManifest.substring(objectManifest.indexOf(CHAR_SLASH) + 1, objectManifest.length()));
-                            final String ns = objectService.getNamespace(container, directory);
-                            systemMetadataService.addProperty(ns, X_OBJECT_MANIFEST, objectManifest);
-                            systemMetadataService.addProperty(ns, "X-Cormorant-DLO-Container", request.getContainer());
-                            systemMetadataService.addProperty(ns, "X-Cormorant-DLO-Object", request.getObject());
-                            object = directory;
-                        }
-                    }
-                    final List<T> objects = objectService.listDynamicLargeObject(object);
-                    if ( ! objects.isEmpty() ) {
-                        etag = checksumService.calculateChecksum(objects);
-                    }
-                    final long size = objectService.getDyanmicObjectSize(object);
-                    properties.put(CONTENT_LENGTH, size);
-                }
-                if (etag == null) {
-                    etag = checksumService.calculateChecksum(container, object);
-                }
-                if ( etag != null &&
-                        ! etag.trim().isEmpty() &&
-                        ! etag.startsWith("\"") &&
-                        ! etag.endsWith("\"") ) {
-                    properties.put(ETAG, "\"" + etag + "\"");
-                }
-            }
-
-            if ( "0".equals(properties.get(CONTENT_LENGTH)) || ! properties.containsKey(CONTENT_LENGTH) ) {
-                properties.put(ETAG,
-                        (properties.containsKey(ETAG) && properties.get(ETAG).toString().contains("\"") ? "\"" : "") + MD5_OF_EMPTY_STRING +
-                        (properties.containsKey(ETAG) && properties.get(ETAG).toString().contains("\"") ? "\"" : ""));
-            }
-
-            for (Map.Entry<String, Object> entry : properties.entrySet()) {
-                final String headerName  = entry.getKey();
-                final Object headerValue = entry.getValue();
-                builder.header(headerName, headerValue);
-            }
-
-            if (properties.containsKey(CONTENT_TYPE)) {
-                response.setContentType((String) properties.get(CONTENT_TYPE));
-            }
-
-            if (dir) {
-                response.setContentType(DIRECTORY);
-            }
-
-            final long timestamp = objectService.getCreationTime(object);
-            response.setTimestamp(timestamp);
-
-            if (staticLargeObject) {
-                builder.header(X_STATIC_LARGE_OBJECT, "True");
-                if ( ! properties.containsKey(CONTENT_TYPE) || response.getContentType() == null ) {
-                    response.setContentType(APPLICATION_JSON);
-                }
-            }
-
-            final String lastModified = FORMATTER.format(ofInstant(ofEpochMilli(objectService.getLastModified(object)), GMT));
-            builder.header(HttpHeaders.LAST_MODIFIED, lastModified);
-            builder.header(ACCEPT_RANGES, BYTES_RESPONSE);
-            return builder.entity(response).build();
         }
+        final String namespace = objectService.getNamespace(container, object);
+        if (dir) {
+            final boolean deleted = "deleted".equals(systemMetadataService.getProperty(namespace, "X-Cormorant-Deleted"));
+            if (deleted) {
+                return status(NOT_FOUND).build();
+            }
+        }
+        final ObjectHeadResponse response = new ObjectHeadResponse();
+        final ResponseBuilder    builder  = ok().entity(response);
+        for (Map.Entry<String, Object> entry : metadataService.getProperties(namespace).entrySet()) {
+            final String key         = entry.getKey();
+            final Object headerValue = entry.getValue();
+            final String headerName  = "X-Object-Meta-" + key;
+            builder.header(headerName, headerValue);
+        }
+        final Map<String, Object> properties = systemMetadataService.getProperties(namespace);
+
+        final boolean dynamicLargeObject = properties.containsKey(X_OBJECT_MANIFEST);
+        final boolean staticLargeObject  = objectService.isMultipartManifest(object);
+        final boolean largeObject        = dynamicLargeObject || staticLargeObject;
+
+        properties.put(CONTENT_LENGTH, objectService.getSize(object));
+
+        // Etag value of a large object is enclosed in double-quotations.
+        if (largeObject) {
+            String etag = (String) properties.get(ETAG);
+            if (dynamicLargeObject) {
+                if ( object != null ) {
+                    final String objectManifest = removeLeadingSlash(systemMetadataService.getProperty(namespace, X_OBJECT_MANIFEST));
+                    if ( objectManifest != null ) {
+                        container = containerService.getContainer(request.getAccount(), objectManifest.substring(0, objectManifest.indexOf(CHAR_SLASH)));
+                        T directory = objectService.getDirectory(container, objectManifest.substring(objectManifest.indexOf(CHAR_SLASH) + 1, objectManifest.length()));
+                        final String ns = objectService.getNamespace(container, directory);
+                        systemMetadataService.addProperty(ns, X_OBJECT_MANIFEST, objectManifest);
+                        systemMetadataService.addProperty(ns, "X-Cormorant-DLO-Container", request.getContainer());
+                        systemMetadataService.addProperty(ns, "X-Cormorant-DLO-Object", request.getObject());
+                        object = directory;
+                    }
+                }
+                final List<T> objects = objectService.listDynamicLargeObject(object);
+                if ( ! objects.isEmpty() ) {
+                    etag = checksumService.calculateChecksum(objects);
+                }
+                final long size = objectService.getDyanmicObjectSize(object);
+                properties.put(CONTENT_LENGTH, size);
+            }
+            if (etag == null) {
+                etag = checksumService.calculateChecksum(container, object);
+            }
+            if ( etag != null &&
+                    ! etag.trim().isEmpty() &&
+                    ! etag.startsWith("\"") &&
+                    ! etag.endsWith("\"") ) {
+                properties.put(ETAG, "\"" + etag + "\"");
+            }
+        }
+
+        if ( "0".equals(properties.get(CONTENT_LENGTH)) || ! properties.containsKey(CONTENT_LENGTH) ) {
+            properties.put(ETAG,
+                    (properties.containsKey(ETAG) && properties.get(ETAG).toString().contains("\"") ? "\"" : "") + MD5_OF_EMPTY_STRING +
+                    (properties.containsKey(ETAG) && properties.get(ETAG).toString().contains("\"") ? "\"" : ""));
+        }
+
+        for (Map.Entry<String, Object> entry : properties.entrySet()) {
+            final String headerName  = entry.getKey();
+            final Object headerValue = entry.getValue();
+            builder.header(headerName, headerValue);
+        }
+
+        if (properties.containsKey(CONTENT_TYPE)) {
+            response.setContentType((String) properties.get(CONTENT_TYPE));
+        }
+
+        if (dir) {
+            response.setContentType(DIRECTORY);
+        }
+
+        final long timestamp = objectService.getCreationTime(object);
+        response.setTimestamp(timestamp);
+
+        if (staticLargeObject) {
+            builder.header(X_STATIC_LARGE_OBJECT, "True");
+            if ( ! properties.containsKey(CONTENT_TYPE) || response.getContentType() == null ) {
+                response.setContentType(APPLICATION_JSON);
+            }
+        }
+
+        final String lastModified = FORMATTER.format(ofInstant(ofEpochMilli(objectService.getLastModified(object)), GMT));
+        builder.header(HttpHeaders.LAST_MODIFIED, lastModified);
+        builder.header(ACCEPT_RANGES, BYTES_RESPONSE);
+        return builder.entity(response).build();
     }
 
     @SuppressWarnings("unchecked")
     @DELETE
     @Path("/{object: .*}")
     public Response delete(@BeanParam final ObjectDeleteRequest request) {
+        System.out.println(request.getObject());
         final T container = containerService.getContainer(request.getAccount(), request.getContainer());
         if (container == null) {
             return status(NO_CONTENT).build();
@@ -591,9 +597,13 @@ public class ObjectController<T> {
 
                 return status(NO_CONTENT).build();
             } else {
+                final String deleted = systemMetadataService.getProperty(namespace, "X-Cormorant-Deleted");
+                if ( deleted == null ) {
+                    systemMetadataService.delete(namespace);
+                    metadataService.delete(namespace);
+                    systemMetadataService.addProperty(namespace, "X-Cormorant-Deleted", "true");
+                }
                 return status(NO_CONTENT)
-                        .header("X-Cormorant-Message", "Failed to delete object [" +
-                                request.getObject() + "]. Directory must be empty.")
                         .build();
             }
 
@@ -642,7 +652,7 @@ public class ObjectController<T> {
                     throw new CormorantException(e);
                 }
             }
-            
+
             final String namespace = objectService.getNamespace(container, object);
             final long size = objectService.getSize(object);
             objectService.delete(container, object);
@@ -1165,8 +1175,11 @@ public class ObjectController<T> {
                         final ObjectPutRequest  request,
                         final ObjectPutResponse response,
                         final InputStream       is) {
-        final T container = containerService.getContainer(request.getAccount(), request.getContainer());
-        objectService.createDirectory(request.getAccount(), container, request.getObject());
+        final T container      = containerService.getContainer(request.getAccount(), request.getContainer());
+        final T object         = objectService.createDirectory(request.getAccount(), container, request.getObject());
+        final String namespace = objectService.getNamespace(container, object);
+        systemMetadataService.delete(namespace);
+        metadataService.delete(namespace);
         response.setETag(MD5_OF_EMPTY_STRING);
     }
 

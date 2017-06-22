@@ -37,4 +37,6 @@ public interface ContainerService<T> {
     long getMaxQuotaBytes(String accountName, String containerName);
 
     long getMaxQuotaCount(String accountName, String containerName);
+
+    void setObjectService(ObjectService<T> objectService);
 }

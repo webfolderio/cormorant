@@ -17,11 +17,11 @@
  */
 package io.webfolder.cormorant.api.fs;
 
-import static java.lang.Boolean.*;
 import static io.webfolder.cormorant.api.property.MetadataServiceFactory.MANIFEST_EXTENSION;
 import static io.webfolder.cormorant.api.resource.ContentFormat.json;
 import static io.webfolder.cormorant.api.resource.ContentFormat.plain;
 import static io.webfolder.cormorant.api.resource.ContentFormat.xml;
+import static java.lang.Boolean.TRUE;
 import static java.nio.file.Files.getLastModifiedTime;
 import static java.nio.file.Files.isDirectory;
 import static java.nio.file.Files.size;
@@ -34,6 +34,8 @@ import io.webfolder.cormorant.api.exception.CormorantException;
 import io.webfolder.cormorant.api.resource.ContentFormat;
 import io.webfolder.cormorant.api.resource.ResourceAdapter;
 import io.webfolder.cormorant.api.service.ChecksumService;
+import io.webfolder.cormorant.api.service.MetadataService;
+import io.webfolder.cormorant.api.service.ObjectService;
 
 public class PathAdapter implements ResourceAdapter<Path> {
 
@@ -51,15 +53,23 @@ public class PathAdapter implements ResourceAdapter<Path> {
 
     private static final String MD5_OF_EMPTY_STRING  = "d41d8cd98f00b204e9800998ecf8427e";
 
-    private final Path root;
+    private final Path container;
 
     private final ChecksumService<Path> checksumService;
 
+    private final ObjectService<Path> objectService;
+
+    private final MetadataService systemMetadataService;
+
     public PathAdapter(
-                    final Path                   root,
-                    final ChecksumService<Path>  checksumService) {
-        this.root            = root.toAbsolutePath().normalize();
+                    final Path                  container,
+                    final ChecksumService<Path> checksumService,
+                    final ObjectService<Path>   objectService,
+                    final MetadataService       systemMetadataService) {
+        this.container        = container.toAbsolutePath().normalize();
         this.checksumService = checksumService;
+        this.objectService   = objectService;
+        this.systemMetadataService = systemMetadataService;
     }
 
     @Override
@@ -68,13 +78,20 @@ public class PathAdapter implements ResourceAdapter<Path> {
                     final ContentFormat contentFormat,
                     final Boolean       appendForwardSlash) {
         final StringBuilder builder        = new StringBuilder();
-        final String        location       = root.relativize(path).toString();
+        final String        location       = container.relativize(path).toString();
         final boolean       isdir          = isDirectory(path, NOFOLLOW_LINKS);
-        final String        mimeType       = checksumService.getMimeType(root, path, false);
+        final String        mimeType       = checksumService.getMimeType(container, path, false);
         final String        name           = location.replace(CHAR_BACKSLASH, CHAR_FORWARD_SLASH);
         final int           start          = name.lastIndexOf(MANIFEST_EXTENSION);
         final String        normalizedName =  start > 0 ? name.substring(0, start) : name;
         Long size;
+        if (isdir) {
+            final String namespace = objectService.getNamespace(container, path);
+            final boolean deleted = "true".equals(systemMetadataService.getProperty(namespace, "X-Cormorant-Deleted"));
+            if (deleted) {
+                return null;
+            }
+        }
         try {
             size = isdir ? DIR_SIZE : size(path);
         } catch (IOException e) {
@@ -117,7 +134,7 @@ public class PathAdapter implements ResourceAdapter<Path> {
         if (isDir) {
             return checksumService.calculateChecksum(lastModified);
         } else {
-            return checksumService.calculateChecksum(root, path);
+            return checksumService.calculateChecksum(container, path);
         }
     }
 }

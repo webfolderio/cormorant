@@ -36,6 +36,7 @@ import io.webfolder.cormorant.api.resource.ResourceStream;
 import io.webfolder.cormorant.api.service.ChecksumService;
 import io.webfolder.cormorant.api.service.ContainerService;
 import io.webfolder.cormorant.api.service.MetadataService;
+import io.webfolder.cormorant.api.service.ObjectService;
 
 public class PathContainerService implements ContainerService<Path> {
 
@@ -49,15 +50,21 @@ public class PathContainerService implements ContainerService<Path> {
 
     private final MetadataService       metadataService;
 
+    private final MetadataService       systemMetadataService;
+
+    private ObjectService<Path>   objectService;
+
     public PathContainerService(
                     final Path                  root,
                     final int                   pathMaxCount,
                     final ChecksumService<Path> checksumService,
-                    final MetadataService       metadaService) {
-        this.root                 = root.toAbsolutePath().normalize();
-        this.pathMaxCount         = pathMaxCount    ;
-        this.checksumService      = checksumService ;
-        this.metadataService      = metadaService   ;
+                    final MetadataService       metadaService,
+                    final MetadataService       systemMetadataService) {
+        this.root                  = root.toAbsolutePath().normalize();
+        this.pathMaxCount          = pathMaxCount                     ;
+        this.checksumService       = checksumService                  ;
+        this.metadataService       = metadaService                    ;
+        this.systemMetadataService = systemMetadataService            ;
     }
 
     @Override
@@ -67,13 +74,13 @@ public class PathContainerService implements ContainerService<Path> {
                                         final ListContainerOptions options      ) {
         ResourceStream<Path> stream = EMPTY_STREAM;
 
-        final Path containerPath = getContainer(accountName, containerName);
+        final Path container = getContainer(accountName, containerName);
 
-        if (containerPath == null) {
+        if (container == null) {
             return stream;
         }
 
-        Path visitorPath = containerPath;
+        Path visitorPath = container;
 
         boolean recursive = true;
 
@@ -110,7 +117,7 @@ public class PathContainerService implements ContainerService<Path> {
                 throw new CormorantException("Unable to list objects.", e);
             }
             stream = new PathStream(visitor,
-                                new PathAdapter(containerPath, checksumService));
+                                new PathAdapter(container, checksumService, objectService, systemMetadataService));
         }
 
         return stream;
@@ -192,5 +199,10 @@ public class PathContainerService implements ContainerService<Path> {
         } else {
             return value.longValue();
         }
+    }
+
+    @Override
+    public void setObjectService(ObjectService<Path> objectService) {
+        this.objectService = objectService;
     }
 }
