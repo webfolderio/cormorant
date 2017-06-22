@@ -54,8 +54,7 @@ build_script:
 
 test_script:
   - ps: |
-      mvn -Dmaven.javadoc.skip=true -B -V -q package
-      $MyProcess = Start-Process "mvn -Dtest=TestServer#startServer -Dstart.server=true -Dorg.slf4j.simpleLogger.defaultLogLevel=error -Duser.language=en test" -PassThru
+      C:\maven\apache-maven-3.5.0\bin\mvn.cmd -Dmaven.javadoc.skip=true -B -V -q package
+      $MyProcess = Start-Process "C:\maven\apache-maven-3.5.0\bin\mvn.cmd -Dtest=TestServer#startServer -Dstart.server=true -Dorg.slf4j.simpleLogger.defaultLogLevel=error -Duser.language=en test" -PassThru
       cd swift
       go test -run TestObjectsAll
-      Stop-Process -Id $MyProcess.Id
