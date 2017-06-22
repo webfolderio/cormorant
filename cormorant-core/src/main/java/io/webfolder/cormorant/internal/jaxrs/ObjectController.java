@@ -218,10 +218,12 @@ public class ObjectController<T> {
             if ( objectManifest != null ) {
                 container = containerService.getContainer(request.getAccount(), objectManifest.substring(0, objectManifest.indexOf(CHAR_SLASH)));
                 T directory = objectService.getDirectory(container, objectManifest.substring(objectManifest.indexOf(CHAR_SLASH) + 1, objectManifest.length()));
-                object = directory;
-                dynamicLargeObject = true;
-                final List<T> objects  = objectService.listDynamicLargeObject(object);
-                dynamicLargeObjectEtag = checksumService.calculateChecksum(objects);
+                if ( directory != null ) {
+                    object = directory;
+                    dynamicLargeObject = true;
+                    final List<T> objects  = objectService.listDynamicLargeObject(object);
+                    dynamicLargeObjectEtag = checksumService.calculateChecksum(objects);
+                }
             }
         }
 
@@ -484,11 +486,9 @@ public class ObjectController<T> {
                     if ( objectManifest != null ) {
                         container = containerService.getContainer(request.getAccount(), objectManifest.substring(0, objectManifest.indexOf(CHAR_SLASH)));
                         T directory = objectService.getDirectory(container, objectManifest.substring(objectManifest.indexOf(CHAR_SLASH) + 1, objectManifest.length()));
-                        final String ns = objectService.getNamespace(container, directory);
-                        systemMetadataService.addProperty(ns, X_OBJECT_MANIFEST, objectManifest);
-                        systemMetadataService.addProperty(ns, "X-Cormorant-DLO-Container", request.getContainer());
-                        systemMetadataService.addProperty(ns, "X-Cormorant-DLO-Object", request.getObject());
-                        object = directory;
+                        if ( directory != null ) {
+                            object = directory;
+                        }
                     }
                 }
                 final List<T> objects = objectService.listDynamicLargeObject(object);
@@ -570,41 +570,14 @@ public class ObjectController<T> {
         final boolean emptyDirectory = isDirectory && objectService.isEmptyDirectory(container, object);
         if ( isDirectory && ! emptyDirectory ) {
             final String namespace = objectService.getNamespace(container, object);
-            final String objectManifest = systemMetadataService.getProperty(namespace, X_OBJECT_MANIFEST);
-            if ( objectManifest != null ) {
-
-                final String mc = systemMetadataService.getProperty(namespace, "X-Cormorant-DLO-Container");
-                final String mo = systemMetadataService.getProperty(namespace, "X-Cormorant-DLO-Object");
-
-                if (  mc != null && mo != null ) {
-                    final T manifestContainer = containerService.getContainer(request.getAccount(), mc);
-                    if ( mc != null ) {
-                        if ( mc != null && mo != null ) {
-                            T staticLargeObject = objectService.getObject(request.getAccount(), mc, mo);
-                            if ( staticLargeObject != null ) {
-                                objectService.delete(containerService.getContainer(request.getAccount(), mc), staticLargeObject);
-                                String ns = objectService.getNamespace(manifestContainer, staticLargeObject);
-                                metadataService.delete(ns);
-                                systemMetadataService.delete(ns);
-
-                                metadataService.delete(namespace);
-                                systemMetadataService.delete(namespace);
-                            }
-                        }
-                    }
-                }
-
-                return status(NO_CONTENT).build();
-            } else {
-                final String deleted = systemMetadataService.getProperty(namespace, "X-Cormorant-Deleted");
-                if ( deleted == null ) {
-                    systemMetadataService.delete(namespace);
-                    metadataService.delete(namespace);
-                    systemMetadataService.addProperty(namespace, "X-Cormorant-Deleted", "true");
-                }
-                return status(NO_CONTENT)
-                        .build();
+            final String deleted   = systemMetadataService.getProperty(namespace, "X-Cormorant-Deleted");
+            if (deleted == null) {
+                systemMetadataService.delete(namespace);
+                metadataService.delete(namespace);
+                systemMetadataService.addProperty(namespace, "X-Cormorant-Deleted", "true");
             }
+            return status(NO_CONTENT)
+                    .build();
 
         } else {
             if (deleteStaticLargeObject) {
