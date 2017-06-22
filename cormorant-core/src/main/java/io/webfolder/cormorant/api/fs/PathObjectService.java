@@ -17,13 +17,14 @@
  */
 package io.webfolder.cormorant.api.fs;
 
-import static java.nio.file.Files.*;
 import static io.webfolder.cormorant.api.property.MetadataServiceFactory.MANIFEST_EXTENSION;
 import static java.nio.channels.FileChannel.open;
+import static java.nio.file.Files.createDirectories;
 import static java.nio.file.Files.createTempFile;
 import static java.nio.file.Files.exists;
 import static java.nio.file.Files.getLastModifiedTime;
 import static java.nio.file.Files.isReadable;
+import static java.nio.file.Files.move;
 import static java.nio.file.Files.size;
 import static java.nio.file.LinkOption.NOFOLLOW_LINKS;
 import static java.nio.file.StandardCopyOption.ATOMIC_MOVE;
@@ -48,20 +49,28 @@ import java.util.regex.Pattern;
 
 import io.webfolder.cormorant.api.exception.CormorantException;
 import io.webfolder.cormorant.api.service.ContainerService;
+import io.webfolder.cormorant.api.service.MetadataService;
 import io.webfolder.cormorant.api.service.ObjectService;
 
 public class PathObjectService implements ObjectService<Path> {
 
-    private static final String  BACKSLASH     = "\\";
+    private static final String  BACKSLASH         = "\\";
 
-    private static final String  SLASH         = "/";
+    private static final String  SLASH             = "/";
 
+    private static final char    CHAR_SLASH        = '/';
+
+    private static final String  X_OBJECT_MANIFEST = "X-Object-Manifest";
+    
     private static final Pattern LEADING_SLASH = compile("^/+");
 
     private final ContainerService<Path> containerService;
 
-    public PathObjectService(final ContainerService<Path> containerService) {
+    private final MetadataService systemMetadataService;
+
+    public PathObjectService(final ContainerService<Path> containerService, final MetadataService systemMetadataService) {
         this.containerService = containerService;
+        this.systemMetadataService = systemMetadataService;
     }
 
     @Override
@@ -303,31 +312,44 @@ public class PathObjectService implements ObjectService<Path> {
     }
 
     @Override
-    public List<Path> listDynamicLargeObject(Path object) {
-        if ( ! Files.isDirectory(object) ) {
+    public List<Path> listDynamicLargeObject(Path container, Path object) {
+        if ( Files.isDirectory(object) ) {
+            DyanmicLargeObjectVisitor visitor = new DyanmicLargeObjectVisitor(null);
+            try {
+                Files.walkFileTree(object, visitor);
+                return visitor.getFiles();
+            } catch (IOException e) {
+                throw new CormorantException(e);
+            }
+        } else if (Files.isRegularFile(object, NOFOLLOW_LINKS)) {
+            final Path manifestFile = object.getParent();
+            final String namespace = getNamespace(container, object);
+            final String objectManifest = systemMetadataService.getProperty(namespace, X_OBJECT_MANIFEST);
+            final int start = objectManifest.lastIndexOf(CHAR_SLASH);
+            if (start >= 0) {
+                final String prefix = objectManifest.substring(start + 1, objectManifest.length());
+                DyanmicLargeObjectVisitor visitor = new DyanmicLargeObjectVisitor(prefix);
+                try {
+                    Files.walkFileTree(manifestFile, visitor);
+                    return visitor.getFiles();
+                } catch (IOException e) {
+                    throw new CormorantException(e);
+                }
+            } else {
+                return emptyList();
+            }
+        } else {
             return emptyList();
         }
-        FileVisitor visitor = new FileVisitor();
-        try {
-            Files.walkFileTree(object, visitor);
-        } catch (IOException e) {
-            throw new CormorantException(e);
-        }
-        return visitor.getFiles();
     }
 
     @Override
-    public long getDyanmicObjectSize(Path object) {
-        if ( ! Files.isDirectory(object) ) {
-            return 0L;
+    public long getDyanmicObjectSize(Path container, Path object) {
+        long size = 0L;
+        for (Path next : listDynamicLargeObject(container, object)) {
+            size += getSize(next);
         }
-        FileSizeVisitor visitor = new FileSizeVisitor(false);
-        try {
-            Files.walkFileTree(object, visitor);
-        } catch (IOException e) {
-            throw new CormorantException(e);
-        }
-        return visitor.getBytesUsed();
+        return size;
     }
 
     @Override

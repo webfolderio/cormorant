@@ -209,7 +209,7 @@ class ResourceHandler<T> {
             if ( ! resource.isDynamicLargeObject() ) {
                 response.setContentLengthLong(range.getLength());
             } else {
-                final long size = objectService.getDyanmicObjectSize(resource.getObject());
+                final long size = objectService.getDyanmicObjectSize(resource.getContainer(), resource.getObject());
                 response.setContentLengthLong(size);
             }
 
@@ -259,7 +259,7 @@ class ResourceHandler<T> {
                     List<T> objects = new ArrayList<>();
 
                     if (resource.isDynamicLargeObject()) {
-                        objects = objectService.listDynamicLargeObject(resource.getObject());
+                        objects = objectService.listDynamicLargeObject(resource.getContainer(), resource.getObject());
                     } else {
                         for (Segment<T> next : resource.getSegments()) {
                             objects.add(next.getObject());

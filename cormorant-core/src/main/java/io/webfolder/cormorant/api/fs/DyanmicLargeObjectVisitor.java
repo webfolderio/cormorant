@@ -28,11 +28,17 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FileVisitor extends SimpleFileVisitor<Path> {
+class DyanmicLargeObjectVisitor extends SimpleFileVisitor<Path> {
 
     private final List<Path> files = new ArrayList<>();
 
+    private final String prefix;
+
     private long dirCounter;
+
+    public DyanmicLargeObjectVisitor(String prefix) {
+        this.prefix = prefix;
+    }
 
     @Override
     public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
@@ -42,7 +48,15 @@ public class FileVisitor extends SimpleFileVisitor<Path> {
 
     @Override
     public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-        files.add(file);
+        if ( prefix != null ) {
+            final String fileName = file.getFileName().toString();
+            if ( ! fileName.equals(prefix) &&
+                    fileName.startsWith(prefix) ) {
+                files.add(file);
+            }
+        } else {
+            files.add(file);
+        }
         return CONTINUE;
     }
 

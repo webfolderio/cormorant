@@ -22,6 +22,8 @@ import java.util.Map;
 
 class Resource<T> {
 
+    private final T      container;
+
     private final T      object;
 
     private final long   length;
@@ -45,6 +47,7 @@ class Resource<T> {
     private final List<Segment<T>> segments;
 
     public Resource(
+                final T                   container,
                 final T                   object,
                 final long                length,
                 final long                lastModified,
@@ -56,6 +59,7 @@ class Resource<T> {
                 final boolean             dynamicLargeObject,
                 final Map<String, String> headers,
                 final List<Segment<T>>    segments) {
+        this.container          = container;
         this.object             = object;
         this.length             = length;
         this.lastModified       = lastModified;
@@ -111,5 +115,9 @@ class Resource<T> {
 
     public List<Segment<T>> getSegments() {
         return segments;
+    }
+
+    public T getContainer() {
+        return container;
     }
 }

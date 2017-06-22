@@ -65,9 +65,9 @@ public interface ObjectService<T> {
 
     long getCreationTime(T object);
 
-    List<T> listDynamicLargeObject(T object);
+    List<T> listDynamicLargeObject(T container, T object);
 
-    long getDyanmicObjectSize(T object);
+    long getDyanmicObjectSize(T container, T object);
 
     String toPath(T container, T object);
 

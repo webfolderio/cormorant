@@ -211,24 +211,29 @@ public class ObjectController<T> {
         boolean dynamicLargeObject = false;
         String dynamicLargeObjectEtag = null;
 
-        // dynamic large object which has X_OBJECT_MANIFEST
+        List<T> dynamicLargeObjects = emptyList();
+
+        // dynamic large object that has X_OBJECT_MANIFEST
         if ( object != null ) {
             final String namespace = objectService.getNamespace(container, object);
             final String objectManifest = removeLeadingSlash(systemMetadataService.getProperty(namespace, X_OBJECT_MANIFEST));
             if ( objectManifest != null ) {
-                container = containerService.getContainer(request.getAccount(), objectManifest.substring(0, objectManifest.indexOf(CHAR_SLASH)));
-                T directory = objectService.getDirectory(container, objectManifest.substring(objectManifest.indexOf(CHAR_SLASH) + 1, objectManifest.length()));
-                if ( directory != null ) {
-                    object = directory;
-                    dynamicLargeObject = true;
-                    final List<T> objects  = objectService.listDynamicLargeObject(object);
-                    dynamicLargeObjectEtag = checksumService.calculateChecksum(objects);
+                final String manifestContainer = objectManifest.substring(0, objectManifest.indexOf(CHAR_SLASH));
+                container = containerService.getContainer(request.getAccount(), manifestContainer);
+                final String manifestPath = objectManifest.substring(objectManifest.indexOf(CHAR_SLASH) + 1, objectManifest.length());
+                final T manifestDirectory = objectService.getDirectory(container, manifestPath);
+                if ( manifestDirectory != null ) {
+                    object = manifestDirectory;
                 }
+                dynamicLargeObject = true;
+                dynamicLargeObjects    = objectService.listDynamicLargeObject(container, object);
+                dynamicLargeObjectEtag = checksumService.calculateChecksum(dynamicLargeObjects);
             }
         }
 
         if (object == null) {
 
+            // dynamic large object without X_OBJECT_MANIFEST
             if (objectService.isValidPath(container, request.getObject())) {
                 final T directory = objectService.getDirectory(container, request.getObject());
                 if ( directory != null ) {
@@ -244,8 +249,8 @@ public class ObjectController<T> {
                                 object = objectService.getDirectory(dynamicLargeObjectContainer, objectPath);
                                 container = dynamicLargeObjectContainer;
                                 dynamicLargeObject = true;
-                                final List<T> objects  = objectService.listDynamicLargeObject(object);
-                                dynamicLargeObjectEtag = checksumService.calculateChecksum(objects);
+                                dynamicLargeObjects    = objectService.listDynamicLargeObject(container, object);
+                                dynamicLargeObjectEtag = checksumService.calculateChecksum(dynamicLargeObjects);
                             }
                         }
                     }
@@ -304,27 +309,28 @@ public class ObjectController<T> {
         final String contentType;
         final Long   size;
 
-        List<Segment<T>> segments;
+        List<Segment<T>> staticSegments;
         
         final boolean staticLargeObject = objectService.isMultipartManifest(object);
         if (staticLargeObject) {
             headers.put(X_STATIC_LARGE_OBJECT, "True");
-            segments = listStaticLargeObject(request.getAccount(), object);
-            if ( !segments.isEmpty() ) {
+            staticSegments = listStaticLargeObject(request.getAccount(), object);
+            if ( !staticSegments.isEmpty() ) {
                 long totalSize = 0L;
-                for (Segment<T> next : segments) {
+                for (Segment<T> next : staticSegments) {
                     totalSize += next.getSize();
                 }
                 size = totalSize;
-                contentType = segments.get(0).getContentType();
+                contentType = staticSegments.get(0).getContentType();
             } else {
                 size = 0L;
                 contentType = null;
             }
         } else {
-            segments = emptyList();
-            contentType = systemMetadataService.getProperty(namespace, CONTENT_TYPE);
-            size = dynamicLargeObject ? objectService.getDyanmicObjectSize(object) : objectService.getSize(object);
+            staticSegments = emptyList();
+            contentType = systemMetadataService.getProperty( ! dynamicLargeObjects.isEmpty() ?
+                                    objectService.getNamespace(container, dynamicLargeObjects.get(0)) : namespace, CONTENT_TYPE);
+            size = dynamicLargeObject ? objectService.getDyanmicObjectSize(container, object) : objectService.getSize(object);
         }
 
         final boolean isLargeObject = dynamicLargeObject || manifest;
@@ -335,12 +341,12 @@ public class ObjectController<T> {
             objectEtag = size == 0L ? MD5_OF_EMPTY_STRING : etag;
         }
 
-        final Resource<T> resource = new Resource<>(object              , size  ,
-                                                      lastModified      , creationTime,
-                                                      objectEtag        , contentType ,
-                                                      contentDisposition, manifest    ,
-                                                      dynamicLargeObject, headers,
-                                                      segments);
+        final Resource<T> resource = new Resource<>(container   , object,
+                                                    size        , lastModified,
+                                                    creationTime, objectEtag,
+                                                    contentType , contentDisposition,
+                                                    manifest    , dynamicLargeObject,
+                                                    headers     , staticSegments);
 
         final ResourceHandler<T> handler = new ResourceHandler<>(
                                                 objectService,
@@ -491,11 +497,11 @@ public class ObjectController<T> {
                         }
                     }
                 }
-                final List<T> objects = objectService.listDynamicLargeObject(object);
+                final List<T> objects = objectService.listDynamicLargeObject(container, object);
                 if ( ! objects.isEmpty() ) {
                     etag = checksumService.calculateChecksum(objects);
                 }
-                final long size = objectService.getDyanmicObjectSize(object);
+                final long size = objectService.getDyanmicObjectSize(container, object);
                 properties.put(CONTENT_LENGTH, size);
             }
             if (etag == null) {
@@ -1035,7 +1041,7 @@ public class ObjectController<T> {
 
         containerInfo.incrementObjectCount();
 
-        final Long size = dynamicObject ? objectService.getDyanmicObjectSize(targetObject) : objectService.getSize(targetObject);
+        final Long size = dynamicObject ? objectService.getDyanmicObjectSize(targetContainer, targetObject) : objectService.getSize(targetObject);
         containerInfo.addBytesUsed(size);
         final String contentType = ! dynamicObject && TRUE.equals(request.getDetectContentType())     ?
                                      checksumService.getMimeType(sourceContainer, targetObject, true) :
@@ -1123,7 +1129,7 @@ public class ObjectController<T> {
         if ( ! dynamicObject ) {
             response.setETag(copy ?(String) systemMetadata.get(ETAG) : etag);
         } else {
-            final List<T> objects                = objectService.listDynamicLargeObject(targetObject);
+            final List<T> objects                = objectService.listDynamicLargeObject(targetContainer, targetObject);
             final String  dynamicLargeObjectEtag = checksumService.calculateChecksum(objects);
             response.setETag(dynamicLargeObjectEtag);
         }

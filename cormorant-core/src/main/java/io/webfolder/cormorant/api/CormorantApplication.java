@@ -103,7 +103,7 @@ public class CormorantApplication extends Application {
 
         final FileChecksumService    checksumService  = new FileChecksumService(objectMetadataService);
         final ContainerService<Path> containerService = new PathContainerService(objectStore, pathMaxCount, checksumService, containerMetadataService, systemMetadataService);
-        final ObjectService<Path>    objectService    = new PathObjectService(containerService);
+        final ObjectService<Path>    objectService    = new PathObjectService(containerService, systemMetadataService);
 
         containerService.setObjectService(objectService);
         checksumService.setObjectService(objectService);
