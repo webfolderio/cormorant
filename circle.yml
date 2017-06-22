@@ -64,12 +64,8 @@ jobs:
             sleep 5
             source ./refstack-client/.venv/bin/activate
             ./refstack-client/refstack-client test -c tempest.conf -v --test-list cormorant-tempest.txt
-            git clone https://github.com/ncw/swift.git
-            export SWIFT_API_USER=myaccount
-            export SWIFT_API_KEY=mypassword
-            export SWIFT_AUTH_URL=http://localhost:5000/v2.0
-            export SWIFT_TENANT=default
-            export SWIFT_TENANT_ID=default
+            git clone https://github.com/ncw/swift.git swift
+            cd swift
             go test -run (TestObjectsAll)
             go test -run (TestObjectsAllWithLimit)
             go test -run (TestObjectNamesWithPath)
