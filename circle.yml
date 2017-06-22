@@ -64,6 +64,7 @@ jobs:
             sleep 5
             source ./refstack-client/.venv/bin/activate
             ./refstack-client/refstack-client test -c tempest.conf -v --test-list cormorant-tempest.txt
+            go get github.com/ncw/swift
             git clone https://github.com/ncw/swift.git swift
             cd swift
             go test -run TestObjectsAll
