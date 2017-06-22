@@ -562,8 +562,8 @@ public class ObjectController<T> {
                 isDirectory = true;
             }
         }
-        if (object == null) {
-            return status(NO_CONTENT).build();
+        if ( ! isDirectory && object == null ) {
+            return status(NOT_FOUND).build();
         }
         final boolean deleteStaticLargeObject = "delete".equals(request.getMultipartManifest())
                                                         && objectService.isMultipartManifest(object);
