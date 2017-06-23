@@ -9,16 +9,34 @@ cormorant is an object storage server released under AGPL. It is compatible with
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/d6af9f5df82d4568ba29ea6fceb9d605)](https://www.codacy.com/app/WebFolder/cormorant?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=webfolderio/cormorant&amp;utm_campaign=Badge_Grade)
 [![Coverage Status](https://coveralls.io/repos/github/webfolderio/cormorant/badge.svg?branch=master)](https://coveralls.io/github/webfolderio/cormorant?branch=master)
 
-Key Features
-------------
-* [x] Authentication with Keystone V2.0, V3 API
-* [x] Set & get account, container, object metadata
-* [x] List container (supports json, xml, text formats)
-* [x] GET/PUT/HEAD/DELETE/POST/COPY Object
-* [x] Upload & download Static & Dyanmic Large Objects
-* [x] Supports TempURL
-* [x] [Passes](https://github.com/webfolderio/cormorant/blob/master/cormorant-tempest.txt) tempest tests
-* [x] Support container quotas
+The following table describes the support status for current Swift functional features:
+
+Features Support
+----------------
+* Authentication
+* Get Account Metadata
+* List Containers
+* Delete Container
+* Create Container
+* Get Container Metadata
+* Update Container Metadata
+* Delete Container Metadata
+* List Objects
+* Create Object
+* Create Large Object
+* Delete Object
+* Get Object
+* Copy Object
+* Get Object Metadata
+* Update Object Metadata
+
+Missing Features
+----------------
+* ACLs
+* Static Website
+* Expiring Objects
+* Object Versioning
+* CORS
 
 License
 -------
