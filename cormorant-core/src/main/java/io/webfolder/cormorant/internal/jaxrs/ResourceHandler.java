@@ -213,7 +213,10 @@ class ResourceHandler<T> {
                 response.setContentLengthLong(size);
             }
 
-            if (response.getStatus() == SC_PARTIAL_CONTENT) {
+            final boolean all = range.getStart() == 0 && (range.getEnd() + 1) == resource.getLength();
+
+            if ( ! all ) {
+                response.setStatus(SC_PARTIAL_CONTENT);
                 response.setHeader("Content-Range", "bytes " + range.getStart() + '-' + range.getEnd() + '/' + resource.getLength());
             }
         } else {
