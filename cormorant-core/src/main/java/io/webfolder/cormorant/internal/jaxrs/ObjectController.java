@@ -24,7 +24,6 @@ import static java.lang.Double.compare;
 import static java.lang.Long.parseLong;
 import static java.lang.String.valueOf;
 import static java.lang.System.currentTimeMillis;
-import static java.nio.ByteBuffer.allocateDirect;
 import static java.nio.channels.Channels.newChannel;
 import static java.nio.channels.Channels.newReader;
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -58,7 +57,6 @@ import java.io.DataInputStream;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
@@ -138,8 +136,6 @@ public class ObjectController<T> {
     private static final String  X_STATIC_LARGE_OBJECT  = "X-Static-Large-Object";
 
     private static final int     UNPROCESSABLE_ENTITY   = 422;
-
-    private static final int     BUFFER_CAPACITY        = 16 * 1024                 ; // 16 KB
 
     private static final int     MAX_MANIFEST_SIZE      = 2 * 1024 * 1024           ; // 2 MB
 
@@ -1275,21 +1271,8 @@ public class ObjectController<T> {
                     final WritableByteChannel writableChannel,
                     final Long                start          ,
                     final Long                maxTransferSize) throws IOException {
-        if (FileChannel.class.isAssignableFrom(writableChannel.getClass())) {
-            final long count = maxTransferSize != null ? maxTransferSize.longValue() : MAX_UPLOAD_SIZE;
-            ((FileChannel) writableChannel).transferFrom(readableChannel, start, count);
-        } else {
-            final ByteBuffer buffer = allocateDirect(BUFFER_CAPACITY);
-            while ( readableChannel.read(buffer) != -1 ) {
-              buffer.flip();
-              writableChannel.write(buffer);
-              buffer.compact();
-            }
-            buffer.flip();
-            while (buffer.hasRemaining()) {
-                writableChannel.write(buffer);
-            }
-        }
+        final long count = maxTransferSize != null ? maxTransferSize.longValue() : MAX_UPLOAD_SIZE;
+        ((FileChannel) writableChannel).transferFrom(readableChannel, start, count);
     }
 
     protected boolean isChunked(final String transferEncoding) {
