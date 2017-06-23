@@ -269,8 +269,6 @@ class ResourceHandler<T> {
 
                 try (final WritableByteChannel writableChannel = newChannel(response.getOutputStream())) {
 
-                    objectService.sortLexicographically(objects);
-
                     for (T next : objects) {
                         try (FileChannel readableChannel = (FileChannel) objectService.getReadableChannel(next)) {
                             long size = objectService.getSize(next);

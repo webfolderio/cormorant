@@ -19,6 +19,7 @@ package io.webfolder.cormorant.api.fs;
 
 import static java.nio.file.FileVisitResult.CONTINUE;
 import static java.nio.file.FileVisitResult.TERMINATE;
+import static java.util.Collections.sort;
 
 import java.io.IOException;
 import java.nio.file.FileVisitResult;
@@ -26,6 +27,7 @@ import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 class DyanmicLargeObjectVisitor extends SimpleFileVisitor<Path> {
@@ -36,6 +38,21 @@ class DyanmicLargeObjectVisitor extends SimpleFileVisitor<Path> {
 
     private long dirCounter;
 
+    private boolean sorted;
+
+    private final int maxDepth = 10;
+
+    private static final Comparator<Path> FILE_NAME_COMPORATOR = new FileNameComporator();
+    
+    private static final class FileNameComporator implements Comparator<Path> {
+
+        @Override
+        public int compare(Path o1, Path o2) {
+            return o1.getFileName().toString().compareTo(o2.getFileName().toString());
+        }
+        
+    }
+
     public DyanmicLargeObjectVisitor(String prefix) {
         this.prefix = prefix;
     }
@@ -43,7 +60,7 @@ class DyanmicLargeObjectVisitor extends SimpleFileVisitor<Path> {
     @Override
     public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
         dirCounter += 1;
-        return dirCounter > 1 ? TERMINATE : CONTINUE;
+        return dirCounter > maxDepth ? TERMINATE : CONTINUE;
     }
 
     @Override
@@ -61,6 +78,10 @@ class DyanmicLargeObjectVisitor extends SimpleFileVisitor<Path> {
     }
 
     public List<Path> getFiles() {
+        if ( ! sorted ) {
+            sorted = true;
+            sort(files, FILE_NAME_COMPORATOR);
+        }
         return files;
     }
 }

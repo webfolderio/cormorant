@@ -493,9 +493,10 @@ public class ObjectController<T> {
                     final String objectManifest = removeLeadingSlash(systemMetadataService.getProperty(namespace, X_OBJECT_MANIFEST));
                     if ( objectManifest != null ) {
                         container = containerService.getContainer(request.getAccount(), objectManifest.substring(0, objectManifest.indexOf(CHAR_SLASH)));
-                        T directory = objectService.getDirectory(container, objectManifest.substring(objectManifest.indexOf(CHAR_SLASH) + 1, objectManifest.length()));
-                        if ( directory != null ) {
-                            object = directory;
+                        final String manifestPath = objectManifest.substring(objectManifest.indexOf(CHAR_SLASH) + 1, objectManifest.length());
+                        T manifestDirectory = objectService.getDirectory(container, manifestPath);
+                        if ( manifestDirectory != null ) {
+                            object = manifestDirectory;
                         }
                     }
                 }
@@ -1006,7 +1007,7 @@ public class ObjectController<T> {
             } catch (IOException e) {
                 throw new CormorantException(e);
             }
-            
+
             sourceObject    = tempObject;
             targetContainer = sourceContainer;
         }
