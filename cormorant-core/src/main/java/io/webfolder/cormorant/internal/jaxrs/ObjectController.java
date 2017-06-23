@@ -207,16 +207,18 @@ public class ObjectController<T> {
         }
 
         T object = objectService.getObject(request.getAccount(), request.getContainer(), request.getObject());
-        final String  namespace = objectService.getNamespace(container, object);
 
         boolean dynamicLargeObject = false;
         String dynamicLargeObjectEtag = null;
 
         List<T> dynamicLargeObjects = emptyList();
 
+        String objectManifest = null;
+
         // dynamic large object that has X_OBJECT_MANIFEST
         if ( object != null ) {
-            final String objectManifest = removeLeadingSlash(systemMetadataService.getProperty(namespace, X_OBJECT_MANIFEST));
+            final String  namespace     = objectService.getNamespace(container, object);
+                         objectManifest = removeLeadingSlash(systemMetadataService.getProperty(namespace, X_OBJECT_MANIFEST));
             if ( objectManifest != null ) {
                 final String manifestContainer = objectManifest.substring(0, objectManifest.indexOf(CHAR_SLASH));
                 container = containerService.getContainer(request.getAccount(), manifestContainer);
@@ -238,7 +240,7 @@ public class ObjectController<T> {
                 final T directory = objectService.getDirectory(container, request.getObject());
                 if ( directory != null ) {
                     final String  manifestNamespace = objectService.getNamespace(container, directory);
-                    final String objectManifest = systemMetadataService.getProperty(manifestNamespace, X_OBJECT_MANIFEST);
+                                     objectManifest = systemMetadataService.getProperty(manifestNamespace, X_OBJECT_MANIFEST);
                     if ( objectManifest != null ) {
                         final String directoryPath = removeLeadingSlash(objectManifest);
                         final String containerName = directoryPath.indexOf(CHAR_SLASH) > 0 ? directoryPath.substring(0, directoryPath.indexOf(CHAR_SLASH)) : null;
@@ -270,6 +272,7 @@ public class ObjectController<T> {
                             request.getObject() + "] is not a multipart manifest.");
         }
 
+        final String  namespace          = objectService.getNamespace(container, object);
         final long    lastModified       = objectService.getLastModified(object);
         final long    creationTime       = objectService.getCreationTime(object);
         final String  etag               = dynamicLargeObjectEtag != null ? dynamicLargeObjectEtag : checksumService.calculateChecksum(container, object);
@@ -301,6 +304,10 @@ public class ObjectController<T> {
             headers.put(X_OBJECT_MANIFEST, (String) systemMetadata.get(X_OBJECT_MANIFEST));
         }
 
+        if ( objectManifest != null ) {
+            headers.put(X_OBJECT_MANIFEST, objectManifest);
+        }
+        
         if (systemMetadata.containsKey(TRANSFER_ENCODING)) {
             headers.put(TRANSFER_ENCODING, (String) systemMetadata.get(TRANSFER_ENCODING));
         }
