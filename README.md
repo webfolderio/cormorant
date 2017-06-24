@@ -45,6 +45,7 @@ The following list describes the support status for current features:
 ### Supported Client Libraries (SDKs)
 __Java__
 * [Apache jclouds](https://jclouds.apache.org/)
+* [Javaswift joss](https://github.com/javaswift/joss)
 
 __Go__
 * [ncw/swift](https://github.com/ncw/swift)
@@ -58,16 +59,8 @@ cormorant software inside your product or deploying it on a network without disc
 ### Supported Platforms
 cormorant has been tested under Windows and Ubuntu, but should work on any platform where a Java available.
 
-How it is tested
-----------------
+### How it is tested
 cormorant is regularly built and tested on [circleci](https://circleci.com/gh/webfolderio/cormorant) and [AppVeyor](https://ci.appveyor.com/project/WebFolder/cormorant).
 
-### Authors
+### Author
 [WebFolder OÜ](https://webfolder.io)
-
-### Getting Help
-
-![WebFolder](https://raw.githubusercontent.com/webfolderio/cdp4j/master/images/logo.png)
-
-The amount of effort needed to maintain and develop new features for the project is not sustainable without proper financial backing. You can support cormorant development by 
-**buying** support package. Please [contact us](https://webfolder.io/support) for support packages & pricing.
