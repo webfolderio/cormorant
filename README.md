@@ -1,8 +1,6 @@
-# cormorant
-
 ![WebFolder](https://raw.githubusercontent.com/webfolderio/cormorant/master/cormorant.png)
 
-cormorant is an object storage server released under AGPL.
+__cormorant__ is an object storage server released under AGPL.
 
 [![License](https://img.shields.io/badge/license-AGPL-blue.svg)](https://opensource.org/licenses/AGPL-3.0)
 [![circleci](https://img.shields.io/circleci/project/github/webfolderio/cdp4j.svg?label=linux)](https://circleci.com/gh/webfolderio/cormorant)
@@ -41,6 +39,7 @@ The following list describes the support status for current features:
 
 * [CloudBerry Explorer for OpenStack](https://www.cloudberrylab.com/explorer/openstack.aspx)
 * [ExpanDrive](http://www.expandrive.com/)
+* [rclone](https://rclone.org/)
 
 ### Supported Client Libraries (SDKs)
 __Java__
