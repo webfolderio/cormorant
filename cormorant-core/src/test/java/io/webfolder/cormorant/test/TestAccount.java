@@ -22,9 +22,11 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.runners.MethodSorters.NAME_ASCENDING;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.javaswift.joss.model.Container;
 import org.jclouds.openstack.swift.v1.domain.Account;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
@@ -78,5 +80,13 @@ public class TestAccount extends TestSwift {
 
         metadata = accountApi.get().getMetadata();
         assertTrue(metadata.isEmpty());
+    }
+
+    @Test
+    public void t3TestJossAccount() {
+        Collection<Container> containers = jossAccount.list();
+        assertFalse(containers.isEmpty());
+        assertEquals(1, containers.size());
+        assertEquals("container1", containers.iterator().next().getName());
     }
 }

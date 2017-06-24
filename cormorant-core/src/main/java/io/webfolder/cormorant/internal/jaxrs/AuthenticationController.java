@@ -73,6 +73,10 @@ public class AuthenticationController {
 
     private static final String HEADER_SUBJECT_TOKEN     = "X-Subject-Token";
 
+    private static final String X_AUTH_TOKEN             = "X-Auth-Token";
+
+    private static final String X_STORAGE_URL            = "X-Storage-Url";
+
     private final String infoV2;
 
     private final String authTemplateV2;
@@ -119,6 +123,43 @@ public class AuthenticationController {
         this.infoV2                = loadResource("/io/webfolder/cormorant/info-v2.json");
         this.contextPath           = contextPath;
         this.accountName           = accountName;
+    }
+
+    @GET
+    @PermitAll
+    @Path("/auth/v1.0")
+    public Response tokensV1(
+                final @HeaderParam("X-Auth-User") String username,
+                final @HeaderParam("X-Auth-Key")  String password) {
+
+        if ( username == null ||
+                username.trim().isEmpty() ||
+                password == null ||
+                password.trim().isEmpty() ) {
+            return status(BAD_REQUEST)
+                    .entity("Incorrect username or password.")
+                    .build();
+        }
+
+        if ( ! authenticationService.authenticate(username, password) ) {
+            return status(BAD_REQUEST)
+                            .entity("Incorrect username or password.")
+                            .build();
+        }
+
+        final String token = HEADER_AUTH_TOKEN_PREFIX + valueOf(toHexString(new SecureRandom().nextLong()));
+
+        Instant expires = now().plus(1, DAYS);
+
+        CormorantPrincipal principal = new CormorantPrincipal(username, token, expires);
+        tokens.put(token, principal);
+
+        final String publicUrl = "http://" + host + ":" + port + contextPath + "/v1/" + accountName;
+
+        return ok()
+                .header(X_AUTH_TOKEN, token)
+                .header(X_STORAGE_URL, publicUrl)
+                .build();
     }
 
     @GET

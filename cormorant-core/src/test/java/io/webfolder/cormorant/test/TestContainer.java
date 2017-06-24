@@ -34,11 +34,13 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Scanner;
 
+import org.javaswift.joss.model.StoredObject;
 import org.jclouds.blobstore.domain.Blob;
 import org.jclouds.http.HttpRequest;
 import org.jclouds.http.HttpResponseException;
@@ -293,6 +295,23 @@ public class TestContainer extends TestSwift {
         assertEquals(container.getObjectCount().longValue(), 0L);
         assertEquals("container2", container.getName());
         containerApi.deleteIfEmpty("container2");
+    }
+
+    @Test
+    public void t20JossListObjects() {
+        org.javaswift.joss.model.Container container = jossAccount.list().iterator().next();
+        Collection<StoredObject> objects = container.list();
+        assertFalse(objects.isEmpty());
+    }
+
+    @Test
+    public void t20JossPutAndGet() {
+        org.javaswift.joss.model.Container container = jossAccount.list().iterator().next();
+        StoredObject object = container.getObject("foobar.txt");
+        object.uploadObject("hello, world!".getBytes());
+        assertEquals("http://localhost:5000/v1/myaccount/container1/foobar.txt", object.getURL());
+        String content = new String(object.downloadObject(), UTF_8);
+        assertEquals("hello, world!", content);
     }
 
     protected String toString(final InputStream is) {

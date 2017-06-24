@@ -30,6 +30,10 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import org.javaswift.joss.client.factory.AccountConfig;
+import org.javaswift.joss.client.factory.AccountFactory;
+import org.javaswift.joss.client.factory.AuthenticationMethod;
+import org.javaswift.joss.model.Account;
 import org.jclouds.blobstore.BlobStore;
 import org.jclouds.logging.slf4j.config.SLF4JLoggingModule;
 import org.jclouds.openstack.swift.v1.SwiftApi;
@@ -72,6 +76,10 @@ public class TestSwift {
     protected static CormorantServer server;
 
     protected static BlobStore blobStore;
+
+    protected static AccountConfig jossConfig;
+
+    protected static Account jossAccount;
 
     @BeforeClass
     public static void start() {
@@ -153,6 +161,15 @@ public class TestSwift {
         accountApi = swiftApi.getAccountApi(region);
 
         containerApi = swiftApi.getContainerApi(region);
+
+        jossConfig = new AccountConfig();
+
+        jossConfig.setUsername("myaccount");
+        jossConfig.setPassword("mypassword");
+        jossConfig.setAuthUrl("http://localhost:5000/auth/v1.0");
+        jossConfig.setAuthenticationMethod(AuthenticationMethod.BASIC);
+
+        jossAccount = new AccountFactory(jossConfig).createAccount();
     }
 
     @AfterClass
