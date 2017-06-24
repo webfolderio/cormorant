@@ -1,6 +1,8 @@
 Object Storage Server
 =====================
 
+![WebFolder](https://raw.githubusercontent.com/webfolderio/cormorant/master/cormorant.png)
+
 cormorant is an object storage server released under AGPL. It is compatible with swift API.
 
 [![License](https://img.shields.io/badge/license-AGPL-blue.svg)](https://opensource.org/licenses/AGPL-3.0)
