@@ -350,6 +350,9 @@ public class PathObjectService implements ObjectService<Path> {
             final Path manifestFile = object.getParent();
             final String namespace = getNamespace(container, object);
             final String objectManifest = systemMetadataService.getProperty(namespace, X_OBJECT_MANIFEST);
+            if (objectManifest == null) {
+                return emptyList();
+            }
             final int start = objectManifest.lastIndexOf(BACKWARD_SLASH);
             if (start >= 0) {
                 final String prefix = objectManifest.substring(start + 1, objectManifest.length());
