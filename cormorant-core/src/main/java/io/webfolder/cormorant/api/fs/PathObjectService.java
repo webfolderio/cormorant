@@ -264,7 +264,8 @@ public class PathObjectService implements ObjectService<Path> {
                            final String destinationObjectPath,
                            final String sourceAccount        ,
                            final Path   sourceContainer      ,
-                           final Path   sourceObject) {
+                           final Path   sourceObject         ,
+                           final String multipartManifest) {
         final Path targetObject = destinationContainer.resolve(destinationObjectPath);
         final Path targetParent = targetObject.getParent();
         try {
@@ -288,7 +289,7 @@ public class PathObjectService implements ObjectService<Path> {
                     Files.copy(sequenceInputStream, targetObject, REPLACE_EXISTING);
                     return targetObject;
                 }
-            } else if (staticLargeObject) {
+            } else if ( staticLargeObject && ! "get".equals(multipartManifest) ) {
                 List<Segment<Path>> segments = listStaticLargeObject(sourceAccount, sourceObject);
                 Vector<InputStream> streams = new Vector<>();
                 for (Segment<Path> next : segments) {

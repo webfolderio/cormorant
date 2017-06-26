@@ -789,7 +789,8 @@ public class ObjectController<T> {
                                                         targetObjectPath,
                                                         request.getAccount(),
                                                         sourceContainer,
-                                                        sourceObject);
+                                                        sourceObject,
+                                                        request.getMultipartManifest());
 
         final String  sourceNamespace = objectService.getNamespace(sourceContainer, sourceObject);
         final String targetNamespace  = objectService.getNamespace(targetContainer, targetObject);
@@ -1023,7 +1024,13 @@ public class ObjectController<T> {
             if ( ! copy ) {
                 targetObject = objectService.moveTempObject(request.getAccount(), sourceObject, targetContainer, request.getObject());
             } else {
-                targetObject = objectService.copyObject(request.getAccount(), targetContainer, request.getObject(), request.getAccount(), sourceContainer, sourceObject);
+                targetObject = objectService.copyObject(request.getAccount(),
+                                                        targetContainer,
+                                                        request.getObject(),
+                                                        request.getAccount(),
+                                                        sourceContainer,
+                                                        sourceObject,
+                                                        null);
             }
         }
 

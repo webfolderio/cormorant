@@ -55,7 +55,13 @@ public interface ObjectService<T> {
 
     boolean isEmptyDirectory(T container, T object);
 
-    T copyObject(String destinationAccount, T destinationContainer, String destinationObjectPath, String sourceAccount, T sourceContainer, T sourceObject);
+    T copyObject(String destinationAccount,
+                 T      destinationContainer,
+                 String destinationObjectPath,
+                 String sourceAccount,
+                 T      sourceContainer,
+                 T      sourceObject,
+                 String multipartManifest);
 
     boolean isValidPath(T container, String objectPath);
 
