@@ -264,20 +264,54 @@ class ResourceHandler<T> {
                     readableChannel.transferTo(range.getStart(), range.getLength(), writableChannel);
                 }
             } else {
-                List<T> objects = new ArrayList<>();
-
-                if (resource.isDynamicLargeObject()) {
-                    objects = objectService.listDynamicLargeObject(resource.getContainer(), resource.getObject());
-                } else {
-                    for (Segment<T> next : resource.getSegments()) {
-                        objects.add(next.getObject());
+                final boolean fullRange = range.getStart() == 0L && (range.getEnd() + 1) == range.getLength();
+                if (fullRange) {
+                    List<T> objects = new ArrayList<>();
+                    if (resource.isDynamicLargeObject()) {
+                        objects = objectService.listDynamicLargeObject(resource.getContainer(), resource.getObject());
+                    } else {
+                        for (Segment<T> next : resource.getSegments()) {
+                            objects.add(next.getObject());
+                        }
                     }
-                }
-                try (final WritableByteChannel writableChannel = newChannel(response.getOutputStream())) {
-                    for (T next : objects) {
-                        try (FileChannel readableChannel = (FileChannel) objectService.getReadableChannel(next)) {
-                            long size = objectService.getSize(next);
-                            readableChannel.transferTo(0L, size, writableChannel);
+                    try (final WritableByteChannel writableChannel = newChannel(response.getOutputStream())) {
+                        for (T next : objects) {
+                            try (FileChannel readableChannel = (FileChannel) objectService.getReadableChannel(next)) {
+                                long size = objectService.getSize(next);
+                                readableChannel.transferTo(0L, size, writableChannel);
+                            }
+                        }
+                    }                    
+                } else {
+                    if (resource.isDynamicLargeObject()) {
+                        Vector<InputStream> streams = new Vector<>();
+                        for (T next : objectService.listDynamicLargeObject(resource.getContainer(), resource.getObject())) {
+                            InputStream is = newInputStream(objectService.getReadableChannel(next));
+                            streams.add(is);
+                        }
+                        long totalSize = objectService.getDyanmicObjectSize(resource.getContainer(), resource.getObject());
+                        try (ServletOutputStream sos = response.getOutputStream();
+                                SequenceInputStream is = new SequenceInputStream(streams.elements())) {
+                            for (Range next : ranges) {
+                                copy(is, totalSize, response.getOutputStream(), next.getStart(), next.getLength());
+                            }
+                        }
+                    } else {
+                        Vector<InputStream> streams = new Vector<>();
+                        for (Segment<T> next : resource.getSegments()) {
+                            InputStream is = newInputStream(objectService.getReadableChannel(next.getObject()));
+                            streams.add(is);
+                        }
+                        long totalSize = 0L;
+                        for (Segment<T> segment : resource.getSegments()) {
+                            long size = objectService.getSize(segment.getObject());
+                            totalSize += size;
+                        }
+                        try (ServletOutputStream sos = response.getOutputStream();
+                                SequenceInputStream is = new SequenceInputStream(streams.elements())) {
+                            for (Range next : ranges) {
+                                copy(is, totalSize, response.getOutputStream(), next.getStart(), next.getLength());
+                            }
                         }
                     }
                 }
@@ -315,12 +349,12 @@ class ResourceHandler<T> {
                 }
                 try (ServletOutputStream sos = response.getOutputStream();
                         SequenceInputStream is = new SequenceInputStream(streams.elements())) {
-                    for (Range r : ranges) {
+                    for (Range next : ranges) {
                         sos.println();
-                        sos.println("--" + r.getBoundary());
+                        sos.println("--" + next.getBoundary());
                         sos.println("Content-Type: " + contentType);
-                        sos.println("Content-Range: bytes " + r.getStart() + "-" + r.getEnd() + "/" + totalSize);                        
-                        copy(is, totalSize, response.getOutputStream(), r.getStart(), r.getLength());
+                        sos.println("Content-Range: bytes " + next.getStart() + "-" + next.getEnd() + "/" + totalSize);                        
+                        copy(is, totalSize, response.getOutputStream(), next.getStart(), next.getLength());
                     }
                     sos.println();
                     sos.println("--" + ranges.get(0).getBoundary() + "--");
