@@ -1,7 +1,6 @@
 package io.webfolder.cormorant.internal.jaxrs;
 
 import static javax.ws.rs.core.Response.ok;
-import static org.apache.commons.io.IOUtils.toByteArray;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,6 +10,8 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Response;
+
+import org.apache.commons.io.output.ByteArrayOutputStream;
 
 @Path("/favicon.ico")
 public class FaviconController {
@@ -30,6 +31,18 @@ public class FaviconController {
         cache = new CacheControl();
         cache.setMaxAge(60 * 60 * 24 * 7);
         cache.setMustRevalidate(false);
+    }
+
+    public byte[] toByteArray(InputStream is) throws IOException {
+        if (is == null) {
+            return null;
+        }
+        try (ByteArrayOutputStream r = new ByteArrayOutputStream(2048)) {
+            byte[] read = new byte[512];
+            for (int i; -1 != (i = is.read(read)); r.write(read, 0, i));
+            is.close();
+            return r.toByteArray();
+        }
     }
 
     @GET
