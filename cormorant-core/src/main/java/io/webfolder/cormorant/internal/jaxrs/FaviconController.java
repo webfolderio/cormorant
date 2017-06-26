@@ -2,6 +2,7 @@ package io.webfolder.cormorant.internal.jaxrs;
 
 import static javax.ws.rs.core.Response.ok;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -10,8 +11,6 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Response;
-
-import org.apache.commons.io.output.ByteArrayOutputStream;
 
 @Path("/favicon.ico")
 public class FaviconController {
