@@ -24,7 +24,6 @@ import static io.webfolder.cormorant.api.resource.ContentFormat.xml;
 import static java.lang.Boolean.TRUE;
 import static java.nio.file.Files.getLastModifiedTime;
 import static java.nio.file.Files.isDirectory;
-import static java.nio.file.Files.size;
 import static java.nio.file.LinkOption.NOFOLLOW_LINKS;
 
 import java.io.IOException;
@@ -84,7 +83,6 @@ public class PathAdapter implements ResourceAdapter<Path> {
         final String        name           = location.replace(CHAR_BACKSLASH, CHAR_FORWARD_SLASH);
         final int           start          = name.lastIndexOf(MANIFEST_EXTENSION);
         final String        normalizedName =  start > 0 ? name.substring(0, start) : name;
-        Long size;
         if (isdir) {
             final String namespace = objectService.getNamespace(container, path);
             final boolean deleted = "true".equals(systemMetadataService.getProperty(namespace, "X-Cormorant-Deleted"));
@@ -92,11 +90,7 @@ public class PathAdapter implements ResourceAdapter<Path> {
                 return null;
             }
         }
-        try {
-            size = isdir ? DIR_SIZE : size(path);
-        } catch (IOException e) {
-            throw new CormorantException(e);
-        }
+        long size = isdir ? DIR_SIZE : objectService.getSize(path);
         String lastModified = null;
         try {
             lastModified = getLastModifiedTime(path, NOFOLLOW_LINKS).toInstant().toString();

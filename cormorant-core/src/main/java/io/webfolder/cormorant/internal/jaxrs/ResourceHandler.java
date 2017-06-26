@@ -23,6 +23,7 @@ import static java.lang.String.valueOf;
 import static java.nio.ByteBuffer.allocateDirect;
 import static java.nio.ByteBuffer.wrap;
 import static java.nio.channels.Channels.newChannel;
+import static java.nio.channels.Channels.newInputStream;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Arrays.binarySearch;
 import static java.util.Arrays.sort;
@@ -37,14 +38,19 @@ import static javax.ws.rs.core.Response.Status.PRECONDITION_FAILED;
 import static javax.ws.rs.core.Response.Status.REQUESTED_RANGE_NOT_SATISFIABLE;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.SequenceInputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.WritableByteChannel;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Vector;
 import java.util.regex.Pattern;
 
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.Response.Status;
@@ -277,46 +283,116 @@ class ResourceHandler<T> {
                 }
             }
         } else {
-            try (final FileChannel readableChannel = (FileChannel) objectService.getReadableChannel(resource.getObject());
-                    final WritableByteChannel writableChannel = newChannel(response.getOutputStream())) {
-                ByteBuffer NL = wrap(NEW_LINE);
-                for (final Range range : ranges) {
-                    NL.clear();
-                    writableChannel.write(NL);
-                    writableChannel.write(wrap(("--" + range.getBoundary()).getBytes(UTF_8)));
-                    NL.clear();
-                    writableChannel.write(NL);
-                    writableChannel.write(wrap(("Content-Type: " + contentType).getBytes(UTF_8)));
-                    NL.clear();
-                    writableChannel.write(NL);
-                    writableChannel.write(wrap(("Content-Range: bytes " + range.getStart() + '-' + range.getEnd() + '/' + range.getLength()).getBytes(UTF_8)));
-                    NL.clear();
-                    writableChannel.write(NL);
-                    NL.clear();
-                    writableChannel.write(NL);
-                    NL.clear();
-
-                    readableChannel.position(0L);
-
-                    final ByteBuffer buffer = allocateDirect(BUFFER_SIZE);
-                    long size = 0;
-                    while ( readableChannel.read(buffer, range.getStart() + size) != -1 ) {
-                        buffer.flip();
-                        if (size + buffer.limit() > range.getLength()) {
-                            buffer.limit((int) (range.getLength() - size));
-                        }
-                        size += writableChannel.write(buffer);
-                        if (size >= range.getLength()) {
-                            break;
-                        }
-                        buffer.clear();
-                    }
+            if (resource.isDynamicLargeObject()) {
+                Vector<InputStream> streams = new Vector<>();
+                for (T next : objectService.listDynamicLargeObject(resource.getContainer(), resource.getObject())) {
+                    InputStream is = newInputStream(objectService.getReadableChannel(next));
+                    streams.add(is);
                 }
+                long totalSize = objectService.getDyanmicObjectSize(resource.getContainer(), resource.getObject());
+                try (ServletOutputStream sos = response.getOutputStream();
+                        SequenceInputStream is = new SequenceInputStream(streams.elements())) {
+                    for (Range r : ranges) {
+                        sos.println();
+                        sos.println("--" + r.getBoundary());
+                        sos.println("Content-Type: " + contentType);
+                        sos.println("Content-Range: bytes " + r.getStart() + "-" + r.getEnd() + "/" + totalSize);                        
+                        copy(is, totalSize, response.getOutputStream(), r.getStart(), r.getLength());
+                    }
+                    sos.println();
+                    sos.println("--" + ranges.get(0).getBoundary() + "--");
+                }
+            } else if (resource.isManifest()) {
+                Vector<InputStream> streams = new Vector<>();
+                for (Segment<T> next : resource.getSegments()) {
+                    InputStream is = newInputStream(objectService.getReadableChannel(next.getObject()));
+                    streams.add(is);
+                }
+                long totalSize = 0L;
+                for (Segment<T> segment : resource.getSegments()) {
+                    long size = objectService.getSize(segment.getObject());
+                    totalSize += size;
+                }
+                try (ServletOutputStream sos = response.getOutputStream();
+                        SequenceInputStream is = new SequenceInputStream(streams.elements())) {
+                    for (Range r : ranges) {
+                        sos.println();
+                        sos.println("--" + r.getBoundary());
+                        sos.println("Content-Type: " + contentType);
+                        sos.println("Content-Range: bytes " + r.getStart() + "-" + r.getEnd() + "/" + totalSize);                        
+                        copy(is, totalSize, response.getOutputStream(), r.getStart(), r.getLength());
+                    }
+                    sos.println();
+                    sos.println("--" + ranges.get(0).getBoundary() + "--");
+                }
+            } else {
+                try (final FileChannel readableChannel = (FileChannel) objectService.getReadableChannel(resource.getObject());
+                        final WritableByteChannel writableChannel = newChannel(response.getOutputStream())) {
+                    ByteBuffer NL = wrap(NEW_LINE);
+                    for (final Range range : ranges) {
+                        NL.clear();
+                        writableChannel.write(NL);
+                        writableChannel.write(wrap(("--" + range.getBoundary()).getBytes(UTF_8)));
+                        NL.clear();
+                        writableChannel.write(NL);
+                        writableChannel.write(wrap(("Content-Type: " + contentType).getBytes(UTF_8)));
+                        NL.clear();
+                        writableChannel.write(NL);
+                        writableChannel.write(wrap(("Content-Range: bytes " + range.getStart() + '-' + range.getEnd() + '/' + range.getLength()).getBytes(UTF_8)));
+                        NL.clear();
+                        writableChannel.write(NL);
+                        NL.clear();
+                        writableChannel.write(NL);
+                        NL.clear();
 
-                writableChannel.write(NL);
-                NL.clear();
-                writableChannel.write(wrap(("--" + ranges.get(0).getBoundary() + "--").getBytes(UTF_8)));
-                writableChannel.write(NL);
+                        readableChannel.position(0L);
+
+                        final ByteBuffer buffer = allocateDirect(BUFFER_SIZE);
+                        long size = 0;
+                        while ( readableChannel.read(buffer, range.getStart() + size) != -1 ) {
+                            buffer.flip();
+                            if (size + buffer.limit() > range.getLength()) {
+                                buffer.limit((int) (range.getLength() - size));
+                            }
+                            size += writableChannel.write(buffer);
+                            if (size >= range.getLength()) {
+                                break;
+                            }
+                            buffer.clear();
+                        }
+                    }
+
+                    writableChannel.write(NL);
+                    NL.clear();
+                    writableChannel.write(wrap(("--" + ranges.get(0).getBoundary() + "--").getBytes(UTF_8)));
+                    writableChannel.write(NL);
+                }
+            }
+        }
+    }
+
+    protected void copy(final InputStream  input,
+                        final long         totalSize,
+                        final OutputStream output,
+                        final long         start,
+                        final long         length) throws IOException {
+        byte[] buffer = new byte[1024 * 16];
+        int read;
+        if (totalSize == length) {
+            while ((read = input.read(buffer)) > 0) {
+                output.write(buffer, 0, read);
+            }
+        } else {
+            input.skip(start);
+            long toRead = length;
+
+            while ((read = input.read(buffer)) > 0) {
+                if ((toRead -= read) > 0) {
+                    output.write(buffer, 0, read);
+                } else {
+                    output.write(buffer, 0, (int) toRead + read);
+                    break;
+                }
             }
         }
     }

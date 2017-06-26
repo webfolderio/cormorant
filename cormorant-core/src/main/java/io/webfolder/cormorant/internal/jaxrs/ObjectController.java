@@ -491,6 +491,15 @@ public class ObjectController<T> {
                     (properties.containsKey(ETAG) && properties.get(ETAG).toString().contains("\"") ? "\"" : ""));
         }
 
+        if (staticLargeObject) {
+            List<Segment<T>> segments = objectService.listStaticLargeObject(request.getAccount(), object);
+            long totalSize = 0L;
+            for (Segment<T> next : segments) {
+                totalSize += next.getSize();
+            }
+            properties.put(CONTENT_LENGTH, totalSize);
+        }
+
         for (Map.Entry<String, Object> entry : properties.entrySet()) {
             final String headerName  = entry.getKey();
             final Object headerValue = entry.getValue();

@@ -348,7 +348,6 @@ public class PathObjectService implements ObjectService<Path> {
                 throw new CormorantException(e);
             }
         } else if (Files.isRegularFile(object, NOFOLLOW_LINKS)) {
-            final Path manifestFile = object.getParent();
             final String namespace = getNamespace(container, object);
             final String objectManifest = systemMetadataService.getProperty(namespace, X_OBJECT_MANIFEST);
             if (objectManifest == null) {
@@ -356,11 +355,22 @@ public class PathObjectService implements ObjectService<Path> {
             }
             final int start = objectManifest.lastIndexOf(BACKWARD_SLASH);
             if (start >= 0) {
-                final String prefix = objectManifest.substring(start + 1, objectManifest.length());
-                DyanmicLargeObjectVisitor visitor = new DyanmicLargeObjectVisitor(prefix);
+                DyanmicLargeObjectVisitor visitor = new DyanmicLargeObjectVisitor(null);
                 try {
-                    Files.walkFileTree(manifestFile, visitor);
-                    return visitor.getFiles();
+                    final Path manifestContainer = containerService.getContainer(null,
+                                                        objectManifest.substring(0, objectManifest.indexOf(BACKWARD_SLASH)));
+                    Path manifestDir = manifestContainer.resolve(objectManifest.substring(objectManifest.indexOf(BACKWARD_SLASH) + 1, objectManifest.length()));
+                    if ( ! Files.isDirectory(manifestDir) ) {
+                        manifestDir = object.getParent();
+                        final String prefix = objectManifest.substring(start + 1, objectManifest.length());
+                        visitor = new DyanmicLargeObjectVisitor(prefix);
+                    }
+                    if ( Files.isDirectory(manifestDir)) {
+                        Files.walkFileTree(manifestDir, visitor);
+                        return visitor.getFiles();
+                    } else {
+                        return emptyList();
+                    }
                 } catch (IOException e) {
                     throw new CormorantException(e);
                 }
