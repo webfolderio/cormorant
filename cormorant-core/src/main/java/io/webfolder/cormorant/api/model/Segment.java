@@ -15,9 +15,9 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package io.webfolder.cormorant.internal.jaxrs;
+package io.webfolder.cormorant.api.model;
 
-class Segment<T> {
+public class Segment<T> {
 
     private final String contentType;
 

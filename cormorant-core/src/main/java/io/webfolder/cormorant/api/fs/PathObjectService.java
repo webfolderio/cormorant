@@ -17,8 +17,11 @@
  */
 package io.webfolder.cormorant.api.fs;
 
+import static io.webfolder.cormorant.api.Json.read;
 import static io.webfolder.cormorant.api.property.MetadataServiceFactory.MANIFEST_EXTENSION;
+import static java.nio.channels.Channels.newReader;
 import static java.nio.channels.FileChannel.open;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.nio.file.Files.createDirectories;
 import static java.nio.file.Files.createTempFile;
 import static java.nio.file.Files.exists;
@@ -35,7 +38,10 @@ import static java.nio.file.StandardOpenOption.WRITE;
 import static java.util.Collections.emptyList;
 import static java.util.regex.Pattern.compile;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.SequenceInputStream;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
 import java.nio.file.Files;
@@ -43,33 +49,43 @@ import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributeView;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Vector;
 import java.util.regex.Pattern;
 
+import io.webfolder.cormorant.api.Json;
 import io.webfolder.cormorant.api.exception.CormorantException;
+import io.webfolder.cormorant.api.model.Segment;
+import io.webfolder.cormorant.api.service.ChecksumService;
 import io.webfolder.cormorant.api.service.ContainerService;
 import io.webfolder.cormorant.api.service.MetadataService;
 import io.webfolder.cormorant.api.service.ObjectService;
 
 public class PathObjectService implements ObjectService<Path> {
 
-    private static final String  BACKSLASH         = "\\";
+    private static final char    FORWARD_SLASH     = '\\';
 
-    private static final String  SLASH             = "/";
-
-    private static final char    CHAR_SLASH        = '/';
+    private static final char    BACKWARD_SLASH    = '/';
 
     private static final String  X_OBJECT_MANIFEST = "X-Object-Manifest";
     
-    private static final Pattern LEADING_SLASH = compile("^/+");
+    private static final Pattern LEADING_SLASH     = compile("^/+");
 
     private final ContainerService<Path> containerService;
 
     private final MetadataService systemMetadataService;
 
-    public PathObjectService(final ContainerService<Path> containerService, final MetadataService systemMetadataService) {
-        this.containerService = containerService;
+    private final ChecksumService<Path> checksumService;
+
+    public PathObjectService(
+                final ContainerService<Path> containerService,
+                final MetadataService        systemMetadataService,
+                final ChecksumService<Path>  checksumService) {
+        this.containerService      = containerService;
         this.systemMetadataService = systemMetadataService;
+        this.checksumService       = checksumService;
     }
 
     @Override
@@ -138,17 +154,18 @@ public class PathObjectService implements ObjectService<Path> {
         if ( ! objectAbsolutePath.startsWith(container) ) {
             return null;
         }
-        if ( Files.isDirectory(objectAbsolutePath, NOFOLLOW_LINKS) ) {
+        final Path manifest = objectAbsolutePath.getParent().resolve(objectAbsolutePath.getFileName() + MANIFEST_EXTENSION);
+        if (exists(manifest, NOFOLLOW_LINKS) && isReadable(manifest)) {
+            return manifest;
+        }
+        if (Files.isDirectory(objectAbsolutePath, NOFOLLOW_LINKS)) {
             return null;
         }
-        if ( ! exists(objectAbsolutePath, NOFOLLOW_LINKS) || ! isReadable(objectAbsolutePath) ) {
-            Path manifest = objectAbsolutePath.getParent().resolve(objectAbsolutePath.getFileName() + MANIFEST_EXTENSION);
-            if ( exists(manifest, NOFOLLOW_LINKS) && isReadable(manifest) ) {
-                return manifest;
-            }
+        if (Files.exists(objectAbsolutePath)) {
+            return objectAbsolutePath;
+        } else {
             return null;
         }
-        return objectAbsolutePath;
     }
 
     @Override
@@ -171,18 +188,18 @@ public class PathObjectService implements ObjectService<Path> {
 
     @Override
     public String relativize(final Path container, final Path object) {
-        return container.relativize(object).toString().replace(BACKSLASH, SLASH);
+        return container.relativize(object).toString().replace(FORWARD_SLASH, BACKWARD_SLASH);
     }
 
     @Override
     public String toPath(Path container, Path object) {
-        return container.getParent().relativize(object).toString().replace(BACKSLASH, SLASH);
+        return container.getParent().relativize(object).toString().replace(FORWARD_SLASH, BACKWARD_SLASH);
     }
 
     @Override
     public String getNamespace(final Path container, final Path object) {
         final String namespace = relativize(container, object);
-        return container.getFileName().toString() + SLASH + namespace.replace(BACKSLASH, SLASH);
+        return container.getFileName().toString() + BACKWARD_SLASH + namespace.replace(FORWARD_SLASH, BACKWARD_SLASH);
     }
 
     @Override
@@ -242,35 +259,46 @@ public class PathObjectService implements ObjectService<Path> {
     }
 
     @Override
-    public Path copyObject(String account, Path sourceObject, Path targetContainer, String targetObjectPath) {
-        final Path targetObject = targetContainer.resolve(targetObjectPath);
-        final Path targetParent = targetObject.getParent();
-        try {
-            if ( ! Files.exists(targetParent, NOFOLLOW_LINKS) ) {
-                Files.createDirectories(targetParent);
-            }
-            if (sourceObject.equals(targetObject)) {
-                return targetObject;
-            } else {
-                Files.copy(sourceObject, targetObject, REPLACE_EXISTING);
-            }
-        } catch (IOException e) {
-            throw new CormorantException("Unable to copy object.", e);
-        }
-        return targetObject;
-    }
-
-    @Override
-    public Path copyObject(String destinationAccount, Path destinationContainer, String destinationObjectPath,
-            String sourceAccount, Path sourceContainer, Path sourceObject) {
+    public Path copyObject(final String destinationAccount   ,
+                           final Path   destinationContainer ,
+                           final String destinationObjectPath,
+                           final String sourceAccount        ,
+                           final Path   sourceContainer      ,
+                           final Path   sourceObject) {
         final Path targetObject = destinationContainer.resolve(destinationObjectPath);
         final Path targetParent = targetObject.getParent();
         try {
             if ( ! Files.exists(targetParent, NOFOLLOW_LINKS) ) {
                 Files.createDirectories(targetParent);
             }
+            
+            final List<Path> dynamicLargeObjects = listDynamicLargeObject(sourceContainer, sourceObject);
+            final boolean    dynamicLargeObject  = ! dynamicLargeObjects.isEmpty();
+            final boolean    staticLargeObject   = isMultipartManifest(sourceObject);
+
             if (sourceObject.equals(targetObject)) {
                 return targetObject;
+            } else if (dynamicLargeObject) {
+                Vector<InputStream> streams = new Vector<>();
+                for (Path next : dynamicLargeObjects) {
+                    InputStream is = Files.newInputStream(next, READ);
+                    streams.add(is);
+                }
+                try (SequenceInputStream sequenceInputStream = new SequenceInputStream(streams.elements())) {
+                    Files.copy(sequenceInputStream, targetObject, REPLACE_EXISTING);
+                    return targetObject;
+                }
+            } else if (staticLargeObject) {
+                List<Segment<Path>> segments = listStaticLargeObject(sourceAccount, sourceObject);
+                Vector<InputStream> streams = new Vector<>();
+                for (Segment<Path> next : segments) {
+                    InputStream is = Files.newInputStream(next.getObject(), READ);
+                    streams.add(is);
+                }
+                try (SequenceInputStream sequenceInputStream = new SequenceInputStream(streams.elements())) {
+                    Files.copy(sequenceInputStream, targetObject, REPLACE_EXISTING);
+                    return targetObject;
+                }
             } else {
                 return Files.copy(sourceObject, targetObject, REPLACE_EXISTING);
             }
@@ -307,6 +335,9 @@ public class PathObjectService implements ObjectService<Path> {
 
     @Override
     public List<Path> listDynamicLargeObject(Path container, Path object) {
+        if (isMultipartManifest(object)) {
+            return emptyList();
+        }
         if ( Files.isDirectory(object) ) {
             DyanmicLargeObjectVisitor visitor = new DyanmicLargeObjectVisitor(null);
             try {
@@ -319,7 +350,7 @@ public class PathObjectService implements ObjectService<Path> {
             final Path manifestFile = object.getParent();
             final String namespace = getNamespace(container, object);
             final String objectManifest = systemMetadataService.getProperty(namespace, X_OBJECT_MANIFEST);
-            final int start = objectManifest.lastIndexOf(CHAR_SLASH);
+            final int start = objectManifest.lastIndexOf(BACKWARD_SLASH);
             if (start >= 0) {
                 final String prefix = objectManifest.substring(start + 1, objectManifest.length());
                 DyanmicLargeObjectVisitor visitor = new DyanmicLargeObjectVisitor(prefix);
@@ -335,6 +366,41 @@ public class PathObjectService implements ObjectService<Path> {
         } else {
             return emptyList();
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<Segment<Path>> listStaticLargeObject(final String accountName, final Path manifestObject) {
+        final List<Segment<Path>> segments = new ArrayList<>();
+        try (final BufferedReader reader = new BufferedReader(newReader(getReadableChannel(manifestObject), UTF_8.name()))) {
+            final StringBuilder builder = new StringBuilder();
+            String line;
+            while ( ( line = reader.readLine() ) != null ) {
+                builder.append(line);
+            }
+            final Json json = read(builder.toString());
+            final List<Object> list = json.asList();
+            for (Object next : list) {
+                final Map<String, Object> map = (Map<String, Object>) next;
+                final String path = removeLeadingSlash(map.get("path").toString()).replace(BACKWARD_SLASH, FORWARD_SLASH);
+                if ( path != null && ! path.trim().isEmpty() ) {
+                    final String containerName = path.indexOf(FORWARD_SLASH) > 0 ? path.substring(0, path.indexOf(FORWARD_SLASH)) : null;
+                    final String objectPath = path.substring(path.indexOf(FORWARD_SLASH) + 1, path.length());
+                    Path container = containerService.getContainer(accountName, containerName);
+                    if ( container != null ) {
+                        final Path object = getObject(accountName, containerName, objectPath);
+                        if ( object != null ) {
+                            final long size = getSize(object);
+                            final String contentType = checksumService.getMimeType(container, object, true);
+                            Segment<Path> segment = new Segment<>(contentType, size, container, object);
+                            segments.add(segment);
+                        }
+                    }
+                }
+            }
+        } catch (IOException e) {
+            throw new CormorantException(e);
+        }
+        return segments;
     }
 
     @Override
@@ -356,10 +422,10 @@ public class PathObjectService implements ObjectService<Path> {
             return null;
         }
         String normalizedPath = path;
-        if (normalizedPath.charAt(0) == SLASH.charAt(0)) {
+        if (normalizedPath.charAt(0) == BACKWARD_SLASH) {
             normalizedPath = path.substring(1, path.length());
         }
-        if (normalizedPath.charAt(0) == SLASH.charAt(0)) {
+        if (normalizedPath.charAt(0) == BACKWARD_SLASH) {
             normalizedPath = LEADING_SLASH.matcher(normalizedPath).replaceAll("");
         }
         return normalizedPath;

@@ -49,6 +49,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.Response.Status;
 
+import io.webfolder.cormorant.api.model.Segment;
 import io.webfolder.cormorant.api.service.ObjectService;
 
 class ResourceHandler<T> {
@@ -266,9 +267,7 @@ class ResourceHandler<T> {
                         objects.add(next.getObject());
                     }
                 }
-
                 try (final WritableByteChannel writableChannel = newChannel(response.getOutputStream())) {
-
                     for (T next : objects) {
                         try (FileChannel readableChannel = (FileChannel) objectService.getReadableChannel(next)) {
                             long size = objectService.getSize(next);

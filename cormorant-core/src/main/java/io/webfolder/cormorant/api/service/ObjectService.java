@@ -21,6 +21,8 @@ import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
 import java.util.List;
 
+import io.webfolder.cormorant.api.model.Segment;
+
 public interface ObjectService<T> {
 
     WritableByteChannel getWritableChannel(T object);
@@ -53,8 +55,6 @@ public interface ObjectService<T> {
 
     boolean isEmptyDirectory(T container, T object);
 
-    T copyObject(String account, T sourceObject, T targetContainer, String targetObjectPath);
-
     T copyObject(String destinationAccount, T destinationContainer, String destinationObjectPath, String sourceAccount, T sourceContainer, T sourceObject);
 
     boolean isValidPath(T container, String objectPath);
@@ -64,6 +64,8 @@ public interface ObjectService<T> {
     long getCreationTime(T object);
 
     List<T> listDynamicLargeObject(T container, T object);
+
+    List<Segment<T>> listStaticLargeObject(final String accountName, final T manifestObject);
 
     long getDyanmicObjectSize(T container, T object);
 

@@ -66,20 +66,20 @@ import io.webfolder.cormorant.internal.response.ContainerPutResponse;
 @DeclareRoles({ "cormorant-container" })
 public class ContainerController<T> {
 
-    private static final String META_PREFIX        = "x-container-meta-";
+    private static final String META_PREFIX        = "x-container-meta-"       ;
 
     private static final String META_REMOVE_PREFIX = "x-remove-container-meta-";
 
-    private static final String  SLASH             = "/";
+    private static final String  SLASH             = "/"                       ;
 
-    private final AccountService      accountService;
+    private final AccountService      accountService  ;
 
     private final ContainerService<T> containerService;
 
-    private final MetadataService     metadataService;
+    private final MetadataService     metadataService ;
 
     @Context
-    private HttpHeaders httpHeaders;
+    private       HttpHeaders         httpHeaders     ;
 
     public ContainerController(
                             final AccountService accountService,

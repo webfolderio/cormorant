@@ -20,6 +20,8 @@ package io.webfolder.cormorant.internal.jaxrs;
 import java.util.List;
 import java.util.Map;
 
+import io.webfolder.cormorant.api.model.Segment;
+
 class Resource<T> {
 
     private final T      container;

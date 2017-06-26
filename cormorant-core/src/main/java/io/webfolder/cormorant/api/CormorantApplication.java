@@ -50,6 +50,7 @@ import io.webfolder.cormorant.api.service.ObjectService;
 import io.webfolder.cormorant.internal.jaxrs.AccountController;
 import io.webfolder.cormorant.internal.jaxrs.AuthenticationController;
 import io.webfolder.cormorant.internal.jaxrs.ContainerController;
+import io.webfolder.cormorant.internal.jaxrs.FaviconController;
 import io.webfolder.cormorant.internal.jaxrs.HealthCheckController;
 import io.webfolder.cormorant.internal.jaxrs.ObjectController;
 
@@ -103,7 +104,7 @@ public class CormorantApplication extends Application {
 
         final FileChecksumService    checksumService  = new FileChecksumService(objectMetadataService);
         final ContainerService<Path> containerService = new PathContainerService(objectStore, pathMaxCount, checksumService, containerMetadataService, systemMetadataService);
-        final ObjectService<Path>    objectService    = new PathObjectService(containerService, systemMetadataService);
+        final ObjectService<Path>    objectService    = new PathObjectService(containerService, systemMetadataService, checksumService);
 
         containerService.setObjectService(objectService);
         checksumService.setObjectService(objectService);
@@ -134,7 +135,10 @@ public class CormorantApplication extends Application {
                                                     objectService,
                                                     checksumService,
                                                     objectMetadataService,
-                                                    systemMetadataService));
+                                                    systemMetadataService,
+                                                    new DefaultUrlDecoder()));
+
+        singletons.add(new FaviconController());
 
         return singletons;
     }

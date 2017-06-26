@@ -25,7 +25,6 @@ import static java.lang.Long.parseLong;
 import static java.lang.String.valueOf;
 import static java.lang.System.currentTimeMillis;
 import static java.nio.channels.Channels.newChannel;
-import static java.nio.channels.Channels.newReader;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.time.Instant.ofEpochMilli;
 import static java.time.ZoneId.of;
@@ -51,7 +50,6 @@ import static javax.ws.rs.core.Response.Status.NO_CONTENT;
 import static javax.ws.rs.core.Response.Status.OK;
 import static javax.ws.rs.core.Response.Status.REQUEST_ENTITY_TOO_LARGE;
 
-import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.EOFException;
@@ -88,15 +86,16 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 
-import io.undertow.util.URLUtils;
 import io.webfolder.cormorant.api.Json;
 import io.webfolder.cormorant.api.exception.CormorantException;
 import io.webfolder.cormorant.api.model.Container;
+import io.webfolder.cormorant.api.model.Segment;
 import io.webfolder.cormorant.api.service.AccountService;
 import io.webfolder.cormorant.api.service.ChecksumService;
 import io.webfolder.cormorant.api.service.ContainerService;
 import io.webfolder.cormorant.api.service.MetadataService;
 import io.webfolder.cormorant.api.service.ObjectService;
+import io.webfolder.cormorant.api.service.UrlDecoder;
 import io.webfolder.cormorant.internal.request.ObjectCopyRequest;
 import io.webfolder.cormorant.internal.request.ObjectDeleteRequest;
 import io.webfolder.cormorant.internal.request.ObjectGetRequest;
@@ -120,8 +119,7 @@ public class ObjectController<T> {
                                                                 .withLocale(ENGLISH)
                                                                 .withZone(GMT);
 
-
-    private static final char    CHAR_SLASH             = '/';
+    private static final char    FORWARD_SLASH          = '/';
 
     private static final String  META_PREFIX            = "x-object-meta-";
 
@@ -167,6 +165,8 @@ public class ObjectController<T> {
 
     private final MetadataService     metadataService;
 
+    private final UrlDecoder          urlDecoder;
+
     @Context
     private HttpHeaders httpHeaders;
 
@@ -182,13 +182,15 @@ public class ObjectController<T> {
                     final ObjectService<T>    objectService   ,
                     final ChecksumService<T>  checksumService ,
                     final MetadataService     metadataService ,
-                    final MetadataService     systemMetadata  ) {
+                    final MetadataService     systemMetadata  ,
+                    final UrlDecoder          urlDecoder) {
         this.accountService        = accountService  ;
         this.containerService      = containerService;
         this.objectService         = objectService   ;
         this.checksumService       = checksumService ;
         this.metadataService       = metadataService ;
         this.systemMetadataService = systemMetadata  ;
+        this.urlDecoder            = urlDecoder      ;
     }
 
     @GET
@@ -211,14 +213,17 @@ public class ObjectController<T> {
 
         String objectManifest = null;
 
+        // static large object
+        final boolean manifest = objectService.isMultipartManifest(object);
+
         // dynamic large object that has X_OBJECT_MANIFEST
         if ( object != null ) {
             final String  namespace     = objectService.getNamespace(container, object);
                          objectManifest = removeLeadingSlash(systemMetadataService.getProperty(namespace, X_OBJECT_MANIFEST));
             if ( objectManifest != null ) {
-                final String manifestContainer = objectManifest.substring(0, objectManifest.indexOf(CHAR_SLASH));
+                final String manifestContainer = objectManifest.substring(0, objectManifest.indexOf(FORWARD_SLASH));
                 container = containerService.getContainer(request.getAccount(), manifestContainer);
-                final String manifestPath = objectManifest.substring(objectManifest.indexOf(CHAR_SLASH) + 1, objectManifest.length());
+                final String manifestPath = objectManifest.substring(objectManifest.indexOf(FORWARD_SLASH) + 1, objectManifest.length());
                 final T manifestDirectory = objectService.getDirectory(container, manifestPath);
                 if ( manifestDirectory != null ) {
                     object = manifestDirectory;
@@ -229,7 +234,7 @@ public class ObjectController<T> {
             }
         }
 
-        if (object == null) {
+        if ( object == null && ! manifest ) {
 
             // dynamic large object without X_OBJECT_MANIFEST
             if (objectService.isValidPath(container, request.getObject())) {
@@ -239,11 +244,11 @@ public class ObjectController<T> {
                                      objectManifest = systemMetadataService.getProperty(manifestNamespace, X_OBJECT_MANIFEST);
                     if ( objectManifest != null ) {
                         final String directoryPath = removeLeadingSlash(objectManifest);
-                        final String containerName = directoryPath.indexOf(CHAR_SLASH) > 0 ? directoryPath.substring(0, directoryPath.indexOf(CHAR_SLASH)) : null;
+                        final String containerName = directoryPath.indexOf(FORWARD_SLASH) > 0 ? directoryPath.substring(0, directoryPath.indexOf(FORWARD_SLASH)) : null;
                         if ( containerName != null ) {
                             T dynamicLargeObjectContainer = containerService.getContainer(request.getAccount(), containerName);
                             if (objectService.isValidPath(dynamicLargeObjectContainer, directoryPath)) {
-                                final String objectPath = directoryPath.substring(directoryPath.indexOf(CHAR_SLASH) + 1, directoryPath.length());
+                                final String objectPath = directoryPath.substring(directoryPath.indexOf(FORWARD_SLASH) + 1, directoryPath.length());
                                 object = objectService.getDirectory(dynamicLargeObjectContainer, objectPath);
                                 container = dynamicLargeObjectContainer;
                                 dynamicLargeObject = true;
@@ -259,9 +264,6 @@ public class ObjectController<T> {
                 return status(NOT_FOUND).build();
             }
         }
-
-        // static large object
-        final boolean manifest = objectService.isMultipartManifest(object);
 
         if ( "get".equalsIgnoreCase(request.getMultipartManifest()) && ! manifest ) {
             throw new CormorantException("Invalid multipart manifest request. Object [" +
@@ -316,7 +318,7 @@ public class ObjectController<T> {
         final boolean staticLargeObject = objectService.isMultipartManifest(object);
         if (staticLargeObject) {
             headers.put(X_STATIC_LARGE_OBJECT, "True");
-            staticSegments = listStaticLargeObject(request.getAccount(), object);
+            staticSegments = objectService.listStaticLargeObject(request.getAccount(), object);
             if ( !staticSegments.isEmpty() ) {
                 long totalSize = 0L;
                 for (Segment<T> next : staticSegments) {
@@ -335,9 +337,9 @@ public class ObjectController<T> {
             size = dynamicLargeObject ? objectService.getDyanmicObjectSize(container, object) : objectService.getSize(object);
         }
 
-        final boolean isLargeObject = dynamicLargeObject || manifest;
+        final boolean largeObject = dynamicLargeObject || manifest;
         final String objectEtag;
-        if (isLargeObject) {
+        if (largeObject) {
             objectEtag = "\"" + (size == 0L ? MD5_OF_EMPTY_STRING : etag) + "\"";
         } else {
             objectEtag = size == 0L ? MD5_OF_EMPTY_STRING : etag;
@@ -363,41 +365,6 @@ public class ObjectController<T> {
 
         final ResponseBuilder builder = status(status);
         return builder.build();
-    }
-
-    @SuppressWarnings("unchecked")
-    protected List<Segment<T>> listStaticLargeObject(final String accountName, final T manifestObject) {
-        final List<Segment<T>> segments = new ArrayList<>();
-        try (final BufferedReader reader = new BufferedReader(newReader(objectService.getReadableChannel(manifestObject), UTF_8.name()))) {
-            final StringBuilder builder = new StringBuilder();
-            String line;
-            while ( ( line = reader.readLine() ) != null ) {
-                builder.append(line);
-            }
-            final Json json = read(builder.toString());
-            final List<Object> list = json.asList();
-            for (Object next : list) {
-                final Map<String, Object> foo = (Map<String, Object>) next;
-                final String path = removeLeadingSlash(foo.get("path").toString());
-                if ( path != null && ! path.trim().isEmpty() ) {
-                    final String containerName = path.indexOf(CHAR_SLASH) > 0 ? path.substring(0, path.indexOf(CHAR_SLASH)) : null;
-                    final String objectPath = path.substring(path.indexOf(CHAR_SLASH) + 1, path.length());
-                    T container = containerService.getContainer(accountName, containerName);
-                    if ( container != null ) {
-                        final T object = objectService.getObject(accountName, containerName, objectPath);
-                        if ( object != null ) {
-                            final long size = objectService.getSize(object);
-                            final String contentType = checksumService.getMimeType(container, object, true);
-                            Segment<T> segment = new Segment<T>(contentType, size, container, object);
-                            segments.add(segment);
-                        }
-                    }
-                }
-            }
-        } catch (IOException e) {
-            throw new CormorantException(e);
-        }
-        return segments;
     }
 
     @PUT
@@ -492,8 +459,8 @@ public class ObjectController<T> {
                 if ( object != null ) {
                     final String objectManifest = removeLeadingSlash(systemMetadataService.getProperty(namespace, X_OBJECT_MANIFEST));
                     if ( objectManifest != null ) {
-                        container = containerService.getContainer(request.getAccount(), objectManifest.substring(0, objectManifest.indexOf(CHAR_SLASH)));
-                        final String manifestPath = objectManifest.substring(objectManifest.indexOf(CHAR_SLASH) + 1, objectManifest.length());
+                        container = containerService.getContainer(request.getAccount(), objectManifest.substring(0, objectManifest.indexOf(FORWARD_SLASH)));
+                        final String manifestPath = objectManifest.substring(objectManifest.indexOf(FORWARD_SLASH) + 1, objectManifest.length());
                         T manifestDirectory = objectService.getDirectory(container, manifestPath);
                         if ( manifestDirectory != null ) {
                             object = manifestDirectory;
@@ -602,10 +569,10 @@ public class ObjectController<T> {
                                     Map<String, Object> map = (Map<String, Object>) next;
                                     String path = (String) map.get("path");
                                     final String directoryPath = removeLeadingSlash(path);
-                                    final String containerName = directoryPath.indexOf(CHAR_SLASH) > 0 ? directoryPath.substring(0, directoryPath.indexOf(CHAR_SLASH)) : null;
+                                    final String containerName = directoryPath.indexOf(FORWARD_SLASH) > 0 ? directoryPath.substring(0, directoryPath.indexOf(FORWARD_SLASH)) : null;
                                     final T manifestContainer = containerService.getContainer(request.getAccount(), containerName);
                                     if ( manifestContainer != null ) {
-                                        String objectPath = directoryPath.substring(directoryPath.indexOf(CHAR_SLASH) + 1, directoryPath.length());
+                                        String objectPath = directoryPath.substring(directoryPath.indexOf(FORWARD_SLASH) + 1, directoryPath.length());
                                         T manifestObject = objectService.getObject(request.getAccount(), containerName, objectPath);
                                         if ( manifestObject != null ) {
                                             if ( objectService.exist(manifestContainer, manifestObject) &&
@@ -641,7 +608,7 @@ public class ObjectController<T> {
             final String objectManifest = systemMetadataService.getProperty(namespace, X_OBJECT_MANIFEST);
             final boolean dynamicLargeObject = objectManifest != null;
             if (dynamicLargeObject && size == 0) {
-                final String manifestContainerName = objectManifest.substring(0, objectManifest.indexOf(CHAR_SLASH));
+                final String manifestContainerName = objectManifest.substring(0, objectManifest.indexOf(FORWARD_SLASH));
                 final T manifestContainer = containerService.getContainer(request.getAccount(), manifestContainerName);
                 for (T next : objectService.listDynamicLargeObject(manifestContainer, object)) {
                     objectService.delete(manifestContainer, next);
@@ -677,11 +644,11 @@ public class ObjectController<T> {
         final T dynamicLargeObjectContainer;
         if ( request.getObjectManifest() != null ) {
             final String directoryPath = removeLeadingSlash(request.getObjectManifest());
-            final String containerName = directoryPath.indexOf(CHAR_SLASH) > 0 ? directoryPath.substring(0, directoryPath.indexOf(CHAR_SLASH)) : null;
+            final String containerName = directoryPath.indexOf(FORWARD_SLASH) > 0 ? directoryPath.substring(0, directoryPath.indexOf(FORWARD_SLASH)) : null;
             if ( containerName != null ) {
                 dynamicLargeObjectContainer = containerService.getContainer(request.getAccount(), containerName);
                 if (objectService.isValidPath(dynamicLargeObjectContainer, directoryPath)) {
-                    final String objectPath = directoryPath.substring(directoryPath.indexOf(CHAR_SLASH) + 1, directoryPath.length());
+                    final String objectPath = directoryPath.substring(directoryPath.indexOf(FORWARD_SLASH) + 1, directoryPath.length());
                     object = objectService.getDirectory(dynamicLargeObjectContainer, objectPath);
                 } else {
                     object = null;
@@ -752,8 +719,8 @@ public class ObjectController<T> {
                                             request.getDestinationAccount().trim().isEmpty() ?
                                             request.getAccount() : request.getDestinationAccount();
 
-        final String targetPath = URLUtils.decode(removeLeadingSlash(request.getDestination()), UTF_8.name(), false, new StringBuilder());
-        final int    start      = targetPath.indexOf(CHAR_SLASH);
+        final String targetPath = urlDecoder.decode(request.getDestination());
+        final int    start      = targetPath.indexOf(FORWARD_SLASH);
 
         if (start < 0) {
             throw new CormorantException("Failed to copy object [" + targetPath + "]. Missing container name.");
@@ -818,10 +785,11 @@ public class ObjectController<T> {
         checkQuota(sourceContentLength, targetAccount, targetContainerName);
 
         final T targetObject = objectService.copyObject(targetAccount,
-                                                targetContainer,
-                                                targetObjectPath,
-                                                request.getAccount(),
-                                                sourceContainer, sourceObject);
+                                                        targetContainer,
+                                                        targetObjectPath,
+                                                        request.getAccount(),
+                                                        sourceContainer,
+                                                        sourceObject);
 
         final String  sourceNamespace = objectService.getNamespace(sourceContainer, sourceObject);
         final String targetNamespace  = objectService.getNamespace(targetContainer, targetObject);
@@ -851,7 +819,7 @@ public class ObjectController<T> {
         final String sourceLastModified = FORMATTER.format(ofInstant(ofEpochMilli(objectService.getLastModified(sourceObject)), GMT));
         final String targetLastModified = FORMATTER.format(ofInstant(ofEpochMilli(objectService.getLastModified(targetObject)), GMT));
 
-        ObjectCopyResponse response = new ObjectCopyResponse();
+        final ObjectCopyResponse response = new ObjectCopyResponse();
         response.setCopiedFromAccount(request.getAccount());
         response.setCopiedFrom(objectService.toPath(sourceContainer, sourceObject));
         response.setCopiedFromLastModified(sourceLastModified);
@@ -974,7 +942,7 @@ public class ObjectController<T> {
         final boolean chunked = isChunked(request.getTransferEncoding());
 
         if ( copy ) {
-            final int start = copyFrom.indexOf(CHAR_SLASH);
+            final int start = copyFrom.indexOf(FORWARD_SLASH);
             if (start < 0) {
                 throw new CormorantException("Failed to copy object [" + copyFrom + "]. Missing container name. " +
                                              "[X-Copy-From] header value must be in form {container}/{object}.");
@@ -1160,10 +1128,10 @@ public class ObjectController<T> {
             return null;
         }
         String normalizedPath = path;
-        if (normalizedPath.charAt(0) == CHAR_SLASH) {
+        if (normalizedPath.charAt(0) == FORWARD_SLASH) {
             normalizedPath = path.substring(1, path.length());
         }
-        if (normalizedPath.charAt(0) == CHAR_SLASH) {
+        if (normalizedPath.charAt(0) == FORWARD_SLASH) {
             normalizedPath = LEADING_SLASH.matcher(normalizedPath).replaceAll("");
         }
         return normalizedPath;
@@ -1217,8 +1185,8 @@ public class ObjectController<T> {
             @SuppressWarnings("unchecked")
             final Map<String, Object> map                = (Map<String, Object>) next;
             final String              path               = (String) map.get("path");
-            final String              normalizedPath     = path.charAt(0) == CHAR_SLASH ? path.substring(1) : path;
-            final String              multipartPath      = normalizedPath.substring(normalizedPath.indexOf(CHAR_SLASH), normalizedPath.length());
+            final String              normalizedPath     = path.charAt(0) == FORWARD_SLASH ? path.substring(1) : path;
+            final String              multipartPath      = normalizedPath.substring(normalizedPath.indexOf(FORWARD_SLASH), normalizedPath.length());
             final String              multipartContainer = request.getContainer();
 
             final T segmentObject = objectService.getObject(request.getAccount(), multipartContainer, multipartPath);
