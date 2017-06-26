@@ -296,7 +296,7 @@ class ResourceHandler<T> {
                                 copy(is, totalSize, response.getOutputStream(), next.getStart(), next.getLength());
                             }
                         }
-                    } else {
+                    } else if(resource.isManifest()) {
                         Vector<InputStream> streams = new Vector<>();
                         for (Segment<T> next : resource.getSegments()) {
                             InputStream is = newInputStream(objectService.getReadableChannel(next.getObject()));
