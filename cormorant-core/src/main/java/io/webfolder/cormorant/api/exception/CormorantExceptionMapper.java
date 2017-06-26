@@ -31,21 +31,23 @@ public class CormorantExceptionMapper implements ExceptionMapper<CormorantExcept
 
     private final Logger log = LoggerFactory.getLogger(CormorantExceptionMapper.class);
 
+    private static final int UNPROCESSABLE_ENTITY = 422;
+
     @Override
     public Response toResponse(final CormorantException t) {
         Throwable cause = t.getCause();
-        final boolean printDetail = ! t.getStatus().equals(CONFLICT) ? true : false;
+        final boolean silent = t.getStatusCode() == UNPROCESSABLE_ENTITY || CONFLICT.equals(t.getStatus()) ? true : false;
         if (cause != null) {
-            if (printDetail) {
-                log.error(cause.getMessage(), cause);
-            } else {
+            if (silent) {
                 log.error(cause.getMessage());
+            } else {
+                log.error(cause.getMessage(), cause);
             }
         } else {
-            if (printDetail) {
-                log.error(t.getMessage(), t);
-            } else {
+            if (silent) {
                 log.error(t.getMessage());
+            } else {
+                log.error(t.getMessage(), t);
             }
         }
         final String error = t.getMessage();
