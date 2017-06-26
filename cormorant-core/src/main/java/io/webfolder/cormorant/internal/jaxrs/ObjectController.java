@@ -135,7 +135,7 @@ public class ObjectController<T> {
 
     private static final int     UNPROCESSABLE_ENTITY   = 422;
 
-    private static final int     MAX_MANIFEST_SIZE      = 2 * 1024 * 1024           ; // 2 MB
+    private static final int     MAX_MANIFEST_SIZE      = 256 * 1024                ; // 256 KB
 
     private static final int     MAX_MANIFEST_SEGMENTS  = 1000                      ;
 
@@ -1173,13 +1173,13 @@ public class ObjectController<T> {
                         final InputStream       is) {
         final Long contentLength = request.getContentLength();
         if (contentLength == null || contentLength > MAX_MANIFEST_SIZE) {
-            throw new CormorantException("Content-Length must be <= 2 MB for multipart manifest body.");
+            throw new CormorantException("Content-Length must be <= 256KB for multipart manifest body.");
         }
         final byte[] data = new byte[contentLength.intValue()];
         try (DataInputStream ds = new DataInputStream(new LimitedInputStream(is, MAX_MANIFEST_SIZE))) {
             ds.readFully(data);
         } catch (EOFException e) {
-            throw new CormorantException("Content-Length must be <= 64 KB for multipart manifest body.", e);
+            throw new CormorantException("Content-Length must be <= 256KB for multipart manifest body.", e);
         } catch (IOException e) {
             throw new CormorantException(e);
         }

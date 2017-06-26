@@ -33,7 +33,7 @@ import io.webfolder.cormorant.api.model.User;
 
 public class DefaultAuthenticationService implements AuthenticationService {
 
-    private final Map<String, User> users = new ConcurrentHashMap<>();
+    private final Map<String, User>    users    = new ConcurrentHashMap<>();
 
     private final Map<String, Project> projects = new ConcurrentHashMap<>();
 
@@ -60,7 +60,7 @@ public class DefaultAuthenticationService implements AuthenticationService {
     public boolean hasPermission(String username, String permission, String method) {
         final User user = users.get(username);
         if ( user == null ) {
-            return true;
+            return false;
         }
         if (None.equals(user.getRole())) {
             return false;
@@ -96,10 +96,7 @@ public class DefaultAuthenticationService implements AuthenticationService {
 
     @Override
     public boolean deleteUser(String userId) {
-        if (users.containsKey(userId)) {
-            return users.remove(userId) != null ? true : false;
-        }
-        return false;
+        return users.remove(userId) != null ? true : false;
     }
 
     @Override
@@ -114,10 +111,7 @@ public class DefaultAuthenticationService implements AuthenticationService {
 
     @Override
     public boolean deleteProject(String projectId) {
-        if (projects.containsKey(projectId)) {
-            return projects.remove(projectId) != null ? true : false;
-        }
-        return false;
+        return projects.remove(projectId) != null ? true : false;
     }
 
     @Override
