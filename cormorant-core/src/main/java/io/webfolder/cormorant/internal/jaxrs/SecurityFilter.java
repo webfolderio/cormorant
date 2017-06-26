@@ -141,10 +141,11 @@ class SecurityFilter<T> implements ContainerRequestFilter {
         if ( ! deleteSelf && ! authorized ) {
             final String error = "Insufficient permission.";
             requestContext
-            .abortWith(status(FORBIDDEN)
+                    .abortWith(status(FORBIDDEN)
                     .header(CONTENT_LENGTH, error.length())
                     .entity(error)
                     .build());
+            return;
         }
 
         if ("cormorant-object".equals(permission)) {

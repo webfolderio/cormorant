@@ -20,6 +20,7 @@ package io.webfolder.cormorant.api.exception;
 import static javax.ws.rs.core.HttpHeaders.CONTENT_LENGTH;
 import static javax.ws.rs.core.Response.status;
 
+import static javax.ws.rs.core.Response.Status.CONFLICT;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
 
@@ -33,10 +34,19 @@ public class CormorantExceptionMapper implements ExceptionMapper<CormorantExcept
     @Override
     public Response toResponse(final CormorantException t) {
         Throwable cause = t.getCause();
+        final boolean printDetail = ! t.getStatus().equals(CONFLICT) ? true : false;
         if (cause != null) {
-            log.error(cause.getMessage(), cause);
+            if (printDetail) {
+                log.error(cause.getMessage(), cause);
+            } else {
+                log.error(cause.getMessage());
+            }
         } else {
-            log.error(t.getMessage(), t);
+            if (printDetail) {
+                log.error(t.getMessage(), t);
+            } else {
+                log.error(t.getMessage());
+            }
         }
         final String error = t.getMessage();
         Response response = status(t.getStatusCode())

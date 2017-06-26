@@ -130,6 +130,9 @@
                 <version>2.20</version>
                 <configuration>
                     <forkMode>always</forkMode>
+                    <excludes>
+                    	<exclude>**/TestServer*</exclude>
+                    </excludes>
                 </configuration>
             </plugin>
             <plugin>

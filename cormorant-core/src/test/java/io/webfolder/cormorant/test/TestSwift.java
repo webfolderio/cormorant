@@ -83,31 +83,29 @@ public class TestSwift {
 
     @BeforeClass
     public static void start() {
+        Locale.setDefault(ENGLISH);
+
         System.setProperty("org.jboss.logging.provider", "slf4j");
 
         Configurator
                 .defaultConfig()
                 .writer(new ConsoleWriter())
-                .level(Level.ERROR)
+                .level(Level.INFO)
                 .formatPattern("{{level}|min-size=8} {date} {message}")
                 .activate();
-
-        Locale.setDefault(ENGLISH);
 
         server        = new CormorantServer();
         objectStore   = Paths.get("mydir");
         metadataStore = Paths.get("mymetadata");
 
-        server.setHost("localhost");
-
         Map<String, User> users = new HashMap<>();
 
         User user = new User("myaccount",
-                            "mypassword",
-                            "test@example.com",
-                            "default",
-                            Role.Admin,
-                            true);
+                             "mypassword",
+                             "test@example.com",
+                             "default",
+                             Role.Admin,
+                             true);
         users.put("myaccount", user);
 
         AccountService accountService = new TestAccountService(objectStore);

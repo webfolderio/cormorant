@@ -50,9 +50,10 @@ public class DefaultAuthenticationService implements AuthenticationService {
 
     @Override
     public boolean authenticate(String username, String password) {
-        return users.containsKey(username) &&
-                    password != null       &&
-                    password.equals(users.get(username).getPassword());
+        return users.containsKey(username)                             &&
+                    password != null                                   &&
+                    password.equals(users.get(username).getPassword()) &&
+                    users.get(username).isEnable();
     }
 
     @Override

@@ -48,9 +48,7 @@ public class TestServer {
     public void startServer() {
         CormorantServer server = new CormorantServer();
 
-        if ( ! "true".equals(System.getProperty("start.server")) ) {
-            return;
-        }
+        System.setProperty("org.jboss.logging.provider", "slf4j");
 
         Configurator
                 .defaultConfig()
@@ -112,7 +110,7 @@ public class TestServer {
             }
         };
 
-        boolean dumpRequest = "true".equals(System.getProperty("dump.request"));
+        boolean dumpRequest = "true".equals(System.getProperty("dump.request", "false"));
 
         server.start((root) -> { return
             predicate(path("/shutdown"), shutdownHandler, dumpRequest ? requestDump(root) : root);
