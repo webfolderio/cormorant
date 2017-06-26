@@ -413,10 +413,13 @@ public class ObjectController<T> {
     @HEAD
     @Path("/{object: .*}")
     public Response head(@BeanParam final ObjectHeadRequest request) {
+        T container = containerService.getContainer(request.getAccount(), request.getContainer());
+        if (container == null) {
+            return status(NOT_FOUND).build();
+        }
         T object = objectService.getObject(request.getAccount(), request.getContainer(), request.getObject());
         boolean dir = false;
         if (object == null) {
-            final T container = containerService.getContainer(request.getAccount(), request.getContainer());
             if ( container != null ) {
                 final T directory = objectService.getDirectory(container, request.getObject());
                 if ( directory != null ) {
@@ -425,7 +428,6 @@ public class ObjectController<T> {
                 }
             }
         }
-        T container = containerService.getContainer(request.getAccount(), request.getContainer());
         if (object == null) {
             return status(NOT_FOUND).build();
         }
