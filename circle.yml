@@ -66,7 +66,10 @@ jobs:
           name: Execute tempest & ncw/swift (go) test
           background: true
           command: |
-            sleep 5
+            sleep 10
+            cd cormorant-core
+            mvn test -Dstart.server=false -Duser.language=en
+            cd ..
             go get github.com/ncw/swift
             git clone https://github.com/ncw/swift.git swift
             cd swift
@@ -117,7 +120,6 @@ jobs:
             cd ..
             source ./refstack-client/.venv/bin/activate
             ./refstack-client/refstack-client test -c tempest.conf -v --test-list cormorant-tempest.txt
-            mvn test -Dstart.server=false -Duser.language=en
             wget http://localhost:5000/shutdown
 
       - run:
