@@ -82,9 +82,7 @@ public class FileChecksumService implements ChecksumService<Path> {
             final byte[] hash     = md.digest();
             final String checksum = format("%032x", new BigInteger(1, hash));
             return checksum;
-        } catch (IOException e) {
-            throw new CormorantException(e);
-        } catch (NoSuchAlgorithmException e) {
+        } catch (IOException | NoSuchAlgorithmException e) {
             throw new CormorantException(e);
         }
     }

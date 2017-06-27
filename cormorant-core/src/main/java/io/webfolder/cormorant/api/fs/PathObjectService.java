@@ -405,7 +405,7 @@ public class PathObjectService implements ObjectService<Path> {
                         if ( object != null ) {
                             final long size = getSize(object);
                             final String contentType = checksumService.getMimeType(container, object, true);
-                            Segment<Path> segment = new Segment<>(contentType, size, container, object);
+                            Segment<Path> segment = new Segment<>(contentType, size, object);
                             segments.add(segment);
                         }
                     }

@@ -17,15 +17,12 @@
  */
 package io.webfolder.cormorant.api.cache;
 
-import static java.util.ServiceLoader.load;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static net.jodah.expiringmap.ExpirationPolicy.CREATED;
 import static net.jodah.expiringmap.ExpiringMap.builder;
 
 import java.lang.ref.WeakReference;
-import java.util.Iterator;
 import java.util.Map;
-import java.util.ServiceLoader;
 import java.util.WeakHashMap;
 
 public class DefaultCacheFactory implements CacheFactory {
@@ -36,20 +33,6 @@ public class DefaultCacheFactory implements CacheFactory {
 
     @SuppressWarnings("rawtypes")
     private final Map<String, WeakReference<Map>> cacheMappings = new WeakHashMap<>();
-
-    @SuppressWarnings({ "rawtypes" })
-    private final CacheLoader cacheLoader;
-
-    @SuppressWarnings("rawtypes")
-    public DefaultCacheFactory() {
-        final ServiceLoader<CacheLoader> loader   = load(CacheLoader.class, getClass().getClassLoader());
-        final Iterator<CacheLoader>      iterator = loader.iterator();
-        if (iterator.hasNext()) {
-            cacheLoader = iterator.next();
-        } else {
-            cacheLoader = null;
-        }
-    }
 
     @Override
     @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -62,9 +45,6 @@ public class DefaultCacheFactory implements CacheFactory {
                                     .expiration(CACHE_DURATION, SECONDS)
                                     .maxSize(CACHE_MAX_SIZE)
                                 .build();
-        if ( cacheLoader != null ) {
-            cacheLoader.load(name, cache);
-        }
         cacheMappings.put(name, new WeakReference<Map>(cache));
         return (Map<K, V>) cache;
     }

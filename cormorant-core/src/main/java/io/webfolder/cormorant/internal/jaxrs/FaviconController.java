@@ -33,9 +33,6 @@ public class FaviconController {
     }
 
     public byte[] toByteArray(InputStream is) throws IOException {
-        if (is == null) {
-            return null;
-        }
         try (ByteArrayOutputStream r = new ByteArrayOutputStream(2048)) {
             byte[] read = new byte[512];
             for (int i; -1 != (i = is.read(read)); r.write(read, 0, i));

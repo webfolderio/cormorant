@@ -103,9 +103,6 @@ public abstract class PathAccountService implements AccountService {
                         final String accountName,
                         final String containerName) {
         final Path path = getContainerPath(accountName, containerName);
-        if (path == null) {
-            return null;
-        }
         try {
             final BasicFileAttributes attribute = (BasicFileAttributes) readAttributes(path,
                                                                                 BasicFileAttributes.class,

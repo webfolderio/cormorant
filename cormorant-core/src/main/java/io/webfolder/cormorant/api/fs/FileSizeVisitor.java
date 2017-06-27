@@ -104,9 +104,4 @@ public class FileSizeVisitor implements FileVisitor<Path> {
     public long getBytesUsed() {
         return bytesUsed;
     }
-
-    @Override
-    public String toString() {
-        return "FileCounter [objectCount=" + objectCount + ", bytesUsed=" + bytesUsed + "]";
-    }
 }

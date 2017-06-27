@@ -23,14 +23,11 @@ public class Segment<T> {
 
     private final long size;
 
-    private final T container;
-
     private final T object;
 
-    public Segment(String contentType, long size, T container, T object) {
+    public Segment(String contentType, long size, T object) {
         this.contentType = contentType;
         this.size = size;
-        this.container = container;
         this.object = object;
     }
 
@@ -40,10 +37,6 @@ public class Segment<T> {
 
     public long getSize() {
         return size;
-    }
-
-    public T getContainer() {
-        return container;
     }
 
     public T getObject() {

@@ -53,7 +53,9 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.core.Response.ResponseBuilder;
 
 import io.webfolder.cormorant.api.Json;
@@ -102,6 +104,9 @@ public class AuthenticationController {
     private final String contextPath;
 
     private final String accountName;
+
+    @Context
+    private UriInfo uriInfo;
 
     public AuthenticationController(
                 final Map<String, Principal> tokens,
@@ -164,10 +169,15 @@ public class AuthenticationController {
 
     @GET
     @Path("/v2.0")
+    @Produces(APPLICATION_JSON)
     @Consumes(APPLICATION_JSON)
     public Response infoV2() {
+        String content = infoV2;
+        content = content.replace("__PROTOCOL__", uriInfo.getBaseUri().getScheme());
+        content = content.replace("__HOST__", uriInfo.getBaseUri().getHost());
+        content = content.replace("__PORT__", valueOf(uriInfo.getBaseUri().getPort()));
         return ok()
-                .entity(infoV2)
+                .entity(content)
                 .build();
     }
 

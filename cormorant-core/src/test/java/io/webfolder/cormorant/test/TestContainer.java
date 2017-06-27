@@ -62,6 +62,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import io.webfolder.cormorant.api.exception.CormorantException;
+import io.webfolder.cormorant.api.fs.PathNullStream;
 import okhttp3.MediaType;
 import okhttp3.Request;
 import okhttp3.RequestBody;
@@ -332,6 +333,27 @@ public class TestContainer extends TestSwift {
         String content = response.body().string();
         assertTrue(content.contains("<?xml version=\"1.0\" encoding=\"UTF-8\"?>"));
         assertTrue(content.contains("<object><name>hello</name><hash>"));
+    }
+
+    @Test
+    public void t24TestFavicon() throws IOException {
+        Response response = client.newCall(new Request.Builder().url(getUrl() + "/favicon.ico").get().build()).execute();
+        assertEquals("image/x-icon", response.header("Content-Type"));
+        assertEquals(200, response.code());
+    }
+
+    @Test
+    public void t25TestInfo() throws IOException {
+        Response response = client.newCall(new Request.Builder().url(getUrl() + "/v2.0").get().build()).execute();
+        assertEquals(200, response.code());
+        assertEquals("application/json", response.header("Content-Type"));
+    }
+
+    @Test
+    public void t25TestPathNullStream() {        
+        PathNullStream stream = new PathNullStream();
+        assertNull(stream.iterator().next());
+        assertNull(stream.convert(null, null, null));
     }
 
     @Test
