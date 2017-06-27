@@ -319,6 +319,13 @@ public class TestContainer extends TestSwift {
     }
 
     @Test
+    public void t22DeleteAbsentContainer() throws IOException {
+        Response response = client.newCall(new Request.Builder().url(getUrl() + "/v1/myaccount/foooobarrrrr").delete().build()).execute();
+        assertEquals(404, response.code());
+        assertEquals("Container [foooobarrrrr] does not exist.", response.body().string());
+    }
+
+    @Test
     public void t200JossListObjects() {
         org.javaswift.joss.model.Container container = jossAccount.list().iterator().next();
         Collection<StoredObject> objects = container.list();
