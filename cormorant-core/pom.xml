@@ -6,7 +6,7 @@
         <artifactId>cormorant</artifactId>
         <version>1.0.0</version>
     </parent>
-        <artifactId>cormorant-core</artifactId>
+    <artifactId>cormorant-core</artifactId>
     <licenses>
         <license>
             <name>GNU Affero General Public License</name>
@@ -136,17 +136,6 @@
                 </configuration>
             </plugin>
             <plugin>
-                <groupId>org.jacoco</groupId>
-                <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.7.9</version>
-                <configuration>
-                    <excludes>
-                        <exclude>io/webfolder/cormorant/internal/request/**</exclude>
-                        <exclude>io/webfolder/cormorant/internal/response/**</exclude>
-                    </excludes>
-                </configuration>
-            </plugin>
-            <plugin>
                 <groupId>org.eluder.coveralls</groupId>
                 <artifactId>coveralls-maven-plugin</artifactId>
                 <version>4.3.0</version>
@@ -257,6 +246,34 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+    <profiles>
+        <profile>
+            <id>report-jacoco</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.jacoco</groupId>
+                        <artifactId>jacoco-maven-plugin</artifactId>
+                        <version>0.7.9</version>
+                        <executions>
+                            <execution>
+                                <id>prepare-agent</id>
+                                <goals>
+                                    <goal>prepare-agent</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <excludes>
+                                <exclude>io/webfolder/cormorant/internal/request/**</exclude>
+                                <exclude>io/webfolder/cormorant/internal/response/**</exclude>
+                            </excludes>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
     <properties>
         <project.build.sourceEncoding>utf-8</project.build.sourceEncoding>
     </properties>
