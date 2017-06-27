@@ -97,7 +97,7 @@ public class PathAdapter implements ResourceAdapter<Path> {
         } catch (IOException e) {
             throw new CormorantException(e);
         }
-        final String hash = isdir ? MD5_OF_EMPTY_STRING : calculateChecksum(path, lastModified, isdir);
+        final String hash = isdir ? MD5_OF_EMPTY_STRING : checksumService.calculateChecksum(container, path);
         if (json.equals(contentFormat)) {
             builder.append("{")
                    .append("\"name\":\"").append(isdir && TRUE.equals(appendForwardSlash) ? normalizedName + FORWARD_SLASH : normalizedName).append("\"").append(",")
@@ -119,16 +119,5 @@ public class PathAdapter implements ResourceAdapter<Path> {
                    .append(NEW_LINE);
         }
         return builder.toString();
-    }
-
-    protected String calculateChecksum(
-                            final Path    path        ,
-                            final String  lastModified,
-                            final boolean isDir       ) {
-        if (isDir) {
-            return checksumService.calculateChecksum(lastModified);
-        } else {
-            return checksumService.calculateChecksum(container, path);
-        }
     }
 }

@@ -71,17 +71,6 @@ public class FileChecksumService implements ChecksumService<Path> {
     }
 
     @Override
-    public String calculateChecksum(String str) {
-        try {
-            final MessageDigest md = getInstance(CHECKSUM_ALGORITHM);
-            md.update(str.getBytes(UTF_8), 0, str.length());
-            return format("%032x", new BigInteger(1, md.digest()));
-        } catch (NoSuchAlgorithmException e) {
-            throw new CormorantException(e);
-        }
-    }
-
-    @Override
     public String calculateChecksum(final Path object) {
         try (InputStream is = newInputStream(open(object, NOFOLLOW_LINKS, READ))) {
             final MessageDigest md     = getInstance(CHECKSUM_ALGORITHM);

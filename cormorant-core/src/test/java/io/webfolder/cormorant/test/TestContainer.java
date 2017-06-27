@@ -21,11 +21,6 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.nio.file.Files.exists;
 import static java.nio.file.Files.isDirectory;
 import static org.jclouds.blobstore.options.PutOptions.Builder.multipart;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 import static org.junit.runners.MethodSorters.NAME_ASCENDING;
 
 import java.io.ByteArrayInputStream;
@@ -59,6 +54,12 @@ import org.junit.Test;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import io.webfolder.cormorant.api.exception.CormorantException;
 import okhttp3.MediaType;
@@ -323,6 +324,14 @@ public class TestContainer extends TestSwift {
         Response response = client.newCall(new Request.Builder().url(getUrl() + "/v1/myaccount/foooobarrrrr").delete().build()).execute();
         assertEquals(404, response.code());
         assertEquals("Container [foooobarrrrr] does not exist.", response.body().string());
+    }
+
+    @Test
+    public void t23ListContainerXML() throws IOException {
+        Response response = client.newCall(new Request.Builder().url(getUrl() + "/v1/myaccount/container1?format=xml").get().build()).execute();
+        String content = response.body().string();
+        assertTrue(content.contains("<?xml version=\"1.0\" encoding=\"UTF-8\"?>"));
+        assertTrue(content.contains("<object><name>hello</name><hash>"));
     }
 
     @Test

@@ -21,8 +21,6 @@ import java.util.List;
 
 public interface ChecksumService<T> {
 
-    String calculateChecksum(String str);
-
     String calculateChecksum(T object);
 
     String calculateChecksum(T container, T object);

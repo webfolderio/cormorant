@@ -51,9 +51,4 @@ class Range {
     public String getBoundary() {
         return boundary;
     }
-
-    @Override
-    public String toString() {
-        return "Range [start=" + start + ", end=" + end + ", length=" + length + ", boundary=" + boundary + "]";
-    }
 }
