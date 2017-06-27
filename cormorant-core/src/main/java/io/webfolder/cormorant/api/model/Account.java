@@ -68,10 +68,4 @@ public class Account {
     public void setTotalContainerCount(Integer totalContainerCount) {
         this.totalContainerCount = totalContainerCount;
     }
-
-    @Override
-    public String toString() {
-        return "Account [name=" + name + ", timestamp=" + timestamp + ", totalBytesUsed=" + totalBytesUsed
-                + ", totalObjectCount=" + totalObjectCount + ", totalContainerCount=" + totalContainerCount + "]";
-    }
 }

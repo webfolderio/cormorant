@@ -35,6 +35,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -60,6 +61,10 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 
 import io.webfolder.cormorant.api.exception.CormorantException;
+import okhttp3.MediaType;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 @FixMethodOrder(NAME_ASCENDING)
 public class TestContainer extends TestSwift {
@@ -298,14 +303,30 @@ public class TestContainer extends TestSwift {
     }
 
     @Test
-    public void t20JossListObjects() {
+    public void t20containerListNegativeLimit() throws IOException {
+        Response response = client.newCall(new Request.Builder().url(getUrl() + "/v1/myaccount/container1?limit=-1").build()).execute();
+        assertEquals(400, response.code());
+        assertEquals("limit must be >= 0", response.body().string());
+    }
+
+    @Test
+    public void t21containerPutNegativeTest() throws IOException {
+        Response response = client.newCall(
+                    new Request.Builder().url(getUrl() + "/v1/myaccount/" + String.join("", Collections.nCopies(257, "x")))
+                    .put(RequestBody.create(MediaType.parse("text/plain"), new byte[] { })).build()).execute();
+        assertEquals(400, response.code());
+        assertEquals("Container name length must in range between 1 to 256.", response.body().string());
+    }
+
+    @Test
+    public void t200JossListObjects() {
         org.javaswift.joss.model.Container container = jossAccount.list().iterator().next();
         Collection<StoredObject> objects = container.list();
         assertFalse(objects.isEmpty());
     }
 
     @Test
-    public void t20JossPutAndGet() {
+    public void t201JossPutAndGet() {
         org.javaswift.joss.model.Container container = jossAccount.list().iterator().next();
         StoredObject object = container.getObject("foobar.txt");
         object.uploadObject("hello, world!".getBytes());

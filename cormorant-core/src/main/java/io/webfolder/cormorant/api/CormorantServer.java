@@ -49,7 +49,7 @@ import io.undertow.server.handlers.GracefulShutdownHandler;
 import io.undertow.server.handlers.HttpContinueAcceptingHandler;
 import io.undertow.server.handlers.HttpContinueReadHandler;
 import io.undertow.server.handlers.PathHandler;
-import io.undertow.server.handlers.accesslog.AccessLogHandler;
+import io.undertow.server.handlers.accesslog.AccessLogHandler.Builder;
 import io.undertow.servlet.api.DeploymentInfo;
 import io.undertow.servlet.api.DeploymentManager;
 import io.undertow.servlet.api.FilterInfo;
@@ -126,7 +126,7 @@ public class CormorantServer {
                         .setDisplayName("cormorant")
                         .setAuthenticationMode(CONSTRAINT_DRIVEN)
                         .setServletStackTraces(NONE)
-                        .addInitialHandlerChainWrapper(new AccessLogHandler.Builder().build(singletonMap("format", "combined")))
+                        .addInitialHandlerChainWrapper(new Builder().build(singletonMap("format", "combined")))
                         .setClassLoader(deployment.getApplication().getClass().getClassLoader());
     }
 

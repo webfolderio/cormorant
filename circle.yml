@@ -117,6 +117,7 @@ jobs:
             cd ..
             source ./refstack-client/.venv/bin/activate
             ./refstack-client/refstack-client test -c tempest.conf -v --test-list cormorant-tempest.txt
+            mvn test -Dstart.server=false -Duser.language=en
             wget http://localhost:5000/shutdown
 
       - run:

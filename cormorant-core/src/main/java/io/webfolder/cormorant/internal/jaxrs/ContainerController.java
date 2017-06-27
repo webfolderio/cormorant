@@ -70,8 +70,6 @@ public class ContainerController<T> {
 
     private static final String META_REMOVE_PREFIX = "x-remove-container-meta-";
 
-    private static final String  SLASH             = "/"                       ;
-
     private final AccountService      accountService  ;
 
     private final ContainerService<T> containerService;
@@ -148,9 +146,6 @@ public class ContainerController<T> {
         }
         if (name.length() < 1 || name.length() > 256) {
             throw new CormorantException("Container name length must in range between 1 to 256.");
-        }
-        if (name.contains(SLASH)) {
-            throw new CormorantException("Container name must not include slash [/] character.");
         }
         containerService.create(request.getAccount(), request.getContainer());
         final ContainerPutResponse response = new ContainerPutResponse();

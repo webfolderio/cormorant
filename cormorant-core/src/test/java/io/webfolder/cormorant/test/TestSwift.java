@@ -29,6 +29,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import org.javaswift.joss.client.factory.AccountConfig;
 import org.javaswift.joss.client.factory.AccountFactory;
@@ -58,6 +59,11 @@ import io.webfolder.cormorant.api.model.User;
 import io.webfolder.cormorant.api.service.AccountService;
 import io.webfolder.cormorant.api.service.AuthenticationService;
 import io.webfolder.cormorant.api.service.DefaultAuthenticationService;
+import okhttp3.Interceptor;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Request.Builder;
+import okhttp3.Response;
 
 public class TestSwift {
 
@@ -80,6 +86,8 @@ public class TestSwift {
     protected static AccountConfig jossConfig;
 
     protected static Account jossAccount;
+
+    protected static OkHttpClient client;
 
     @BeforeClass
     public static void start() {
@@ -120,7 +128,12 @@ public class TestSwift {
                                          server.getPort(),
                                          "",
                                          "myaccount"));
-        server.start((root) -> { return Handlers.requestDump(root); });
+
+        boolean startServer = "true".equals(System.getProperty("start.server", "true"));
+
+        if (startServer) {
+            server.start((root) -> { return Handlers.requestDump(root); });
+        }
 
         Iterable<Module> modules = ImmutableSet.<Module>of(
                                             new SLF4JLoggingModule());
@@ -168,10 +181,40 @@ public class TestSwift {
         jossConfig.setAuthenticationMethod(AuthenticationMethod.BASIC);
 
         jossAccount = new AccountFactory(jossConfig).createAccount();
+
+        client = new OkHttpClient();
+        try {
+            client.newCall(new Request.Builder().get().url(getUrl() + "/v2.0").build()).execute();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        Response response;
+        try {
+            response = client.newCall(new Request.Builder().get().url(getUrl() + "/auth/v1.0").header("X-Auth-User", "myaccount").header("X-Auth-Key", "mypassword").build()).execute();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        String token = response.header("X-Auth-Token");
+        client = new OkHttpClient().newBuilder().addNetworkInterceptor(new Interceptor() {
+            
+            @Override
+            public Response intercept(Chain chain) throws IOException {
+                Builder builder = chain.request().newBuilder();
+                builder.header("X-Auth-Token", token);
+                return chain.proceed(builder.build());
+            }
+        }).readTimeout(10, TimeUnit.MINUTES).build();
+    }
+
+    protected static String getUrl() {
+        return "http://" + server.getHost() + ":" + server.getPort();
     }
 
     @AfterClass
     public static void stop() {
-        server.stop();
+        boolean startServer = "true".equals(System.getProperty("start.server", "true"));
+        if (startServer) {
+            server.stop();
+        }
     }
 }

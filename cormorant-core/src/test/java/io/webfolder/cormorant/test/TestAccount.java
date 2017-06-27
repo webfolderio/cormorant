@@ -17,11 +17,9 @@
  */
 package io.webfolder.cormorant.test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import static org.junit.runners.MethodSorters.NAME_ASCENDING;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -30,6 +28,13 @@ import org.javaswift.joss.model.Container;
 import org.jclouds.openstack.swift.v1.domain.Account;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+import okhttp3.Request;
+import okhttp3.Response;
 
 @FixMethodOrder(NAME_ASCENDING)
 public class TestAccount extends TestSwift {
@@ -77,13 +82,20 @@ public class TestAccount extends TestSwift {
 
         accountApi.deleteMetadata(metadata);
 
-
         metadata = accountApi.get().getMetadata();
         assertTrue(metadata.isEmpty());
     }
 
     @Test
-    public void t3TestJossAccount() {
+    public void t3TestXmlResponse() throws IOException {
+        Response response = client.newCall(new Request.Builder().url(getUrl() + "/v1/myaccount?format=xml").build()).execute();
+        String content = response.body().string();
+        assertTrue(content.contains("<account name=\"myaccount\"><container><name>container1</name><count>0</count><bytes>0</bytes></container></account>"));
+        assertEquals("application/xml; charset=utf-8", response.header("Content-Type"));
+    }
+
+    @Test
+    public void t4TestJossAccount() {
         Collection<Container> containers = jossAccount.list();
         assertFalse(containers.isEmpty());
         assertEquals(1, containers.size());

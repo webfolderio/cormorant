@@ -131,7 +131,7 @@
                 <configuration>
                     <forkMode>always</forkMode>
                     <excludes>
-                    	<exclude>**/TestServer*</exclude>
+                        <exclude>**/TestServer*</exclude>
                     </excludes>
                 </configuration>
             </plugin>
@@ -250,6 +250,12 @@
             <groupId>org.javaswift</groupId>
             <artifactId>joss</artifactId>
             <version>0.9.15</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>okhttp</artifactId>
+            <version>3.8.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>

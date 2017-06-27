@@ -119,9 +119,9 @@ public class CormorantApplication extends Application {
 
         singletons.add(new HealthCheckController());
 
-        singletons.add(new CormorantFeature<>(tokens, authenticationService, accountMetadataService, containerService, contextPath));
+        singletons.add(new CormorantFeature<>(tokens, authenticationService, accountMetadataService, containerService, getContextPath()));
 
-        singletons.add(new AuthenticationController(tokens, authenticationService, host, port, contextPath, accountName));
+        singletons.add(new AuthenticationController(tokens, authenticationService, host, port, getContextPath(), accountName));
 
         singletons.add(new AccountController(accountService,
                                                     accountMetadataService));

@@ -25,7 +25,6 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.time.ZoneId.of;
 import static java.time.ZonedDateTime.now;
 import static java.time.format.DateTimeFormatter.ofPattern;
-import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableMap;
 import static java.util.Collections.unmodifiableSet;
 import static java.util.Locale.ENGLISH;
@@ -33,7 +32,6 @@ import static java.util.concurrent.ThreadLocalRandom.current;
 import static javax.ws.rs.core.HttpHeaders.CONTENT_TYPE;
 import static javax.ws.rs.core.HttpHeaders.USER_AGENT;
 import static javax.ws.rs.core.HttpHeaders.VARY;
-import static javax.ws.rs.core.Response.Status.UNSUPPORTED_MEDIA_TYPE;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -88,8 +86,6 @@ public class ResponseWriter implements MessageBodyWriter {
 
     private final String                    textPlain        = "text/plain; charset=utf-8";
 
-    private final Set<String>               availableFormats = new HashSet<>(asList("json", "xml", "plain"));
- 
     private final Map<Class<?>, Set<Field>> headerMappings   = getHeaderMappings();
 
     private static final String  TRANSFER_ENCODING           = "Transfer-Encoding";
@@ -151,10 +147,6 @@ public class ResponseWriter implements MessageBodyWriter {
 
         if (format == null) {
             format = "plain";
-        }
-
-        if ( ! availableFormats.contains(format) ) {
-            throw new WebApplicationException(UNSUPPORTED_MEDIA_TYPE);
         }
 
         final ContentFormat contentFormat = ContentFormat.valueOf(format);

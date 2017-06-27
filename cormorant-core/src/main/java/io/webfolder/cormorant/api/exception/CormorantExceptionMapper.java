@@ -20,6 +20,7 @@ package io.webfolder.cormorant.api.exception;
 import static javax.ws.rs.core.HttpHeaders.CONTENT_LENGTH;
 import static javax.ws.rs.core.Response.status;
 
+import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
 import static javax.ws.rs.core.Response.Status.CONFLICT;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
@@ -36,7 +37,9 @@ public class CormorantExceptionMapper implements ExceptionMapper<CormorantExcept
     @Override
     public Response toResponse(final CormorantException t) {
         Throwable cause = t.getCause();
-        final boolean silent = t.getStatusCode() == UNPROCESSABLE_ENTITY || CONFLICT.equals(t.getStatus()) ? true : false;
+        final boolean silent = t.getStatusCode() == UNPROCESSABLE_ENTITY  ||
+                                        BAD_REQUEST.equals(t.getStatus()) ||
+                                        CONFLICT.equals(t.getStatus()) ? true : false;
         if (cause != null) {
             if (silent) {
                 log.error(cause.getMessage());
