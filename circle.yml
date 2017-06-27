@@ -127,7 +127,7 @@ jobs:
           command: |
             cd cormorant-core
             java -version
-            mvn -Dreport-jacoco -Dtest=TestServer#startServer -DrepoToken=$COVERALLS_TOKEN -Duser.language=en jacoco:report coveralls:report test
+            mvn -Preport-jacoco -Dtest=TestServer#startServer -DrepoToken=$COVERALLS_TOKEN -Duser.language=en test jacoco:report coveralls:report
 
       - store_test_results:
           path: target/surefire-reports
