@@ -61,11 +61,11 @@ public class CormorantApplication extends Application {
 
     private final Path                   objectStore;
 
+    private final Path                   metadataStore;
+
     private final AccountService         accountService;
 
     private final AuthenticationService  authenticationService;
-
-    private final MetadataServiceFactory metadataServiceFactory;
 
     private final String                 host;
 
@@ -79,7 +79,7 @@ public class CormorantApplication extends Application {
 
     public CormorantApplication(
                 final Path objectStore,
-                final Path propertyStore,
+                final Path metadataStore,
                 final AccountService accountService,
                 final AuthenticationService authenticationService,
                 final String host,
@@ -87,9 +87,9 @@ public class CormorantApplication extends Application {
                 final String contextPath,
                 final String accountName) {
         this.objectStore            = objectStore;
+        this.metadataStore          = metadataStore;
         this.accountService         = accountService;
         this.authenticationService  = authenticationService;
-        this.metadataServiceFactory = createPropertyServiceFactory(propertyStore);
         this.host                   = host;
         this.port                   = port;
         this.contextPath            = contextPath;
@@ -100,6 +100,8 @@ public class CormorantApplication extends Application {
     @Override
     public Set<Object> getSingletons() {
         final Set<Object> singletons = new HashSet<>();
+
+        final MetadataServiceFactory metadataServiceFactory = new DefaultMetadataServiceFactory(metadataStore, getMetadataStorage());
 
         final MetadataService accountMetadataService   = metadataServiceFactory.create(ACCOUNT  , METADATA       , isCacheable(ACCOUNT));
         final MetadataService containerMetadataService = metadataServiceFactory.create(CONTAINER, METADATA       , isCacheable(CONTAINER));
@@ -149,10 +151,6 @@ public class CormorantApplication extends Application {
 
     public String getContextPath() {
         return contextPath;
-    }
-
-    protected MetadataServiceFactory createPropertyServiceFactory(final Path propertyStore) {
-        return new DefaultMetadataServiceFactory(propertyStore, getMetadataStorage());
     }
 
     protected int getPathMaxCount() {

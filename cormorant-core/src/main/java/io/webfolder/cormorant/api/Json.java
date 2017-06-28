@@ -104,4 +104,9 @@ public class Json {
     public boolean equals(Object obj) {
         return delegate.equals(obj);
     }
+
+    @Override
+    public String toString() {
+        return delegate.toString();
+    }
 }
