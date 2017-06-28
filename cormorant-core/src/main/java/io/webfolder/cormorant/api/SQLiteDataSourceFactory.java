@@ -1,10 +1,11 @@
 package io.webfolder.cormorant.api;
 
+import static org.sqlite.SQLiteConfig.Encoding.UTF8;
+
 import javax.sql.DataSource;
 
 import org.sqlite.SQLiteConfig;
 import org.sqlite.SQLiteDataSource;
-import org.sqlite.SQLiteConfig.Encoding;
 
 public class SQLiteDataSourceFactory implements DataSourceFactory {
 
@@ -12,7 +13,7 @@ public class SQLiteDataSourceFactory implements DataSourceFactory {
 
     public SQLiteDataSourceFactory() {
         SQLiteConfig config = new SQLiteConfig();
-        config.setEncoding(Encoding.UTF8);
+        config.setEncoding(UTF8);
         ds = new SQLiteDataSource(config);
         ds.setUrl("jdbc:sqlite:cormorant.db");
     }
