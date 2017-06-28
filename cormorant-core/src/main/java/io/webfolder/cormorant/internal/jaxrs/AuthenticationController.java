@@ -137,15 +137,6 @@ public class AuthenticationController {
                 final @HeaderParam("X-Auth-User") String username,
                 final @HeaderParam("X-Auth-Key")  String password) {
 
-        if ( username == null ||
-                username.trim().isEmpty() ||
-                password == null ||
-                password.trim().isEmpty() ) {
-            return status(BAD_REQUEST)
-                    .entity("Incorrect username or password.")
-                    .build();
-        }
-
         if ( ! authenticationService.authenticate(username, password) ) {
             return status(BAD_REQUEST)
                             .entity("Incorrect username or password.")

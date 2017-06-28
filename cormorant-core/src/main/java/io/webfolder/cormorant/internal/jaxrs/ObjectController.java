@@ -356,12 +356,7 @@ public class ObjectController<T> {
                                                 objectService,
                                                 resource);
 
-        final Status status;
-        try {
-            status = handler.handle(this.request, this.response);
-        } catch (IOException e) {
-            throw new CormorantException(e);
-        }
+        final Status status = handler.handle(this.request, this.response);
 
         final ResponseBuilder builder = status(status);
         return builder.build();
@@ -568,47 +563,43 @@ public class ObjectController<T> {
 
         } else {
             if (deleteStaticLargeObject) {
-                try {
-                    try (ReadableByteChannel channel = objectService.getReadableChannel(object)) {
-                        try (Scanner scanner = new Scanner(Channels.newInputStream(channel))) {
-                            scanner.useDelimiter("\\A");
-                            if (scanner.hasNext()) {
-                                String content = scanner.next();
-                                Json json = read(content);
-                                List<Object> list = json.asList();
-                                for (Object next : list) {
-                                    Map<String, Object> map = (Map<String, Object>) next;
-                                    String path = (String) map.get("path");
-                                    final String directoryPath = removeLeadingSlash(path);
-                                    final String containerName = directoryPath.indexOf(FORWARD_SLASH) > 0 ? directoryPath.substring(0, directoryPath.indexOf(FORWARD_SLASH)) : null;
-                                    final T manifestContainer = containerService.getContainer(request.getAccount(), containerName);
-                                    if ( manifestContainer != null ) {
-                                        String objectPath = directoryPath.substring(directoryPath.indexOf(FORWARD_SLASH) + 1, directoryPath.length());
-                                        T manifestObject = objectService.getObject(request.getAccount(), containerName, objectPath);
-                                        if ( manifestObject != null ) {
-                                            if ( objectService.exist(manifestContainer, manifestObject) &&
-                                                    ! objectService.isDirectory(manifestContainer, manifestObject) ) {
+                try (ReadableByteChannel channel = objectService.getReadableChannel(object)) {
+                    try (Scanner scanner = new Scanner(Channels.newInputStream(channel))) {
+                        scanner.useDelimiter("\\A");
+                        if (scanner.hasNext()) {
+                            String content = scanner.next();
+                            Json json = read(content);
+                            List<Object> list = json.asList();
+                            for (Object next : list) {
+                                Map<String, Object> map = (Map<String, Object>) next;
+                                String path = (String) map.get("path");
+                                final String directoryPath = removeLeadingSlash(path);
+                                final String containerName = directoryPath.indexOf(FORWARD_SLASH) > 0 ? directoryPath.substring(0, directoryPath.indexOf(FORWARD_SLASH)) : null;
+                                final T manifestContainer = containerService.getContainer(request.getAccount(), containerName);
+                                if ( manifestContainer != null ) {
+                                    String objectPath = directoryPath.substring(directoryPath.indexOf(FORWARD_SLASH) + 1, directoryPath.length());
+                                    T manifestObject = objectService.getObject(request.getAccount(), containerName, objectPath);
+                                    if ( manifestObject != null ) {
+                                        if ( objectService.exist(manifestContainer, manifestObject) &&
+                                                ! objectService.isDirectory(manifestContainer, manifestObject) ) {
 
-                                                final long size = objectService.getSize(manifestObject);
+                                            final long size = objectService.getSize(manifestObject);
 
-                                                objectService.delete(manifestContainer, manifestObject);
+                                            objectService.delete(manifestContainer, manifestObject);
 
-                                                final String namespace = objectService.getNamespace(manifestContainer, manifestObject);
-                                                systemMetadataService.delete(namespace);
-                                                metadataService.delete(namespace);
+                                            final String namespace = objectService.getNamespace(manifestContainer, manifestObject);
+                                            systemMetadataService.delete(namespace);
+                                            metadataService.delete(namespace);
 
-                                                Container containerInfo = accountService.getContainer(request.getAccount(), containerName);
-                                                containerInfo.decrementObjectCount();
-                                                containerInfo.removeBytesUsed(size);
-                                            }
+                                            Container containerInfo = accountService.getContainer(request.getAccount(), containerName);
+                                            containerInfo.decrementObjectCount();
+                                            containerInfo.removeBytesUsed(size);
                                         }
                                     }
                                 }
                             }
                         }
                     }
-                } catch (IOException e) {
-                    throw new CormorantException(e);
                 }
             }
 
@@ -984,8 +975,6 @@ public class ObjectController<T> {
             try (final ReadableByteChannel readableChannel = newChannel(is);
                                         final WritableByteChannel writableChannel = objectService.getWritableChannel(tempObject)) {
                 write(readableChannel, writableChannel, 0L, maxTransferSize);
-            } catch (IOException e) {
-                throw new CormorantException(e);
             }
 
             sourceObject    = tempObject;
@@ -1180,8 +1169,6 @@ public class ObjectController<T> {
             ds.readFully(data);
         } catch (EOFException e) {
             throw new CormorantException("Content-Length must be <= 256KB for multipart manifest body.", e);
-        } catch (IOException e) {
-            throw new CormorantException(e);
         }
         final Json json;
         try {
@@ -1248,8 +1235,6 @@ public class ObjectController<T> {
             response.setETag("\"" + eTag + "\"");
             response.setContentType(APPLICATION_JSON);
             response.setLastModified(valueOf(objectService.getLastModified(object)));
-        } catch (IOException e) {
-            throw new CormorantException(e);
         }
     }
 

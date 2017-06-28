@@ -24,8 +24,8 @@ import static java.nio.file.FileVisitResult.TERMINATE;
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.FileVisitResult;
-import java.nio.file.FileVisitor;
 import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Iterator;
 import java.util.NavigableSet;
@@ -34,7 +34,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import io.webfolder.cormorant.api.model.ListContainerOptions;
 
-class PathVisitor implements FileVisitor<Path>, DirectoryStream<Path> {
+class PathVisitor extends SimpleFileVisitor<Path> implements  DirectoryStream<Path> {
 
     private static final String  BACKSLASH = "\\";
 
@@ -105,16 +105,6 @@ class PathVisitor implements FileVisitor<Path>, DirectoryStream<Path> {
 
     protected String getRelative(final Path file) {
         return root.relativize(file).toString().replace(BACKSLASH, SLASH);
-    }
-
-    @Override
-    public FileVisitResult visitFileFailed(Path file, IOException exc) throws IOException {
-        return CONTINUE;
-    }
-
-    @Override
-    public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
-        return CONTINUE;
     }
 
     @Override

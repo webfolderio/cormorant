@@ -23,11 +23,11 @@ import static java.nio.file.FileVisitResult.TERMINATE;
 
 import java.io.IOException;
 import java.nio.file.FileVisitResult;
-import java.nio.file.FileVisitor;
 import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 
-public class FileSizeVisitor implements FileVisitor<Path> {
+public class FileSizeVisitor extends SimpleFileVisitor<Path> {
 
     private long objectCount;
 
@@ -80,16 +80,6 @@ public class FileSizeVisitor implements FileVisitor<Path> {
         objectCount += 1;
         bytesUsed += attrs.size();
         return objectCount < limit ? CONTINUE : TERMINATE;
-    }
-
-    @Override
-    public FileVisitResult visitFileFailed(Path file, IOException exc) throws IOException {
-        return CONTINUE;
-    }
-
-    @Override
-    public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
-        return CONTINUE;
     }
 
     public long getObjectCount() {
