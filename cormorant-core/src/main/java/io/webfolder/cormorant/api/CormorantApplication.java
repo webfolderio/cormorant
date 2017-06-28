@@ -75,6 +75,8 @@ public class CormorantApplication extends Application {
 
     private final String                 accountName;
 
+    private MetadataStorage              metadataStorage = MetadataStorage.SQLite;
+
     public CormorantApplication(
                 final Path objectStore,
                 final Path propertyStore,
@@ -149,7 +151,7 @@ public class CormorantApplication extends Application {
     }
 
     protected MetadataServiceFactory createPropertyServiceFactory(final Path propertyStore) {
-        return new DefaultMetadataServiceFactory(propertyStore, MetadataStorage.SQLite);
+        return new DefaultMetadataServiceFactory(propertyStore, getMetadataStorage());
     }
 
     protected int getPathMaxCount() {
@@ -158,5 +160,13 @@ public class CormorantApplication extends Application {
 
     protected boolean isCacheable(final String cacheName) {
         return true;
+    }
+
+    public MetadataStorage getMetadataStorage() {
+        return metadataStorage;
+    }
+
+    public void setMetadataStorage(MetadataStorage metadataStorage) {
+        this.metadataStorage = metadataStorage;
     }
 }

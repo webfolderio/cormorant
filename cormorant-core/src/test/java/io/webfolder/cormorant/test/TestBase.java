@@ -54,6 +54,7 @@ import io.undertow.Handlers;
 import io.webfolder.cormorant.api.CormorantApplication;
 import io.webfolder.cormorant.api.CormorantServer;
 import io.webfolder.cormorant.api.exception.CormorantException;
+import io.webfolder.cormorant.api.metadata.MetadataStorage;
 import io.webfolder.cormorant.api.model.Role;
 import io.webfolder.cormorant.api.model.User;
 import io.webfolder.cormorant.api.service.AccountService;
@@ -127,15 +128,18 @@ public class TestBase {
         AccountService accountService = new TestAccountService(objectStore);
         AuthenticationService authenticationService = new DefaultAuthenticationService(users);
 
-        server.deploy(
-                new CormorantApplication(objectStore,
-                                         metadataStore,
-                                         accountService,
-                                         authenticationService,
-                                         server.getHost(),
-                                         server.getPort(),
-                                         "",
-                                         "myaccount"));
+        CormorantApplication application = new CormorantApplication(objectStore,
+                                                    metadataStore,
+                                                    accountService,
+                                                    authenticationService,
+                                                    server.getHost(),
+                                                    server.getPort(),
+                                                    "",
+                                                    "myaccount");
+
+        application.setMetadataStorage(MetadataStorage.File);
+
+        server.deploy(application);
 
         boolean startServer = "true".equals(System.getProperty("start.server", "true"));
 
