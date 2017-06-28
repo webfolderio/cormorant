@@ -17,6 +17,7 @@
  */
 package io.webfolder.cormorant.api.service;
 
+import java.io.IOException;
 import java.sql.SQLException;
 
 import io.webfolder.cormorant.api.model.ListContainerOptions;
@@ -26,7 +27,7 @@ public interface ContainerService<T> {
 
     ResourceStream<T> listObjects(String accountName,
                                     String containerName,
-                                    ListContainerOptions options);
+                                    ListContainerOptions options) throws IOException;
 
     T getContainer(String accountName, String containerName);
 

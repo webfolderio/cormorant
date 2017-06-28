@@ -73,7 +73,7 @@ public class PathContainerService implements ContainerService<Path> {
     public ResourceStream<Path> listObjects(
                                         final String               accountName  ,
                                         final String               containerName,
-                                        final ListContainerOptions options      ) {
+                                        final ListContainerOptions options      ) throws IOException {
         ResourceStream<Path> stream = EMPTY_STREAM;
 
         final Path container = getContainer(accountName, containerName);
@@ -112,12 +112,8 @@ public class PathContainerService implements ContainerService<Path> {
             stream = EMPTY_STREAM;
         } else {
             PathVisitor visitor = new PathVisitor(options, visitorPath, pathMaxCount);
-            try {
-                walkFileTree(visitorPath,
-                                    emptySet(), recursive ? MAX_VALUE : 1, visitor);
-            } catch (IOException e) {
-                throw new CormorantException("Unable to list objects.", e);
-            }
+            walkFileTree(visitorPath,
+                                emptySet(), recursive ? MAX_VALUE : 1, visitor);
             stream = new PathStream(visitor,
                                 new PathAdapter(container, checksumService, objectService, systemMetadataService));
         }
@@ -136,7 +132,7 @@ public class PathContainerService implements ContainerService<Path> {
         final Path path = getContainer(accountName, containerName);
         if ( path != null && ! exists(path, NOFOLLOW_LINKS) ) {
             if (isRegularFile(path, NOFOLLOW_LINKS)) {
-                final String error = "Unable to create container. File [" + containerName + "] already exists.";
+                final String error = "Unable to create container. Path [" + containerName + "] already exists.";
                 throw new CormorantException(error);
             } else {
                 try {
