@@ -25,6 +25,7 @@ import static javax.ws.rs.core.Response.ok;
 import static javax.ws.rs.core.Response.status;
 import static javax.ws.rs.core.Response.Status.NO_CONTENT;
 
+import java.io.IOException;
 import java.util.Map;
 import java.util.NavigableSet;
 import java.util.TreeSet;
@@ -89,7 +90,7 @@ public class AccountController {
      * Show account details and list containers
      */
     @GET
-    public AccountGetResponseContext get(@BeanParam final AccountGetRequest request) {
+    public AccountGetResponseContext get(@BeanParam final AccountGetRequest request) throws IOException {
         AccountGetResponseContext context = new AccountGetResponseContext();
         NavigableSet<Container> containers = emptyNavigableSet();
         if ( request.getAccount() != null &&
@@ -149,7 +150,7 @@ public class AccountController {
      * <li>Total number of bytes that are stored in Object Storage for the account</li>
      */
     @HEAD
-    public Response head(@BeanParam final AccountHeadRequest request) {
+    public Response head(@BeanParam final AccountHeadRequest request) throws IOException {
         final AccountHeadResponse response = new AccountHeadResponse();
         response.setContentType(TEXT_PLAIN);
         response.setAcceptRanges(BYTES_RESPONSE);
@@ -182,7 +183,7 @@ public class AccountController {
      * </p>
      */
     @POST
-    public Response post(@BeanParam final AccountPostRequest request) {
+    public Response post(@BeanParam final AccountPostRequest request) throws IOException {
         String account = request.getAccount();
         if ( account != null && accountService.getAccount(account) != null ) {
             MultivaluedMap<String, String> headers = httpHeaders.getRequestHeaders();

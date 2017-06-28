@@ -89,21 +89,13 @@ public class PathObjectService implements ObjectService<Path> {
     }
 
     @Override
-    public Path createTempObject(String accontName, Path container) {
-        try {
-            return createTempFile("cormorant", ".new");
-        } catch (IOException e) {
-            throw new CormorantException("Unable to create temp file.", e);
-        }
+    public Path createTempObject(String accontName, Path container) throws IOException {
+        return createTempFile("cormorant", ".new");
     }
 
     @Override
-    public void deleteTempObject(String accountName, Path container, Path tempObject) {
-        try {
-            Files.delete(tempObject);
-        } catch (IOException e) {
-            throw new CormorantException("Unable to delete temp file [" + tempObject.toString() + "].", e);
-        }
+    public void deleteTempObject(String accountName, Path container, Path tempObject) throws IOException {
+        Files.delete(tempObject);
     }
 
     @Override
@@ -111,35 +103,23 @@ public class PathObjectService implements ObjectService<Path> {
                 final String accountName,
                 final Path   tempObject,
                 final Path   targetContainer,
-                final String targetObjectPath) {
-        try {
-            final Path target       = targetContainer.resolve(targetObjectPath).toAbsolutePath().normalize();
-            final Path targetParent = target.getParent();
-            if ( ! exists(targetParent, NOFOLLOW_LINKS) ) {
-                createDirectories(targetParent);
-            }
-            return move(tempObject, target, ATOMIC_MOVE);
-        } catch (IOException e) {
-            throw new CormorantException(e);
+                final String targetObjectPath) throws IOException {
+        final Path target       = targetContainer.resolve(targetObjectPath).toAbsolutePath().normalize();
+        final Path targetParent = target.getParent();
+        if ( ! exists(targetParent, NOFOLLOW_LINKS) ) {
+            createDirectories(targetParent);
         }
+        return move(tempObject, target, ATOMIC_MOVE);
     }
 
     @Override
-    public WritableByteChannel getWritableChannel(Path path) {
-        try {
-            return open(path, WRITE, CREATE, NOFOLLOW_LINKS);
-        } catch (IOException e) {
-            throw new CormorantException(e);
-        }
+    public WritableByteChannel getWritableChannel(Path path) throws IOException {
+        return open(path, WRITE, CREATE, NOFOLLOW_LINKS);
     }
 
     @Override
-    public ReadableByteChannel getReadableChannel(Path path) {
-        try {
-            return open(path, READ, NOFOLLOW_LINKS);
-        } catch (IOException e) {
-            throw new CormorantException(e);
-        }
+    public ReadableByteChannel getReadableChannel(Path path) throws IOException {
+        return open(path, READ, NOFOLLOW_LINKS);
     }
 
     @Override
@@ -169,21 +149,13 @@ public class PathObjectService implements ObjectService<Path> {
     }
 
     @Override
-    public long getSize(Path object) {
-        try {
-            return size(object);
-        } catch (IOException e) {
-            throw new CormorantException(e);
-        }
+    public long getSize(Path object) throws IOException {
+        return size(object);
     }
 
     @Override
-    public void delete(final Path container, final Path object) {
-        try {
-            Files.delete(object);
-        } catch (IOException e) {
-            throw new CormorantException("Unable to delete path [" + object.toString() + "].", e);
-        }
+    public void delete(final Path container, final Path object) throws IOException {
+        Files.delete(object);
     }
 
     @Override
@@ -203,16 +175,12 @@ public class PathObjectService implements ObjectService<Path> {
     }
 
     @Override
-    public long getLastModified(Path object) {
-        try {
-            return getLastModifiedTime(object, NOFOLLOW_LINKS).toMillis();
-        } catch (IOException e) {
-            throw new CormorantException(e);
-        }
+    public long getLastModified(Path object) throws IOException {
+        return getLastModifiedTime(object, NOFOLLOW_LINKS).toMillis();
     }
 
     @Override
-    public Path createDirectory(String accountName, Path container, String objectPath) {
+    public Path createDirectory(String accountName, Path container, String objectPath) throws IOException {
         if (objectPath == null || objectPath.trim().isEmpty()) {
             throw new CormorantException("Invalid directory name.");
         }
@@ -220,11 +188,7 @@ public class PathObjectService implements ObjectService<Path> {
         if ( ! directory.startsWith(container) ) {
             throw new CormorantException("Invalid directory path.");
         }
-        try {
-            return createDirectories(directory);
-        } catch (IOException e) {
-            throw new CormorantException("Unable to create folder.", e);
-        }
+        return createDirectories(directory);
     }
 
     @Override
@@ -244,15 +208,11 @@ public class PathObjectService implements ObjectService<Path> {
     }
 
     @Override
-    public boolean isEmptyDirectory(final Path container, final Path object) {
+    public boolean isEmptyDirectory(final Path container, final Path object) throws IOException {
         final Path dir = container.resolve(object);
         if (Files.isDirectory(dir)) {
             FileSizeVisitor visitor = new FileSizeVisitor(2, true);
-            try {
-                Files.walkFileTree(dir, visitor);
-            } catch (IOException e) {
-                throw new CormorantException(e);
-            }
+            Files.walkFileTree(dir, visitor);
             return visitor.getObjectCount() == 1 ? true : false;
         }
         return false;
@@ -265,46 +225,42 @@ public class PathObjectService implements ObjectService<Path> {
                            final String sourceAccount        ,
                            final Path   sourceContainer      ,
                            final Path   sourceObject         ,
-                           final String multipartManifest) {
+                           final String multipartManifest) throws IOException {
         final Path targetObject = destinationContainer.resolve(destinationObjectPath);
         final Path targetParent = targetObject.getParent();
-        try {
-            if ( ! Files.exists(targetParent, NOFOLLOW_LINKS) ) {
-                Files.createDirectories(targetParent);
-            }
-            
-            final List<Path> dynamicLargeObjects = listDynamicLargeObject(sourceContainer, sourceObject);
-            final boolean    dynamicLargeObject  = ! dynamicLargeObjects.isEmpty();
-            final boolean    staticLargeObject   = isStaticLargeObject(sourceObject);
+        if ( ! Files.exists(targetParent, NOFOLLOW_LINKS) ) {
+            Files.createDirectories(targetParent);
+        }
+        
+        final List<Path> dynamicLargeObjects = listDynamicLargeObject(sourceContainer, sourceObject);
+        final boolean    dynamicLargeObject  = ! dynamicLargeObjects.isEmpty();
+        final boolean    staticLargeObject   = isStaticLargeObject(sourceObject);
 
-            if (sourceObject.equals(targetObject)) {
-                return targetObject;
-            } else if (dynamicLargeObject) {
-                Vector<InputStream> streams = new Vector<>();
-                for (Path next : dynamicLargeObjects) {
-                    InputStream is = Files.newInputStream(next, READ);
-                    streams.add(is);
-                }
-                try (SequenceInputStream sequenceInputStream = new SequenceInputStream(streams.elements())) {
-                    Files.copy(sequenceInputStream, targetObject, REPLACE_EXISTING);
-                    return targetObject;
-                }
-            } else if ( staticLargeObject && ! "get".equals(multipartManifest) ) {
-                List<Segment<Path>> segments = listStaticLargeObject(sourceAccount, sourceObject);
-                Vector<InputStream> streams = new Vector<>();
-                for (Segment<Path> next : segments) {
-                    InputStream is = Files.newInputStream(next.getObject(), READ);
-                    streams.add(is);
-                }
-                try (SequenceInputStream sequenceInputStream = new SequenceInputStream(streams.elements())) {
-                    Files.copy(sequenceInputStream, targetObject, REPLACE_EXISTING);
-                    return targetObject;
-                }
-            } else {
-                return Files.copy(sourceObject, targetObject, REPLACE_EXISTING);
+        if (sourceObject.equals(targetObject)) {
+            return targetObject;
+        } else if (dynamicLargeObject) {
+            Vector<InputStream> streams = new Vector<>();
+            for (Path next : dynamicLargeObjects) {
+                InputStream is = Files.newInputStream(next, READ);
+                streams.add(is);
             }
-        } catch (IOException e) {
-            throw new CormorantException("Unable to copy object.", e);
+            try (SequenceInputStream sequenceInputStream = new SequenceInputStream(streams.elements())) {
+                Files.copy(sequenceInputStream, targetObject, REPLACE_EXISTING);
+                return targetObject;
+            }
+        } else if ( staticLargeObject && ! "get".equals(multipartManifest) ) {
+            List<Segment<Path>> segments = listStaticLargeObject(sourceAccount, sourceObject);
+            Vector<InputStream> streams = new Vector<>();
+            for (Segment<Path> next : segments) {
+                InputStream is = Files.newInputStream(next.getObject(), READ);
+                streams.add(is);
+            }
+            try (SequenceInputStream sequenceInputStream = new SequenceInputStream(streams.elements())) {
+                Files.copy(sequenceInputStream, targetObject, REPLACE_EXISTING);
+                return targetObject;
+            }
+        } else {
+            return Files.copy(sourceObject, targetObject, REPLACE_EXISTING);
         }
     }
 
@@ -324,29 +280,21 @@ public class PathObjectService implements ObjectService<Path> {
     }
 
     @Override
-    public long getCreationTime(Path object) {
+    public long getCreationTime(Path object) throws IOException {
         BasicFileAttributeView attributeView = Files.getFileAttributeView(object, BasicFileAttributeView.class, NOFOLLOW_LINKS);
-        try {
-            BasicFileAttributes attributes = attributeView.readAttributes();
-            return attributes.creationTime().toMillis();
-        } catch (IOException e) {
-            throw new CormorantException(e);
-        }
+        BasicFileAttributes attributes = attributeView.readAttributes();
+        return attributes.creationTime().toMillis();
     }
 
     @Override
-    public List<Path> listDynamicLargeObject(Path container, Path object) {
+    public List<Path> listDynamicLargeObject(Path container, Path object) throws IOException {
         if (isStaticLargeObject(object)) {
             return emptyList();
         }
         if ( Files.isDirectory(object) ) {
             DyanmicLargeObjectVisitor visitor = new DyanmicLargeObjectVisitor(null);
-            try {
-                Files.walkFileTree(object, visitor);
-                return visitor.getFiles();
-            } catch (IOException e) {
-                throw new CormorantException(e);
-            }
+            Files.walkFileTree(object, visitor);
+            return visitor.getFiles();
         } else if (Files.isRegularFile(object, NOFOLLOW_LINKS)) {
             final String namespace = getNamespace(container, object);
             final String objectManifest = systemMetadataService.get(namespace, X_OBJECT_MANIFEST);
@@ -356,23 +304,19 @@ public class PathObjectService implements ObjectService<Path> {
             final int start = objectManifest.lastIndexOf(BACKWARD_SLASH);
             if (start >= 0) {
                 DyanmicLargeObjectVisitor visitor = new DyanmicLargeObjectVisitor(null);
-                try {
-                    final Path manifestContainer = containerService.getContainer(null,
-                                                        objectManifest.substring(0, objectManifest.indexOf(BACKWARD_SLASH)));
-                    Path manifestDir = manifestContainer.resolve(objectManifest.substring(objectManifest.indexOf(BACKWARD_SLASH) + 1, objectManifest.length()));
-                    if ( ! Files.isDirectory(manifestDir) ) {
-                        manifestDir = object.getParent();
-                        final String prefix = objectManifest.substring(start + 1, objectManifest.length());
-                        visitor = new DyanmicLargeObjectVisitor(prefix);
-                    }
-                    if ( Files.isDirectory(manifestDir)) {
-                        Files.walkFileTree(manifestDir, visitor);
-                        return visitor.getFiles();
-                    } else {
-                        return emptyList();
-                    }
-                } catch (IOException e) {
-                    throw new CormorantException(e);
+                final Path manifestContainer = containerService.getContainer(null,
+                                                    objectManifest.substring(0, objectManifest.indexOf(BACKWARD_SLASH)));
+                Path manifestDir = manifestContainer.resolve(objectManifest.substring(objectManifest.indexOf(BACKWARD_SLASH) + 1, objectManifest.length()));
+                if ( ! Files.isDirectory(manifestDir) ) {
+                    manifestDir = object.getParent();
+                    final String prefix = objectManifest.substring(start + 1, objectManifest.length());
+                    visitor = new DyanmicLargeObjectVisitor(prefix);
+                }
+                if ( Files.isDirectory(manifestDir)) {
+                    Files.walkFileTree(manifestDir, visitor);
+                    return visitor.getFiles();
+                } else {
+                    return emptyList();
                 }
             } else {
                 return emptyList();
@@ -383,7 +327,7 @@ public class PathObjectService implements ObjectService<Path> {
     }
 
     @SuppressWarnings("unchecked")
-    public List<Segment<Path>> listStaticLargeObject(final String accountName, final Path manifestObject) {
+    public List<Segment<Path>> listStaticLargeObject(final String accountName, final Path manifestObject) throws IOException {
         final List<Segment<Path>> segments = new ArrayList<>();
         try (final BufferedReader reader = new BufferedReader(newReader(getReadableChannel(manifestObject), UTF_8.name()))) {
             final StringBuilder builder = new StringBuilder();
@@ -411,14 +355,12 @@ public class PathObjectService implements ObjectService<Path> {
                     }
                 }
             }
-        } catch (IOException e) {
-            throw new CormorantException(e);
         }
         return segments;
     }
 
     @Override
-    public long getDyanmicObjectSize(Path container, Path object) {
+    public long getDyanmicObjectSize(Path container, Path object) throws IOException {
         long size = 0L;
         for (Path next : listDynamicLargeObject(container, object)) {
             size += getSize(next);

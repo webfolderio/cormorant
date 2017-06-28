@@ -75,7 +75,7 @@ public class PathAdapter implements ResourceAdapter<Path> {
     public String convert(
                     final Path          path,
                     final ContentFormat contentFormat,
-                    final Boolean       appendForwardSlash) {
+                    final Boolean       appendForwardSlash) throws IOException {
         final StringBuilder builder        = new StringBuilder();
         final String        location       = container.relativize(path).toString();
         final boolean       isdir          = isDirectory(path, NOFOLLOW_LINKS);

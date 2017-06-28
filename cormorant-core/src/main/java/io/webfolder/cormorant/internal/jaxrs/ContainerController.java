@@ -26,6 +26,7 @@ import static javax.ws.rs.core.Response.Status.CREATED;
 import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 import static javax.ws.rs.core.Response.Status.NO_CONTENT;
 
+import java.io.IOException;
 import java.util.Map;
 
 import javax.annotation.security.DeclareRoles;
@@ -92,7 +93,7 @@ public class ContainerController<T> {
      * Shows details for a container and lists objects, sorted by name, in the container.
      */
     @GET
-    public Response get(@BeanParam final ContainerGetRequest request) {
+    public Response get(@BeanParam final ContainerGetRequest request) throws IOException {
         boolean contains = false;
         if ( request.getAccount() != null            &&
              request.getContainer() != null          &&
@@ -162,7 +163,7 @@ public class ContainerController<T> {
      * To create, update, or delete a custom metadata item, use the X-Container-Meta-{name} header, where {name} is the name of the metadata item.
      */
     @POST
-    public Response post(@BeanParam final ContainerPostRequest request) {
+    public Response post(@BeanParam final ContainerPostRequest request) throws IOException {
         final String account = request.getAccount();
         final String container = request.getContainer();
         final boolean foundContainer = accountService.containsContainer(account, container);
@@ -179,7 +180,7 @@ public class ContainerController<T> {
      * @return 
      */
     @HEAD
-    public Response head(@BeanParam final ContainerHeadRequest request) {
+    public Response head(@BeanParam final ContainerHeadRequest request) throws IOException {
         final ContainerHeadResponse response = new ContainerHeadResponse();
         Container container = accountService.getContainer(request.getAccount(), request.getContainer());
         if ( container != null ) {
@@ -247,7 +248,7 @@ public class ContainerController<T> {
      * This operation fails unless the container is empty. An empty container has no objects.
      */
     @DELETE
-    public Response delete(@BeanParam final ContainerDeleteRequest request) {
+    public Response delete(@BeanParam final ContainerDeleteRequest request) throws IOException {
         boolean contains = containerService.contains(request.getAccount(), request.getContainer());
         if ( ! contains ) {
             throw new CormorantException("Container [" + request.getContainer() + "] does not exist.", NOT_FOUND);

@@ -42,9 +42,4 @@ public class Project {
     public String getDomainId() {
         return domainId;
     }
-
-    @Override
-    public String toString() {
-        return "Project [name=" + name + ", description=" + description + ", domainId=" + domainId + "]";
-    }
 }

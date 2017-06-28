@@ -17,6 +17,7 @@
  */
 package io.webfolder.cormorant.api.service;
 
+import java.io.IOException;
 import java.util.NavigableSet;
 
 import io.webfolder.cormorant.api.model.Account;
@@ -24,11 +25,11 @@ import io.webfolder.cormorant.api.model.Container;
 
 public interface AccountService {
 
-    NavigableSet<Container> listContainers(String accountName);
+    NavigableSet<Container> listContainers(String accountName) throws IOException;
 
-    Container getContainer(String accountName, String containerName);
+    Container getContainer(String accountName, String containerName) throws IOException;
 
-    boolean containsContainer(String account, String container);
+    boolean containsContainer(String account, String container) throws IOException;
 
-    Account getAccount(String accountName);
+    Account getAccount(String accountName) throws IOException;
 }

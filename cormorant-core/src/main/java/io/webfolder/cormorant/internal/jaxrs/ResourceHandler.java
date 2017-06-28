@@ -202,7 +202,7 @@ class ResourceHandler<T> {
                             final HttpServletRequest  request,
                             final HttpServletResponse response,
                             final Resource<T>         resource,
-                            final List<Range>         ranges) {
+                            final List<Range>         ranges) throws IOException {
 
         if ( resource.getContentDisposition() != null ) {
             response.setHeader("Content-Disposition", resource.getContentDisposition());

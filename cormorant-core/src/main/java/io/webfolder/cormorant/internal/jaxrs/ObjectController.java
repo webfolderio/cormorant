@@ -196,7 +196,7 @@ public class ObjectController<T> {
     @GET
     @Path("/{object: .*}")
     public Response get(
-                        @BeanParam final ObjectGetRequest request) {
+                        @BeanParam final ObjectGetRequest request) throws IOException {
 
         T container = containerService.getContainer(request.getAccount(), request.getContainer());
 
@@ -370,7 +370,7 @@ public class ObjectController<T> {
     @Path("/{object: .*}")
     public Response put(
                         @BeanParam final ObjectPutRequest request,
-                                   final InputStream      is) {
+                                   final InputStream      is) throws IOException {
 
         final String  transferEncoding = request.getTransferEncoding();
         final Long    contentLength    = request.getContentLength();
@@ -411,7 +411,7 @@ public class ObjectController<T> {
 
     @HEAD
     @Path("/{object: .*}")
-    public Response head(@BeanParam final ObjectHeadRequest request) {
+    public Response head(@BeanParam final ObjectHeadRequest request) throws IOException {
         T container = containerService.getContainer(request.getAccount(), request.getContainer());
         if (container == null) {
             return status(NOT_FOUND).build();
@@ -534,7 +534,7 @@ public class ObjectController<T> {
     @SuppressWarnings("unchecked")
     @DELETE
     @Path("/{object: .*}")
-    public Response delete(@BeanParam final ObjectDeleteRequest request) {
+    public Response delete(@BeanParam final ObjectDeleteRequest request) throws IOException {
         final T container = containerService.getContainer(request.getAccount(), request.getContainer());
         if (container == null) {
             return status(NO_CONTENT).build();
@@ -648,7 +648,7 @@ public class ObjectController<T> {
 
     @POST
     @Path("/{object: .*}")
-    public Response post(@BeanParam final ObjectPostRequest request) {
+    public Response post(@BeanParam final ObjectPostRequest request) throws IOException {
         final T object;
         // dynamic large object
         final T dynamicLargeObjectContainer;
@@ -724,7 +724,7 @@ public class ObjectController<T> {
 
     @COPY
     @Path("/{object: .*}")
-    public Response copy(@BeanParam ObjectCopyRequest request) {
+    public Response copy(@BeanParam ObjectCopyRequest request) throws IOException {
         final String targetAccount = request.getDestinationAccount() == null ||
                                             request.getDestinationAccount().trim().isEmpty() ?
                                             request.getAccount() : request.getDestinationAccount();
@@ -858,7 +858,7 @@ public class ObjectController<T> {
         return builder.build();
     }
 
-    protected void checkQuota(final Long contentLength, final String accountName, final String containerName) {
+    protected void checkQuota(final Long contentLength, final String accountName, final String containerName) throws IOException {
         final long      maxQuotaBytes = containerService.getMaxQuotaBytes(accountName, containerName);
         final long      maxQuotaCount = containerService.getMaxQuotaCount(accountName, containerName);
         final Container container     = accountService.getContainer(accountName, containerName);
@@ -940,7 +940,7 @@ public class ObjectController<T> {
     protected void upload(
                         final ObjectPutRequest  request,
                         final ObjectPutResponse response,
-                        final InputStream       is) {
+                        final InputStream       is) throws IOException {
 
         final T sourceContainer;
         final T sourceObject;
@@ -1157,7 +1157,7 @@ public class ObjectController<T> {
     protected void createDirectory(
                         final ObjectPutRequest  request,
                         final ObjectPutResponse response,
-                        final InputStream       is) {
+                        final InputStream       is) throws IOException {
         final T container      = containerService.getContainer(request.getAccount(), request.getContainer());
         final T object         = objectService.createDirectory(request.getAccount(), container, request.getObject());
         final String namespace = objectService.getNamespace(container, object);
@@ -1169,7 +1169,7 @@ public class ObjectController<T> {
     protected void uploadManifest(
                         final ObjectPutRequest  request,
                         final ObjectPutResponse response,
-                        final InputStream       is) {
+                        final InputStream       is) throws IOException {
         final Long contentLength = request.getContentLength();
         if (contentLength == null || contentLength > MAX_MANIFEST_SIZE) {
             throw new CormorantException("Content-Length must be <= 256KB for multipart manifest body.");

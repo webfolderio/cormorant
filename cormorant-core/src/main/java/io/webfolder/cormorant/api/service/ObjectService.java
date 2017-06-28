@@ -17,6 +17,7 @@
  */
 package io.webfolder.cormorant.api.service;
 
+import java.io.IOException;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
 import java.util.List;
@@ -25,35 +26,35 @@ import io.webfolder.cormorant.api.model.Segment;
 
 public interface ObjectService<T> {
 
-    WritableByteChannel getWritableChannel(T object);
+    WritableByteChannel getWritableChannel(T object) throws IOException;
 
-    ReadableByteChannel getReadableChannel(T object);
+    ReadableByteChannel getReadableChannel(T object) throws IOException;
 
-    T getObject(String accountName, String containerName, String objectPath);
+    T getObject(String accountName, String containerName, String objectPath) throws IOException;
 
-    T createTempObject(String accontName, T container);
+    T createTempObject(String accontName, T container) throws IOException;
 
-    void deleteTempObject(String accountName, T container, T tempObject);
+    void deleteTempObject(String accountName, T container, T tempObject) throws IOException;
 
-    T moveTempObject(String accountName, T tempObject, T targetContainer, String targetObjectPath);
+    T moveTempObject(String accountName, T tempObject, T targetContainer, String targetObjectPath) throws IOException;
 
-    long getSize(T object);
+    long getSize(T object) throws IOException;
 
-    void delete(T container, T object);
+    void delete(T container, T object) throws IOException;
 
-    String relativize(T container, T object);
+    String relativize(T container, T object) throws IOException;
 
-    String getNamespace(T container, T object);
+    String getNamespace(T container, T object) throws IOException;
 
-    long getLastModified(T object);
+    long getLastModified(T object) throws IOException;
 
-    T createDirectory(String accountName, T container, String objectPath);
+    T createDirectory(String accountName, T container, String objectPath) throws IOException;
 
-    boolean isDirectory(T container, T object);
+    boolean isDirectory(T container, T object) throws IOException;
 
-    T getDirectory(T container, String directoryPath);
+    T getDirectory(T container, String directoryPath) throws IOException;
 
-    boolean isEmptyDirectory(T container, T object);
+    boolean isEmptyDirectory(T container, T object) throws IOException;
 
     T copyObject(String destinationAccount,
                  T      destinationContainer,
@@ -61,21 +62,21 @@ public interface ObjectService<T> {
                  String sourceAccount,
                  T      sourceContainer,
                  T      sourceObject,
-                 String multipartManifest);
+                 String multipartManifest) throws IOException;
 
-    boolean isValidPath(T container, String objectPath);
+    boolean isValidPath(T container, String objectPath) throws IOException;
 
-    boolean isStaticLargeObject(T object);
+    boolean isStaticLargeObject(T object) throws IOException;
 
-    long getCreationTime(T object);
+    long getCreationTime(T object) throws IOException;
 
-    List<T> listDynamicLargeObject(T container, T object);
+    List<T> listDynamicLargeObject(T container, T object) throws IOException;
 
-    List<Segment<T>> listStaticLargeObject(final String accountName, final T manifestObject);
+    List<Segment<T>> listStaticLargeObject(final String accountName, final T manifestObject) throws IOException;
 
-    long getDyanmicObjectSize(T container, T object);
+    long getDyanmicObjectSize(T container, T object) throws IOException;
 
-    String toPath(T container, T object);
+    String toPath(T container, T object) throws IOException;
 
-    boolean exist(T container, T object);
+    boolean exist(T container, T object) throws IOException;
 }

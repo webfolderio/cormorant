@@ -17,6 +17,7 @@
  */
 package io.webfolder.cormorant.api.resource;
 
+import java.io.IOException;
 import java.util.Iterator;
 
 public abstract class AbstractResourceStream<T> implements ResourceStream<T> {
@@ -38,7 +39,7 @@ public abstract class AbstractResourceStream<T> implements ResourceStream<T> {
     }
 
     @Override
-    public String convert(final T o, final ContentFormat contentFormat, final Boolean appendForwardSlash) {
+    public String convert(final T o, final ContentFormat contentFormat, final Boolean appendForwardSlash) throws IOException {
         return resourceAdapter.convert(o, contentFormat, appendForwardSlash);
     }
 }

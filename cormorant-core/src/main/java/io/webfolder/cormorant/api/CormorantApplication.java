@@ -75,7 +75,7 @@ public class CormorantApplication extends Application {
 
     private final String                 accountName;
 
-    private MetadataStorage              metadataStorage = MetadataStorage.SQLite;
+    private MetadataStorage              metadataStorage;
 
     public CormorantApplication(
                 final Path objectStore,
@@ -94,6 +94,7 @@ public class CormorantApplication extends Application {
         this.port                   = port;
         this.contextPath            = contextPath;
         this.accountName            = accountName;
+        setMetadataStorage(MetadataStorage.SQLite);
     }
 
     @Override

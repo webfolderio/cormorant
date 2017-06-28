@@ -32,7 +32,6 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 
-import io.webfolder.cormorant.api.exception.CormorantException;
 import io.webfolder.cormorant.api.model.Account;
 import io.webfolder.cormorant.api.model.Container;
 import io.webfolder.cormorant.api.service.AccountService;
@@ -48,7 +47,7 @@ public abstract class PathAccountService implements AccountService {
     private Map<String, Container> containers = new ConcurrentHashMap<>();
 
     @Override
-    public NavigableSet<Container> listContainers(final String accountName) {
+    public NavigableSet<Container> listContainers(final String accountName) throws IOException {
         final TreeSet<Container> containers = new TreeSet<>();
         for (final String next : getContainers(accountName)) {
             final Container container = get(accountName, next);
@@ -59,7 +58,7 @@ public abstract class PathAccountService implements AccountService {
 
     public Container getContainer(
                             final String accountName,
-                            final String containerName) {
+                            final String containerName) throws IOException {
         if (containsContainer(accountName, containerName)) {
             final Container container = containers.get(containerName);
             if ( container != null ) {
@@ -78,7 +77,7 @@ public abstract class PathAccountService implements AccountService {
     }
 
     @Override
-    public Account getAccount(final String accountName) {
+    public Account getAccount(final String accountName) throws IOException {
         final SortedSet<Container> containers = listContainers(accountName);
         final Account account  = new Account();
         long  objectCounter    = 0L;
@@ -101,36 +100,28 @@ public abstract class PathAccountService implements AccountService {
 
     protected Long getContainerTimestamp(
                         final String accountName,
-                        final String containerName) {
+                        final String containerName) throws IOException {
         final Path path = getContainerPath(accountName, containerName);
-        try {
-            final BasicFileAttributes attribute = (BasicFileAttributes) readAttributes(path,
-                                                                                BasicFileAttributes.class,
-                                                                                NOFOLLOW_LINKS);
-            return attribute.creationTime().toMillis();
-        } catch (IOException e) {
-            throw new CormorantException(e);
-        }
+        final BasicFileAttributes attribute = (BasicFileAttributes) readAttributes(path,
+                                                                            BasicFileAttributes.class,
+                                                                            NOFOLLOW_LINKS);
+        return attribute.creationTime().toMillis();
     }
 
     protected Long getContainerLastModified(
                         final String accountName,
-                        final String containerName) {
+                        final String containerName) throws IOException {
         final Path path = getContainerPath(accountName, containerName);
         if (path == null) {
             return null;
         }
-        try {
-            final BasicFileAttributes attribute = (BasicFileAttributes) readAttributes(path,
-                                                                                BasicFileAttributes.class,
-                                                                                NOFOLLOW_LINKS);
-            return attribute.lastModifiedTime().toMillis();
-        } catch (IOException e) {
-            throw new CormorantException(e);
-        }
+        final BasicFileAttributes attribute = (BasicFileAttributes) readAttributes(path,
+                                                                            BasicFileAttributes.class,
+                                                                            NOFOLLOW_LINKS);
+        return attribute.lastModifiedTime().toMillis();
     }
 
-    protected Container get(final String accountName, final String containerName) {
+    protected Container get(final String accountName, final String containerName) throws IOException {
         final Path path = getContainerPath(accountName, containerName);
         if ( ! exists(path, NOFOLLOW_LINKS) ) {
             return null;
@@ -138,11 +129,7 @@ public abstract class PathAccountService implements AccountService {
         final Long            timestamp    = getContainerTimestamp(accountName, containerName);
         final Long            lastModified = getContainerLastModified(accountName, containerName);
         final FileSizeVisitor counter      = new FileSizeVisitor();
-        try {
-            walkFileTree(path, counter);
-        } catch (IOException e) {
-            throw new CormorantException(e);
-        }
+        walkFileTree(path, counter);
         final Container container = new Container(containerName,
                                             timestamp,
                                             lastModified,

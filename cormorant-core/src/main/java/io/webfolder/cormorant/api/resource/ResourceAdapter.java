@@ -17,7 +17,9 @@
  */
 package io.webfolder.cormorant.api.resource;
 
+import java.io.IOException;
+
 public interface ResourceAdapter<T> {
 
-    String convert(T o, ContentFormat contentFormat, Boolean appendForwardSlash);
+    String convert(T o, ContentFormat contentFormat, Boolean appendForwardSlash) throws IOException;
 }

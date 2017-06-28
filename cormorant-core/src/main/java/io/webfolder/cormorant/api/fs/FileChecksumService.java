@@ -91,7 +91,7 @@ public class FileChecksumService implements ChecksumService<Path> {
     public String getMimeType(
                         final Path    container,
                         final Path    object,
-                        final boolean autoDetect) {
+                        final boolean autoDetect) throws IOException {
         final boolean isDir = Files.isDirectory(object);
         if (isDir) {
             return DIRECTORY;
@@ -115,7 +115,7 @@ public class FileChecksumService implements ChecksumService<Path> {
     @Override
     public String calculateChecksum(
                         final Path container,
-                        final Path object) {
+                        final Path object) throws IOException {
         final String  namespace         = objectService.getNamespace(container, object);
         final String  precalculatedETag = headerService.get(namespace, ETAG);
         final String  contentLength     = headerService.get(namespace, CONTENT_LENGTH);

@@ -17,15 +17,16 @@
  */
 package io.webfolder.cormorant.api.service;
 
+import java.io.IOException;
 import java.util.List;
 
 public interface ChecksumService<T> {
 
     String calculateChecksum(T object);
 
-    String calculateChecksum(T container, T object);
+    String calculateChecksum(T container, T object) throws IOException;
 
-    String getMimeType(T container, T object, boolean autoDetect);
+    String getMimeType(T container, T object, boolean autoDetect) throws IOException;
 
     String calculateChecksum(List<T> objects);
 }
