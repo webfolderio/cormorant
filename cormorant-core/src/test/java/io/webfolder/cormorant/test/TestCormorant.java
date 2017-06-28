@@ -43,6 +43,7 @@ import org.jclouds.http.HttpResponseException;
 import org.jclouds.http.options.GetOptions;
 import org.jclouds.io.Payload;
 import org.jclouds.io.Payloads;
+import org.jclouds.openstack.swift.v1.domain.Account;
 import org.jclouds.openstack.swift.v1.domain.Container;
 import org.jclouds.openstack.swift.v1.domain.SwiftObject;
 import org.jclouds.openstack.swift.v1.features.ObjectApi;
@@ -69,7 +70,70 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 @FixMethodOrder(NAME_ASCENDING)
-public class TestContainer extends TestSwift {
+public class TestCormorant extends TestBase {
+
+    @Test
+    public void t001Account() {
+        Account account = accountApi.get();
+
+        assertEquals(0L, account.getContainerCount());
+        assertEquals(0L, account.getObjectCount());
+        assertEquals(0L, account.getBytesUsed());
+
+        containerApi.create("container1");
+
+        account = accountApi.get();
+
+        assertEquals(1L, account.getContainerCount());
+        assertEquals(0L, account.getObjectCount());
+        assertEquals(0L, account.getBytesUsed());
+    }
+
+    @Test
+    public void t002Metadata() {
+        Map<String, String> metadata = accountApi.get().getMetadata();
+        assertTrue(metadata.isEmpty());
+
+        metadata = new HashMap<>();
+        metadata.put("xyz", "klm");
+        accountApi.updateMetadata(metadata);
+
+        metadata = accountApi.get().getMetadata();
+
+        assertFalse(metadata.isEmpty());
+
+        metadata = new HashMap<>();
+        metadata.put("abc", "123");
+
+        accountApi.updateMetadata(metadata);
+
+        metadata = accountApi.get().getMetadata();
+
+        assertEquals(2, metadata.size());
+        assertEquals("klm", metadata.get("xyz"));
+        assertEquals("123", metadata.get("abc"));
+
+        accountApi.deleteMetadata(metadata);
+
+        metadata = accountApi.get().getMetadata();
+        assertTrue(metadata.isEmpty());
+    }
+
+    @Test
+    public void t003TestXmlResponse() throws IOException {
+        Response response = client.newCall(new Request.Builder().url(getUrl() + "/v1/myaccount?format=xml").build()).execute();
+        String content = response.body().string();
+        assertTrue(content.contains("<account name=\"myaccount\"><container><name>container1</name><count>0</count><bytes>0</bytes></container></account>"));
+        assertEquals("application/xml; charset=utf-8", response.header("Content-Type"));
+    }
+
+    @Test
+    public void t004TestJossAccount() {
+        Collection<org.javaswift.joss.model.Container> containers = jossAccount.list();
+        assertFalse(containers.isEmpty());
+        assertEquals(1, containers.size());
+        assertEquals("container1", containers.iterator().next().getName());
+    }
 
     @Test
     public void t01CreateContainer() {

@@ -65,7 +65,7 @@ import okhttp3.Request;
 import okhttp3.Request.Builder;
 import okhttp3.Response;
 
-public class TestSwift {
+public class TestBase {
 
     protected static SwiftApi swiftApi;
 
@@ -109,7 +109,9 @@ public class TestSwift {
         Map<String, User> users = new HashMap<>();
 
         try {
-            Files.delete(Paths.get("cormorant.db"));
+            if (Files.exists(Paths.get("cormorant.db"))) {
+                Files.delete(Paths.get("cormorant.db"));
+            }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
