@@ -15,11 +15,9 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package io.webfolder.cormorant.api.cache;
+package io.webfolder.cormorant.api.metadata;
 
-import java.util.Map;
-
-public interface CacheFactory {
+public interface CacheNames {
 
     String ACCOUNT   = "metadata/account"     ;
 
@@ -30,6 +28,4 @@ public interface CacheFactory {
     String TOKENS    = "authentication/tokens";
 
     String USERS     = "authentication/users" ;
-
-    <K, V> Map<K, V> create(String name);
 }

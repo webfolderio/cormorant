@@ -17,9 +17,9 @@
  */
 package io.webfolder.cormorant.api.metadata;
 
-import static io.webfolder.cormorant.api.cache.CacheFactory.ACCOUNT;
-import static io.webfolder.cormorant.api.cache.CacheFactory.CONTAINER;
-import static io.webfolder.cormorant.api.cache.CacheFactory.OBJECT;
+import static io.webfolder.cormorant.api.metadata.CacheNames.ACCOUNT;
+import static io.webfolder.cormorant.api.metadata.CacheNames.CONTAINER;
+import static io.webfolder.cormorant.api.metadata.CacheNames.OBJECT;
 import static io.webfolder.cormorant.api.metadata.MetadataStorage.SQLite;
 import static java.nio.file.Files.createDirectories;
 import static java.nio.file.Files.exists;

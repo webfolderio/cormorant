@@ -17,26 +17,21 @@
  */
 package io.webfolder.cormorant.api;
 
-import static io.webfolder.cormorant.api.cache.CacheFactory.ACCOUNT;
-import static io.webfolder.cormorant.api.cache.CacheFactory.CONTAINER;
-import static io.webfolder.cormorant.api.cache.CacheFactory.OBJECT;
-import static io.webfolder.cormorant.api.cache.CacheFactory.TOKENS;
+import static io.webfolder.cormorant.api.metadata.CacheNames.ACCOUNT;
+import static io.webfolder.cormorant.api.metadata.CacheNames.CONTAINER;
+import static io.webfolder.cormorant.api.metadata.CacheNames.OBJECT;
 import static io.webfolder.cormorant.api.metadata.MetadataServiceFactory.METADATA;
 import static io.webfolder.cormorant.api.metadata.MetadataServiceFactory.SYSTEM_METADATA;
-import static java.util.ServiceLoader.load;
 
 import java.nio.file.Path;
 import java.security.Principal;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
-import java.util.ServiceLoader;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.ws.rs.core.Application;
 
-import io.webfolder.cormorant.api.cache.CacheFactory;
-import io.webfolder.cormorant.api.cache.DefaultCacheFactory;
 import io.webfolder.cormorant.api.fs.FileChecksumService;
 import io.webfolder.cormorant.api.fs.PathContainerService;
 import io.webfolder.cormorant.api.fs.PathObjectService;
@@ -115,13 +110,7 @@ public class CormorantApplication extends Application {
         containerService.setObjectService(objectService);
         checksumService.setObjectService(objectService);
 
-        final ServiceLoader<CacheFactory> cacheLoader   = load(CacheFactory.class, getClass().getClassLoader());
-        final Iterator<CacheFactory>      cacheIterator = cacheLoader.iterator();
-        final CacheFactory                cacheFactory  = cacheIterator.hasNext()        ?
-                                                                cacheIterator.next()     :
-                                                                new DefaultCacheFactory();
-
-        final Map<String, Principal> tokens = cacheFactory.create(TOKENS);
+        final Map<String, Principal> tokens = new ConcurrentHashMap<>();
 
         singletons.add(new HealthCheckController());
 
