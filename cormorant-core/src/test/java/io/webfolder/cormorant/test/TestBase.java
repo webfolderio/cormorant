@@ -109,14 +109,6 @@ public class TestBase {
 
         Map<String, User> users = new HashMap<>();
 
-        try {
-            if (Files.exists(Paths.get("cormorant.db"))) {
-                Files.delete(Paths.get("cormorant.db"));
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
         User user = new User("myaccount",
                              "mypassword",
                              "test@example.com",
@@ -128,22 +120,21 @@ public class TestBase {
         AccountService accountService = new TestAccountService(objectStore);
         AuthenticationService authenticationService = new DefaultAuthenticationService(users);
 
-        CormorantApplication application = new CormorantApplication(objectStore,
-                                                    metadataStore,
-                                                    accountService,
-                                                    authenticationService,
-                                                    server.getHost(),
-                                                    server.getPort(),
-                                                    "",
-                                                    "myaccount");
-
-        application.setMetadataStorage(MetadataStorage.File);
-
-        server.deploy(application);
-
         boolean startServer = "true".equals(System.getProperty("start.server", "true"));
 
         if (startServer) {
+            CormorantApplication application = new CormorantApplication(objectStore,
+                                                        metadataStore,
+                                                        accountService,
+                                                        authenticationService,
+                                                        server.getHost(),
+                                                        server.getPort(),
+                                                        "",
+                                                        "myaccount");
+
+            application.setMetadataStorage(MetadataStorage.File);
+            server.deploy(application);
+
             server.start((root) -> { return Handlers.requestDump(root); });
         }
 

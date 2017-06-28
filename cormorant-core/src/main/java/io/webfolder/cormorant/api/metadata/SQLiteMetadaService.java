@@ -13,6 +13,9 @@ import java.util.Map.Entry;
 
 import javax.sql.DataSource;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.webfolder.cormorant.api.exception.CormorantException;
 import io.webfolder.cormorant.api.service.MetadataService;
 
@@ -23,6 +26,8 @@ public class SQLiteMetadaService implements MetadataService {
     private final String     schema;
 
     private final String     table;
+
+    private static final Logger LOG = LoggerFactory.getLogger(SQLiteMetadaService.class);
 
     public SQLiteMetadaService(
                 final DataSource ds,
@@ -38,6 +43,7 @@ public class SQLiteMetadaService implements MetadataService {
                     final String ddl = "create table " +
                                     table + " (NAMESPACE VARCHAR(1024), KEY VARCHAR(1024), VALUE VARCHAR(4096))";
                     stmt.execute(ddl);
+                    LOG.info("SQLite table [{}] created.", new Object[] { table });
                 }
             }
         } catch (SQLException e) {
