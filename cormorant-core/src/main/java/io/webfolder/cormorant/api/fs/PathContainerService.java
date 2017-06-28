@@ -30,6 +30,7 @@ import static java.util.Collections.emptySet;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.sql.SQLException;
 
 import io.webfolder.cormorant.api.exception.CormorantException;
 import io.webfolder.cormorant.api.model.ListContainerOptions;
@@ -148,7 +149,7 @@ public class PathContainerService implements ContainerService<Path> {
     }
 
     @Override
-    public boolean delete(final String accountName, final String containerName) {
+    public boolean delete(final String accountName, final String containerName) throws SQLException {
         final Path path = getContainer(accountName, containerName);
         if ( path != null &&
                 exists(path, NOFOLLOW_LINKS) &&
@@ -183,7 +184,7 @@ public class PathContainerService implements ContainerService<Path> {
     }
 
     @Override
-    public long getMaxQuotaBytes(String accountName, String containerName) {
+    public long getMaxQuotaBytes(String accountName, String containerName) throws SQLException {
         final String value = metadataService.get(containerName, "quota-bytes");
         if (value == null) {
             return Long.MAX_VALUE;
@@ -193,7 +194,7 @@ public class PathContainerService implements ContainerService<Path> {
     }
 
     @Override
-    public long getMaxQuotaCount(String accountName, String containerName) {
+    public long getMaxQuotaCount(String accountName, String containerName) throws SQLException {
         final String value = metadataService.get(containerName, "quota-count");
         if (value == null) {
             return Long.MAX_VALUE;

@@ -18,8 +18,9 @@
 package io.webfolder.cormorant.api.resource;
 
 import java.io.IOException;
+import java.sql.SQLException;
 
 public interface ResourceAdapter<T> {
 
-    String convert(T o, ContentFormat contentFormat, Boolean appendForwardSlash) throws IOException;
+    String convert(T o, ContentFormat contentFormat, Boolean appendForwardSlash) throws IOException, SQLException;
 }

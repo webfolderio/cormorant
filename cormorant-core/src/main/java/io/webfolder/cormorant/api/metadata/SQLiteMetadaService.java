@@ -52,7 +52,7 @@ public class SQLiteMetadaService implements MetadataService {
     }
 
     @Override
-    public String get(final String namespace, final String key) {
+    public String get(final String namespace, final String key) throws SQLException {
         final String sql = "select VALUE from " + getSchemaKeyword() + table + " where NAMESPACE = ? and KEY = ?";
         try (Connection conn = ds.getConnection();
                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -65,13 +65,11 @@ public class SQLiteMetadaService implements MetadataService {
                     return null;
                 }
             }
-        } catch (SQLException e) {
-            throw new CormorantException(e);
         }
     }
 
     @Override
-    public boolean contains(final String namespace, final String key) {
+    public boolean contains(final String namespace, final String key) throws SQLException {
         final String sql = "select KEY from " + getSchemaKeyword() + table + " where NAMESPACE = ? and KEY = ?";
         try (Connection conn = ds.getConnection();
                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -80,13 +78,11 @@ public class SQLiteMetadaService implements MetadataService {
             try (ResultSet rs = pstmt.executeQuery()) {
                 return rs.next();
             }
-        } catch (SQLException e) {
-            throw new CormorantException(e);
         }
     }
 
     @Override
-    public void update(final String namespace, final String key, final String value) {
+    public void update(final String namespace, final String key, final String value) throws SQLException {
         final String sql = "update " + getSchemaKeyword() + table + " set VALUE = ? where NAMESPACE = ? and KEY = ?";
         try (Connection conn = ds.getConnection();
                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -94,13 +90,11 @@ public class SQLiteMetadaService implements MetadataService {
             pstmt.setString(2, namespace);
             pstmt.setString(3, key);
             pstmt.executeUpdate();
-        } catch (SQLException e) {
-            throw new CormorantException(e);
         }
     }
 
     @Override
-    public void add(final String namespace, final String key, final String value) {
+    public void add(final String namespace, final String key, final String value) throws SQLException {
         final String sql = "insert into " + getSchemaKeyword() + table + " (NAMESPACE, KEY, VALUE) VALUES (?, ?, ?)";
         try (Connection conn = ds.getConnection();
                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -108,13 +102,11 @@ public class SQLiteMetadaService implements MetadataService {
             pstmt.setString(2, key);
             pstmt.setObject(3, value);
             pstmt.executeUpdate();
-        } catch (SQLException e) {
-            throw new CormorantException(e);
         }
     }
 
     @Override
-    public Map<String, Object> getValues(final String namespace) {
+    public Map<String, Object> getValues(final String namespace) throws SQLException {
         final Map<String, Object> values = new HashMap<>();
         final String sql = "select KEY, VALUE from " + getSchemaKeyword() + table + " where NAMESPACE = ?";
         try (Connection conn = ds.getConnection();
@@ -127,14 +119,12 @@ public class SQLiteMetadaService implements MetadataService {
                     values.put(key, value);
                 }
             }
-        } catch (SQLException e) {
-            throw new CormorantException(e);
         }
         return values;
     }
 
     @Override
-    public void setValues(final String namespace, final Map<String, Object> values) {
+    public void setValues(final String namespace, final Map<String, Object> values) throws SQLException {
         for (Entry<String, Object> next : values.entrySet()) {
             final String key   = next.getKey();
             final Object value = next.getValue();
@@ -147,27 +137,23 @@ public class SQLiteMetadaService implements MetadataService {
     }
 
     @Override
-    public void delete(final String namespace, final String key) {
+    public void delete(final String namespace, final String key) throws SQLException {
         final String sql = "delete from " + getSchemaKeyword() + table + " where NAMESPACE = ? and KEY = ?";
         try (Connection conn = ds.getConnection();
                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, namespace);
             pstmt.setString(2, key);
             pstmt.executeUpdate();
-        } catch (SQLException e) {
-            throw new CormorantException(e);
         }
     }
 
     @Override
-    public void delete(final String namespace) {
+    public void delete(final String namespace) throws SQLException {
         final String sql = "delete from " + getSchemaKeyword() + table + " where NAMESPACE = ?";
         try (Connection conn = ds.getConnection();
                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, namespace);
             pstmt.executeUpdate();
-        } catch (SQLException e) {
-            throw new CormorantException(e);
         }
     }
 

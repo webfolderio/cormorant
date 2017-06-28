@@ -17,6 +17,8 @@
  */
 package io.webfolder.cormorant.api.service;
 
+import java.sql.SQLException;
+
 import io.webfolder.cormorant.api.model.ListContainerOptions;
 import io.webfolder.cormorant.api.resource.ResourceStream;
 
@@ -32,11 +34,11 @@ public interface ContainerService<T> {
 
     void create(String accountName, String containerName);
 
-    boolean delete(String accountName, String containerName);
+    boolean delete(String accountName, String containerName) throws SQLException;
 
-    long getMaxQuotaBytes(String accountName, String containerName);
+    long getMaxQuotaBytes(String accountName, String containerName) throws SQLException;
 
-    long getMaxQuotaCount(String accountName, String containerName);
+    long getMaxQuotaCount(String accountName, String containerName) throws SQLException;
 
     void setObjectService(ObjectService<T> objectService);
 }

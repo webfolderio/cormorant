@@ -49,6 +49,7 @@ import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributeView;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -225,7 +226,7 @@ public class PathObjectService implements ObjectService<Path> {
                            final String sourceAccount        ,
                            final Path   sourceContainer      ,
                            final Path   sourceObject         ,
-                           final String multipartManifest) throws IOException {
+                           final String multipartManifest) throws IOException, SQLException {
         final Path targetObject = destinationContainer.resolve(destinationObjectPath);
         final Path targetParent = targetObject.getParent();
         if ( ! Files.exists(targetParent, NOFOLLOW_LINKS) ) {
@@ -287,7 +288,7 @@ public class PathObjectService implements ObjectService<Path> {
     }
 
     @Override
-    public List<Path> listDynamicLargeObject(Path container, Path object) throws IOException {
+    public List<Path> listDynamicLargeObject(Path container, Path object) throws IOException, SQLException {
         if (isStaticLargeObject(object)) {
             return emptyList();
         }
@@ -327,7 +328,7 @@ public class PathObjectService implements ObjectService<Path> {
     }
 
     @SuppressWarnings("unchecked")
-    public List<Segment<Path>> listStaticLargeObject(final String accountName, final Path manifestObject) throws IOException {
+    public List<Segment<Path>> listStaticLargeObject(final String accountName, final Path manifestObject) throws IOException, SQLException {
         final List<Segment<Path>> segments = new ArrayList<>();
         try (final BufferedReader reader = new BufferedReader(newReader(getReadableChannel(manifestObject), UTF_8.name()))) {
             final StringBuilder builder = new StringBuilder();
@@ -360,7 +361,7 @@ public class PathObjectService implements ObjectService<Path> {
     }
 
     @Override
-    public long getDyanmicObjectSize(Path container, Path object) throws IOException {
+    public long getDyanmicObjectSize(Path container, Path object) throws IOException, SQLException {
         long size = 0L;
         for (Path next : listDynamicLargeObject(container, object)) {
             size += getSize(next);

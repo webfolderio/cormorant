@@ -59,6 +59,7 @@ import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
+import java.sql.SQLException;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -196,7 +197,7 @@ public class ObjectController<T> {
     @GET
     @Path("/{object: .*}")
     public Response get(
-                        @BeanParam final ObjectGetRequest request) throws IOException {
+                        @BeanParam final ObjectGetRequest request) throws IOException, SQLException {
 
         T container = containerService.getContainer(request.getAccount(), request.getContainer());
 
@@ -370,7 +371,7 @@ public class ObjectController<T> {
     @Path("/{object: .*}")
     public Response put(
                         @BeanParam final ObjectPutRequest request,
-                                   final InputStream      is) throws IOException {
+                                   final InputStream      is) throws IOException, SQLException {
 
         final String  transferEncoding = request.getTransferEncoding();
         final Long    contentLength    = request.getContentLength();
@@ -411,7 +412,7 @@ public class ObjectController<T> {
 
     @HEAD
     @Path("/{object: .*}")
-    public Response head(@BeanParam final ObjectHeadRequest request) throws IOException {
+    public Response head(@BeanParam final ObjectHeadRequest request) throws IOException, SQLException {
         T container = containerService.getContainer(request.getAccount(), request.getContainer());
         if (container == null) {
             return status(NOT_FOUND).build();
@@ -534,7 +535,7 @@ public class ObjectController<T> {
     @SuppressWarnings("unchecked")
     @DELETE
     @Path("/{object: .*}")
-    public Response delete(@BeanParam final ObjectDeleteRequest request) throws IOException {
+    public Response delete(@BeanParam final ObjectDeleteRequest request) throws IOException, SQLException {
         final T container = containerService.getContainer(request.getAccount(), request.getContainer());
         if (container == null) {
             return status(NO_CONTENT).build();
@@ -648,7 +649,7 @@ public class ObjectController<T> {
 
     @POST
     @Path("/{object: .*}")
-    public Response post(@BeanParam final ObjectPostRequest request) throws IOException {
+    public Response post(@BeanParam final ObjectPostRequest request) throws IOException, SQLException {
         final T object;
         // dynamic large object
         final T dynamicLargeObjectContainer;
@@ -724,7 +725,7 @@ public class ObjectController<T> {
 
     @COPY
     @Path("/{object: .*}")
-    public Response copy(@BeanParam ObjectCopyRequest request) throws IOException {
+    public Response copy(@BeanParam ObjectCopyRequest request) throws IOException, SQLException {
         final String targetAccount = request.getDestinationAccount() == null ||
                                             request.getDestinationAccount().trim().isEmpty() ?
                                             request.getAccount() : request.getDestinationAccount();
@@ -858,7 +859,7 @@ public class ObjectController<T> {
         return builder.build();
     }
 
-    protected void checkQuota(final Long contentLength, final String accountName, final String containerName) throws IOException {
+    protected void checkQuota(final Long contentLength, final String accountName, final String containerName) throws IOException, SQLException {
         final long      maxQuotaBytes = containerService.getMaxQuotaBytes(accountName, containerName);
         final long      maxQuotaCount = containerService.getMaxQuotaCount(accountName, containerName);
         final Container container     = accountService.getContainer(accountName, containerName);
@@ -878,7 +879,7 @@ public class ObjectController<T> {
         }
     }
 
-    protected void putSystemMetadata(final String namespace, final ResponseBuilder builder) {
+    protected void putSystemMetadata(final String namespace, final ResponseBuilder builder) throws SQLException {
         if ( systemMetadataService.get(namespace, CONTENT_TYPE) != null ) {
             response.setContentType(systemMetadataService.get(namespace, CONTENT_TYPE));
         }
@@ -899,7 +900,7 @@ public class ObjectController<T> {
         }
     }
 
-    protected void updateMetadata(String namespace) {
+    protected void updateMetadata(String namespace) throws SQLException {
         final MultivaluedMap<String, String> headers = httpHeaders.getRequestHeaders();
         for (String key : headers.keySet()) {
             // Metadata keys (the name of the metadata) must be treated as case-insensitive at all times.
@@ -940,7 +941,7 @@ public class ObjectController<T> {
     protected void upload(
                         final ObjectPutRequest  request,
                         final ObjectPutResponse response,
-                        final InputStream       is) throws IOException {
+                        final InputStream       is) throws IOException, SQLException {
 
         final T sourceContainer;
         final T sourceObject;
@@ -1157,7 +1158,7 @@ public class ObjectController<T> {
     protected void createDirectory(
                         final ObjectPutRequest  request,
                         final ObjectPutResponse response,
-                        final InputStream       is) throws IOException {
+                        final InputStream       is) throws IOException, SQLException {
         final T container      = containerService.getContainer(request.getAccount(), request.getContainer());
         final T object         = objectService.createDirectory(request.getAccount(), container, request.getObject());
         final String namespace = objectService.getNamespace(container, object);
@@ -1169,7 +1170,7 @@ public class ObjectController<T> {
     protected void uploadManifest(
                         final ObjectPutRequest  request,
                         final ObjectPutResponse response,
-                        final InputStream       is) throws IOException {
+                        final InputStream       is) throws IOException, SQLException {
         final Long contentLength = request.getContentLength();
         if (contentLength == null || contentLength > MAX_MANIFEST_SIZE) {
             throw new CormorantException("Content-Length must be <= 256KB for multipart manifest body.");

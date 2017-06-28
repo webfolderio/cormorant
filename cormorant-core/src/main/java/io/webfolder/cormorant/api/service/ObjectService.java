@@ -20,6 +20,7 @@ package io.webfolder.cormorant.api.service;
 import java.io.IOException;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
+import java.sql.SQLException;
 import java.util.List;
 
 import io.webfolder.cormorant.api.model.Segment;
@@ -62,7 +63,7 @@ public interface ObjectService<T> {
                  String sourceAccount,
                  T      sourceContainer,
                  T      sourceObject,
-                 String multipartManifest) throws IOException;
+                 String multipartManifest) throws IOException, SQLException;
 
     boolean isValidPath(T container, String objectPath) throws IOException;
 
@@ -70,11 +71,11 @@ public interface ObjectService<T> {
 
     long getCreationTime(T object) throws IOException;
 
-    List<T> listDynamicLargeObject(T container, T object) throws IOException;
+    List<T> listDynamicLargeObject(T container, T object) throws IOException, SQLException;
 
-    List<Segment<T>> listStaticLargeObject(final String accountName, final T manifestObject) throws IOException;
+    List<Segment<T>> listStaticLargeObject(final String accountName, final T manifestObject) throws IOException, SQLException;
 
-    long getDyanmicObjectSize(T container, T object) throws IOException;
+    long getDyanmicObjectSize(T container, T object) throws IOException, SQLException;
 
     String toPath(T container, T object) throws IOException;
 

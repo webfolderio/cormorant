@@ -26,6 +26,7 @@ import static javax.ws.rs.core.Response.status;
 import static javax.ws.rs.core.Response.Status.NO_CONTENT;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.Map;
 import java.util.NavigableSet;
 import java.util.TreeSet;
@@ -150,7 +151,7 @@ public class AccountController {
      * <li>Total number of bytes that are stored in Object Storage for the account</li>
      */
     @HEAD
-    public Response head(@BeanParam final AccountHeadRequest request) throws IOException {
+    public Response head(@BeanParam final AccountHeadRequest request) throws IOException, SQLException {
         final AccountHeadResponse response = new AccountHeadResponse();
         response.setContentType(TEXT_PLAIN);
         response.setAcceptRanges(BYTES_RESPONSE);
@@ -183,7 +184,7 @@ public class AccountController {
      * </p>
      */
     @POST
-    public Response post(@BeanParam final AccountPostRequest request) throws IOException {
+    public Response post(@BeanParam final AccountPostRequest request) throws IOException, SQLException {
         String account = request.getAccount();
         if ( account != null && accountService.getAccount(account) != null ) {
             MultivaluedMap<String, String> headers = httpHeaders.getRequestHeaders();

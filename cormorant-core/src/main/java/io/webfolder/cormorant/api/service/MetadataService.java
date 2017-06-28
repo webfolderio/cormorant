@@ -17,23 +17,24 @@
  */
 package io.webfolder.cormorant.api.service;
 
+import java.sql.SQLException;
 import java.util.Map;
 
 public interface MetadataService {
 
-    String get(String namespace, String key);
+    String get(String namespace, String key) throws SQLException;
 
-    boolean contains(String namespace, String key);
+    boolean contains(String namespace, String key) throws SQLException;
 
-    void update(String namespace, String key, String value);
+    void update(String namespace, String key, String value) throws SQLException;
 
-    void add(String namespace, String key, String value);
+    void add(String namespace, String key, String value) throws SQLException;
 
-    Map<String, Object> getValues(String namespace);
+    Map<String, Object> getValues(String namespace) throws SQLException;
 
-    void setValues(String namespace, Map<String, Object> values);
+    void setValues(String namespace, Map<String, Object> values) throws SQLException;
 
-    void delete(String namespace, String key);
+    void delete(String namespace, String key) throws SQLException;
 
-    void delete(String namespace);
+    void delete(String namespace) throws SQLException;
 }

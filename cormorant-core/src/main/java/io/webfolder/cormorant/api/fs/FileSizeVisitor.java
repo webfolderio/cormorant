@@ -20,7 +20,6 @@ package io.webfolder.cormorant.api.fs;
 import static java.lang.Long.MAX_VALUE;
 import static java.nio.file.FileVisitResult.CONTINUE;
 import static java.nio.file.FileVisitResult.TERMINATE;
-import static java.nio.file.Files.size;
 
 import java.io.IOException;
 import java.nio.file.FileVisitResult;
@@ -79,11 +78,7 @@ public class FileSizeVisitor implements FileVisitor<Path> {
     @Override
     public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
         objectCount += 1;
-        if (attrs.size() == 0) {
-            bytesUsed += size(file);
-        } else {
-            bytesUsed += attrs.size();
-        }
+        bytesUsed += attrs.size();
         return objectCount < limit ? CONTINUE : TERMINATE;
     }
 

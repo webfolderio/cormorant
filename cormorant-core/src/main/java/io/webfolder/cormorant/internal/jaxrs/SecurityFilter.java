@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.Principal;
+import java.sql.SQLException;
 import java.util.Map;
 
 import javax.crypto.Mac;
@@ -101,7 +102,12 @@ class SecurityFilter<T> implements ContainerRequestFilter {
                 if (unixTime > currentTimeMillis()) {
                     final String hmacBody = format("%s\n%s\n%s", requestContext.getMethod(), tue, contextPath + requestContext.getUriInfo().getPath());
                     final String account = requestContext.getUriInfo().getPathParameters().getFirst("account");
-                    String tempUrlKey = accountMetadataService.get(account, "temp-url-key");
+                    String tempUrlKey;
+                    try {
+                        tempUrlKey = accountMetadataService.get(account, "temp-url-key");
+                    } catch (SQLException e) {
+                        throw new CormorantException(e);
+                    }
                     if ( tempUrlKey != null && ! tempUrlKey.isEmpty() ) {
                         String hash = calculateHash(hmacBody, tempUrlKey);
                         if (  tus.equalsIgnoreCase(hash) ) {

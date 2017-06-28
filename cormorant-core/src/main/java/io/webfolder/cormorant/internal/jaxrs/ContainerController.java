@@ -27,6 +27,7 @@ import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 import static javax.ws.rs.core.Response.Status.NO_CONTENT;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.Map;
 
 import javax.annotation.security.DeclareRoles;
@@ -140,7 +141,7 @@ public class ContainerController<T> {
      * It creates a container or updates an existing container, as appropriate.
      */
     @PUT
-    public Response put(@BeanParam final ContainerPutRequest request) {
+    public Response put(@BeanParam final ContainerPutRequest request) throws SQLException {
         String name = request.getContainer();
         if (name.isEmpty()) {
             throw new CormorantException("Container name must not be empty.");
@@ -163,7 +164,7 @@ public class ContainerController<T> {
      * To create, update, or delete a custom metadata item, use the X-Container-Meta-{name} header, where {name} is the name of the metadata item.
      */
     @POST
-    public Response post(@BeanParam final ContainerPostRequest request) throws IOException {
+    public Response post(@BeanParam final ContainerPostRequest request) throws IOException, SQLException {
         final String account = request.getAccount();
         final String container = request.getContainer();
         final boolean foundContainer = accountService.containsContainer(account, container);
@@ -180,7 +181,7 @@ public class ContainerController<T> {
      * @return 
      */
     @HEAD
-    public Response head(@BeanParam final ContainerHeadRequest request) throws IOException {
+    public Response head(@BeanParam final ContainerHeadRequest request) throws IOException, SQLException {
         final ContainerHeadResponse response = new ContainerHeadResponse();
         Container container = accountService.getContainer(request.getAccount(), request.getContainer());
         if ( container != null ) {
@@ -204,7 +205,7 @@ public class ContainerController<T> {
         }
     }
 
-    protected void updateMetadata(final String container) {
+    protected void updateMetadata(final String container) throws SQLException {
         MultivaluedMap<String, String> headers = httpHeaders.getRequestHeaders();
         for (String key : headers.keySet()) {
             // Metadata keys (the name of the metadata) must be treated as case-insensitive at all times.
@@ -248,7 +249,7 @@ public class ContainerController<T> {
      * This operation fails unless the container is empty. An empty container has no objects.
      */
     @DELETE
-    public Response delete(@BeanParam final ContainerDeleteRequest request) throws IOException {
+    public Response delete(@BeanParam final ContainerDeleteRequest request) throws IOException, SQLException {
         boolean contains = containerService.contains(request.getAccount(), request.getContainer());
         if ( ! contains ) {
             throw new CormorantException("Container [" + request.getContainer() + "] does not exist.", NOT_FOUND);

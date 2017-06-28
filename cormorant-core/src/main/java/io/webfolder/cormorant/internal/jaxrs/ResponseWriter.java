@@ -38,6 +38,7 @@ import java.io.OutputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
+import java.sql.SQLException;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
@@ -249,7 +250,12 @@ public class ResponseWriter implements MessageBodyWriter {
 
             ResourceStream stream = cgr.getBody();
             for (Object next : stream) {
-                String json = stream.convert(next, contentFormat, appendForwardSlash);
+                String json;
+                try {
+                    json = stream.convert(next, contentFormat, appendForwardSlash);
+                } catch (SQLException e) {
+                    throw new CormorantException(e);
+                }
                 if ( json != null ) {
                     joiner.add(json);
                 }

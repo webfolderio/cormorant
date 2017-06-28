@@ -28,6 +28,7 @@ import static java.nio.file.LinkOption.NOFOLLOW_LINKS;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.sql.SQLException;
 
 import io.webfolder.cormorant.api.exception.CormorantException;
 import io.webfolder.cormorant.api.resource.ContentFormat;
@@ -75,7 +76,7 @@ public class PathAdapter implements ResourceAdapter<Path> {
     public String convert(
                     final Path          path,
                     final ContentFormat contentFormat,
-                    final Boolean       appendForwardSlash) throws IOException {
+                    final Boolean       appendForwardSlash) throws IOException, SQLException {
         final StringBuilder builder        = new StringBuilder();
         final String        location       = container.relativize(path).toString();
         final boolean       isdir          = isDirectory(path, NOFOLLOW_LINKS);

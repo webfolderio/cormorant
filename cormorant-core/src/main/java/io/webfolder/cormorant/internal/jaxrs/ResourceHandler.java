@@ -44,6 +44,7 @@ import java.io.SequenceInputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.WritableByteChannel;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
@@ -80,7 +81,7 @@ class ResourceHandler<T> {
 
     public Status handle(
                     final HttpServletRequest  request,
-                    final HttpServletResponse response) throws IOException {
+                    final HttpServletResponse response) throws IOException, SQLException {
 
         if (preconditionFailed(request, resource)) {
             return PRECONDITION_FAILED;
@@ -202,7 +203,7 @@ class ResourceHandler<T> {
                             final HttpServletRequest  request,
                             final HttpServletResponse response,
                             final Resource<T>         resource,
-                            final List<Range>         ranges) throws IOException {
+                            final List<Range>         ranges) throws IOException, SQLException {
 
         if ( resource.getContentDisposition() != null ) {
             response.setHeader("Content-Disposition", resource.getContentDisposition());
@@ -255,7 +256,7 @@ class ResourceHandler<T> {
                         final Resource<T>         resource,
                         final List<Range>         ranges,
                         final String              contentType)
-            throws IOException {
+            throws IOException, SQLException {
         if (ranges.size() == 1) {
             final Range range = ranges.get(0);
             if ( ! resource.isStaticLargeObject() && ! resource.isDynamicLargeObject() ) {

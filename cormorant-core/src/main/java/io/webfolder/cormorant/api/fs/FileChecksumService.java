@@ -40,6 +40,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -91,7 +92,7 @@ public class FileChecksumService implements ChecksumService<Path> {
     public String getMimeType(
                         final Path    container,
                         final Path    object,
-                        final boolean autoDetect) throws IOException {
+                        final boolean autoDetect) throws IOException, SQLException {
         final boolean isDir = Files.isDirectory(object);
         if (isDir) {
             return DIRECTORY;
@@ -115,7 +116,7 @@ public class FileChecksumService implements ChecksumService<Path> {
     @Override
     public String calculateChecksum(
                         final Path container,
-                        final Path object) throws IOException {
+                        final Path object) throws IOException, SQLException {
         final String  namespace         = objectService.getNamespace(container, object);
         final String  precalculatedETag = headerService.get(namespace, ETAG);
         final String  contentLength     = headerService.get(namespace, CONTENT_LENGTH);
