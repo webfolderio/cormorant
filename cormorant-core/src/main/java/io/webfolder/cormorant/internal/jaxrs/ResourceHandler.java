@@ -258,7 +258,7 @@ class ResourceHandler<T> {
             throws IOException {
         if (ranges.size() == 1) {
             final Range range = ranges.get(0);
-            if ( ! resource.isManifest() && ! resource.isDynamicLargeObject() ) {
+            if ( ! resource.isStaticLargeObject() && ! resource.isDynamicLargeObject() ) {
                 try (final FileChannel readableChannel = (FileChannel) objectService.getReadableChannel(resource.getObject());
                         final WritableByteChannel writableChannel = newChannel(response.getOutputStream())) {
                     readableChannel.transferTo(range.getStart(), range.getLength(), writableChannel);
@@ -296,7 +296,7 @@ class ResourceHandler<T> {
                                 copy(is, totalSize, response.getOutputStream(), next.getStart(), next.getLength());
                             }
                         }
-                    } else if(resource.isManifest()) {
+                    } else if(resource.isStaticLargeObject()) {
                         Vector<InputStream> streams = new Vector<>();
                         for (Segment<T> next : resource.getSegments()) {
                             InputStream is = newInputStream(objectService.getReadableChannel(next.getObject()));
@@ -336,7 +336,7 @@ class ResourceHandler<T> {
                     sos.println();
                     sos.println("--" + ranges.get(0).getBoundary() + "--");
                 }
-            } else if (resource.isManifest()) {
+            } else if (resource.isStaticLargeObject()) {
                 Vector<InputStream> streams = new Vector<>();
                 for (Segment<T> next : resource.getSegments()) {
                     InputStream is = newInputStream(objectService.getReadableChannel(next.getObject()));

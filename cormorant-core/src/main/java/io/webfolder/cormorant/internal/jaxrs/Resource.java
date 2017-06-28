@@ -40,7 +40,7 @@ class Resource<T> {
 
     private final String  contentDisposition;
 
-    private final boolean manifest;
+    private final boolean staticLargeObject;
 
     private final boolean dynamicLargeObject;
 
@@ -57,7 +57,7 @@ class Resource<T> {
                 final String              eTag,
                 final String              contentType,
                 final String              contentDisposition,
-                final boolean             manifest,
+                final boolean             staticLargeObject,
                 final boolean             dynamicLargeObject,
                 final Map<String, String> headers,
                 final List<Segment<T>>    segments) {
@@ -69,7 +69,7 @@ class Resource<T> {
         this.eTag               = eTag;
         this.contentType        = contentType;
         this.contentDisposition = contentDisposition;
-        this.manifest           = manifest;
+        this.staticLargeObject  = staticLargeObject;
         this.dynamicLargeObject = dynamicLargeObject;
         this.headers            = headers;
         this.segments           = segments;
@@ -99,8 +99,8 @@ class Resource<T> {
         return contentDisposition;
     }
 
-    public boolean isManifest() {
-        return manifest;
+    public boolean isStaticLargeObject() {
+        return staticLargeObject;
     }
 
     public long getCreationTime() {

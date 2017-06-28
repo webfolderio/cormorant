@@ -275,7 +275,7 @@ public class PathObjectService implements ObjectService<Path> {
             
             final List<Path> dynamicLargeObjects = listDynamicLargeObject(sourceContainer, sourceObject);
             final boolean    dynamicLargeObject  = ! dynamicLargeObjects.isEmpty();
-            final boolean    staticLargeObject   = isMultipartManifest(sourceObject);
+            final boolean    staticLargeObject   = isStaticLargeObject(sourceObject);
 
             if (sourceObject.equals(targetObject)) {
                 return targetObject;
@@ -318,7 +318,7 @@ public class PathObjectService implements ObjectService<Path> {
     }
 
     @Override
-    public boolean isMultipartManifest(final Path object) {
+    public boolean isStaticLargeObject(final Path object) {
         return object != null &&
                 object.getFileName().toString().endsWith(MANIFEST_EXTENSION) ? true : false;
     }
@@ -336,7 +336,7 @@ public class PathObjectService implements ObjectService<Path> {
 
     @Override
     public List<Path> listDynamicLargeObject(Path container, Path object) {
-        if (isMultipartManifest(object)) {
+        if (isStaticLargeObject(object)) {
             return emptyList();
         }
         if ( Files.isDirectory(object) ) {

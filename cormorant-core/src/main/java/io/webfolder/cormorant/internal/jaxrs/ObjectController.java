@@ -213,8 +213,7 @@ public class ObjectController<T> {
 
         String objectManifest = null;
 
-        // static large object
-        final boolean manifest = objectService.isMultipartManifest(object);
+        final boolean isStaticLargeObject = objectService.isStaticLargeObject(object);
 
         // dynamic large object that has X_OBJECT_MANIFEST
         if ( object != null ) {
@@ -228,13 +227,13 @@ public class ObjectController<T> {
                 if ( manifestDirectory != null ) {
                     object = manifestDirectory;
                 }
-                dynamicLargeObject = true;
+                dynamicLargeObject     = true;
                 dynamicLargeObjects    = objectService.listDynamicLargeObject(container, object);
                 dynamicLargeObjectEtag = checksumService.calculateChecksum(dynamicLargeObjects);
             }
         }
 
-        if ( object == null && ! manifest ) {
+        if ( object == null && ! isStaticLargeObject ) {
 
             // dynamic large object without X_OBJECT_MANIFEST
             if (objectService.isValidPath(container, request.getObject())) {
@@ -265,7 +264,7 @@ public class ObjectController<T> {
             }
         }
 
-        if ( "get".equalsIgnoreCase(request.getMultipartManifest()) && ! manifest ) {
+        if ( "get".equalsIgnoreCase(request.getMultipartManifest()) && ! isStaticLargeObject ) {
             throw new CormorantException("Invalid multipart manifest request. Object [" +
                             request.getObject() + "] is not a multipart manifest.");
         }
@@ -315,7 +314,7 @@ public class ObjectController<T> {
 
         List<Segment<T>> staticSegments;
         
-        final boolean staticLargeObject = objectService.isMultipartManifest(object);
+        final boolean staticLargeObject = objectService.isStaticLargeObject(object);
         if (staticLargeObject) {
             headers.put(X_STATIC_LARGE_OBJECT, "True");
             staticSegments = objectService.listStaticLargeObject(request.getAccount(), object);
@@ -337,7 +336,7 @@ public class ObjectController<T> {
             size = dynamicLargeObject ? objectService.getDyanmicObjectSize(container, object) : objectService.getSize(object);
         }
 
-        final boolean largeObject = dynamicLargeObject || manifest;
+        final boolean largeObject = dynamicLargeObject || isStaticLargeObject;
         final String objectEtag;
         if (largeObject) {
             objectEtag = "\"" + (size == 0L ? MD5_OF_EMPTY_STRING : etag) + "\"";
@@ -349,7 +348,7 @@ public class ObjectController<T> {
                                                     size        , lastModified,
                                                     creationTime, objectEtag,
                                                     contentType , contentDisposition,
-                                                    manifest    , dynamicLargeObject,
+                                                    isStaticLargeObject    , dynamicLargeObject,
                                                     headers     , staticSegments);
 
         final ResourceHandler<T> handler = new ResourceHandler<>(
@@ -449,7 +448,7 @@ public class ObjectController<T> {
         final Map<String, Object> properties = systemMetadataService.getProperties(namespace);
 
         final boolean dynamicLargeObject = properties.containsKey(X_OBJECT_MANIFEST);
-        final boolean staticLargeObject  = objectService.isMultipartManifest(object);
+        final boolean staticLargeObject  = objectService.isStaticLargeObject(object);
         final boolean largeObject        = dynamicLargeObject || staticLargeObject;
 
         properties.put(CONTENT_LENGTH, objectService.getSize(object));
@@ -553,7 +552,7 @@ public class ObjectController<T> {
             return status(NOT_FOUND).build();
         }
         final boolean deleteStaticLargeObject = "delete".equals(request.getMultipartManifest())
-                                                        && objectService.isMultipartManifest(object);
+                                                        && objectService.isStaticLargeObject(object);
         final boolean emptyDirectory = isDirectory && objectService.isEmptyDirectory(container, object);
         if ( isDirectory && ! emptyDirectory ) {
             final String namespace = objectService.getNamespace(container, object);
@@ -634,7 +633,7 @@ public class ObjectController<T> {
             systemMetadataService.delete(namespace);
             metadataService.delete(namespace);
 
-            if ( ! isDirectory && ! objectService.isMultipartManifest(object) ) {
+            if ( ! isDirectory && ! objectService.isStaticLargeObject(object) ) {
                 Container containerInfo = accountService.getContainer(request.getAccount(), request.getContainer());
                 containerInfo.decrementObjectCount();
                 containerInfo.removeBytesUsed(size);

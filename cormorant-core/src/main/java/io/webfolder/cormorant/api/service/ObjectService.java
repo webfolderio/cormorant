@@ -65,7 +65,7 @@ public interface ObjectService<T> {
 
     boolean isValidPath(T container, String objectPath);
 
-    boolean isMultipartManifest(T object);
+    boolean isStaticLargeObject(T object);
 
     long getCreationTime(T object);
 
