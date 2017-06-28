@@ -179,7 +179,7 @@ public class FileChecksumService implements ChecksumService<Path> {
     }
 
     @Override
-    public String calculateChecksum(List<Path> objects) {
+    public String calculateChecksum(List<Path> objects) throws IOException {
         MessageDigest md;
         try {
             md = getInstance(CHECKSUM_ALGORITHM);
@@ -193,8 +193,6 @@ public class FileChecksumService implements ChecksumService<Path> {
                 while((read = is.read(buffer)) > 0) {
                     md.update(buffer, 0, read);
                 }
-            } catch (IOException e) {
-                throw new CormorantException(e);
             }
         }
         final byte[] hash = md.digest();

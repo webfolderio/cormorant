@@ -80,9 +80,14 @@ public class CormorantServer {
 
     private volatile ReentrantLock lock = new ReentrantLock(true);
 
-    private String host = DEFAULT_HOST;
+    private String host;
 
-    private int port = DEFAULT_PORT;
+    private int port;
+
+    public CormorantServer() {
+        setHost(DEFAULT_HOST);
+        setPort(DEFAULT_PORT);
+    }
 
     public CormorantServer deploy(
                             final Application application,
@@ -162,39 +167,36 @@ public class CormorantServer {
     }
 
     public void stop() {
-        if (lock == null) {
-            return;
-        }
-        boolean locked = lock.tryLock();
-        if ( ! locked ) {
-            return;
-        }
-        try {
-            if ( gracefulHandler != null ) {
+        if (lock != null) {
+            if (lock.tryLock()) {
                 try {
-                    gracefulHandler.shutdown();
-                    gracefulHandler.awaitShutdown(SHUTDOWN_TIMEOUT);
-                } catch (InterruptedException e) {
-                    LOG.error(e.getMessage(), e);
+                    if ( gracefulHandler != null ) {
+                        try {
+                            gracefulHandler.shutdown();
+                            gracefulHandler.awaitShutdown(SHUTDOWN_TIMEOUT);
+                        } catch (InterruptedException e) {
+                            LOG.error(e.getMessage(), e);
+                        } finally {
+                            gracefulHandler = null;
+                        }
+                    }
+                    if ( deployment != null ) {
+                        deployment.stop();
+                        deployment = null;
+                    }
+                    if ( manager != null ) {
+                        manager.undeploy();
+                        manager = null;
+                    }
+                    if ( server != null ) {
+                        server.stop();
+                        server = null;
+                    }
                 } finally {
-                    gracefulHandler = null;
+                    lock.unlock();
+                    lock = null;
                 }
             }
-            if ( deployment != null ) {
-                deployment.stop();
-                deployment = null;
-            }
-            if ( manager != null ) {
-                manager.undeploy();
-                manager = null;
-            }
-            if ( server != null ) {
-                server.stop();
-                server = null;
-            }
-        } finally {
-            lock.unlock();
-            lock = null;
         }
     }
 

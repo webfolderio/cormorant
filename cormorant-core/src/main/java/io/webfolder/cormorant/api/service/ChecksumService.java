@@ -29,5 +29,5 @@ public interface ChecksumService<T> {
 
     String getMimeType(T container, T object, boolean autoDetect) throws IOException, SQLException;
 
-    String calculateChecksum(List<T> objects);
+    String calculateChecksum(List<T> objects) throws IOException;
 }
