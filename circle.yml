@@ -40,7 +40,7 @@ jobs:
       - run:
           name: mvn test
           command: |
-              mvn -q test
+              mvn -q -Preport-jacoco test jacoco:report
               rm -rf mydir
               rm -rf mymetadata
               mkdir mydir
