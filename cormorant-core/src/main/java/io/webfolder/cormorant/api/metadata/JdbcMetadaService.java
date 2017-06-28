@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
 import io.webfolder.cormorant.api.exception.CormorantException;
 import io.webfolder.cormorant.api.service.MetadataService;
 
-public class SQLiteMetadaService implements MetadataService {
+public class JdbcMetadaService implements MetadataService {
 
     private final DataSource ds;
 
@@ -27,28 +27,16 @@ public class SQLiteMetadaService implements MetadataService {
 
     private final String     table;
 
-    private static final Logger LOG = LoggerFactory.getLogger(SQLiteMetadaService.class);
+    private static final Logger LOG = LoggerFactory.getLogger(JdbcMetadaService.class);
 
-    public SQLiteMetadaService(
+    public JdbcMetadaService(
                 final DataSource ds,
                 final String     schema,
                 final String     table) {
         this.ds         = ds;
         this.schema     = schema;
         this.table      = table;
-        try (Connection conn = ds.getConnection()) {
-            ResultSet rs = conn.getMetaData().getTables(null, schema.isEmpty() ? null : schema, table, new String[] { "TABLE" });
-            if ( ! rs.next() ) {
-                try (Statement stmt = conn.createStatement()) {
-                    final String ddl = "create table " +
-                                    table + " (NAMESPACE VARCHAR(1024), KEY VARCHAR(1024), VALUE VARCHAR(4096))";
-                    stmt.execute(ddl);
-                    LOG.info("SQLite table [{}] created.", new Object[] { table });
-                }
-            }
-        } catch (SQLException e) {
-            throw new CormorantException(e);
-        }
+        createTable();
     }
 
     @Override
@@ -159,5 +147,21 @@ public class SQLiteMetadaService implements MetadataService {
 
     protected String getSchemaKeyword() {
         return schema.isEmpty() ? "" : schema + ".";
+    }
+
+    protected void createTable() {
+        try (Connection conn = ds.getConnection()) {
+            ResultSet rs = conn.getMetaData().getTables(null, schema.isEmpty() ? null : schema, table, new String[] { "TABLE" });
+            if ( ! rs.next() ) {
+                try (Statement stmt = conn.createStatement()) {
+                    final String ddl = "create table " +
+                                    table + " (NAMESPACE VARCHAR(1024), KEY VARCHAR(1024), VALUE VARCHAR(4096))";
+                    stmt.execute(ddl);
+                    LOG.info("SQLite table [{}] created.", new Object[] { table });
+                }
+            }
+        } catch (SQLException e) {
+            throw new CormorantException(e);
+        }
     }
 }

@@ -20,6 +20,7 @@ package io.webfolder.cormorant.api.metadata;
 import static io.webfolder.cormorant.api.cache.CacheFactory.ACCOUNT;
 import static io.webfolder.cormorant.api.cache.CacheFactory.CONTAINER;
 import static io.webfolder.cormorant.api.cache.CacheFactory.OBJECT;
+import static io.webfolder.cormorant.api.metadata.MetadataStorage.SQLite;
 import static java.nio.file.Files.createDirectories;
 import static java.nio.file.Files.exists;
 import static java.nio.file.Files.isDirectory;
@@ -33,8 +34,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.ServiceLoader;
 
-import org.sqlite.SQLiteDataSource;
-
+import io.webfolder.cormorant.api.DataSourceFactory;
+import io.webfolder.cormorant.api.SQLiteDataSourceFactory;
 import io.webfolder.cormorant.api.cache.CacheFactory;
 import io.webfolder.cormorant.api.cache.DefaultCacheFactory;
 import io.webfolder.cormorant.api.exception.CormorantException;
@@ -46,6 +47,8 @@ public class DefaultMetadataServiceFactory implements MetadataServiceFactory {
 
     private final CacheFactory    cacheFactory;
 
+    private final DataSourceFactory dsFactory ;
+
     private final MetadataStorage storage     ;
 
     public DefaultMetadataServiceFactory(final Path root, final MetadataStorage storage) {
@@ -56,6 +59,9 @@ public class DefaultMetadataServiceFactory implements MetadataServiceFactory {
         this.cacheFactory                               = cacheIterator.hasNext()  ?
                                                           cacheIterator.next()     :
                                                           new DefaultCacheFactory();
+        final ServiceLoader<DataSourceFactory> dsServFactory = load(DataSourceFactory.class, getClass().getClassLoader());
+        final Iterator<DataSourceFactory> dsServIterator = dsServFactory.iterator();
+        this.dsFactory = dsServIterator.hasNext() ? dsServIterator.next() : SQLite.equals(storage) ? new SQLiteDataSourceFactory() : null;
     }
 
     @Override
@@ -94,9 +100,7 @@ public class DefaultMetadataServiceFactory implements MetadataServiceFactory {
                     case CONTAINER: table = "CONTAINER_META"; break;
                     case OBJECT   : table = groupName.contains("system") ? "OBJECT_SYS_META" : "OBJECT_META"; break;
                 }
-                SQLiteDataSource ds = new SQLiteDataSource();
-                ds.setUrl("jdbc:sqlite:cormorant.db");
-                return new SQLiteMetadaService(ds, schema, table);
+                return new JdbcMetadaService(dsFactory.get(), schema, table);
             }
         }
     }
