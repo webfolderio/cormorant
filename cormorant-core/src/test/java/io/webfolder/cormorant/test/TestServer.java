@@ -136,6 +136,11 @@ public class TestServer {
 
         server.stop();
 
-        JUnitCore.main(TestCormorant.class.getName());
+        try {
+            JUnitCore core = new JUnitCore();
+            core.run(TestCormorant.class);
+        } catch (Throwable t) {
+            t.printStackTrace();
+        }
     }
 }
