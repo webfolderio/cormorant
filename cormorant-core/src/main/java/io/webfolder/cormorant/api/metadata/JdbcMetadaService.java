@@ -154,10 +154,15 @@ public class JdbcMetadaService implements MetadataService {
             ResultSet rs = conn.getMetaData().getTables(null, schema.isEmpty() ? null : schema, table, new String[] { "TABLE" });
             if ( ! rs.next() ) {
                 try (Statement stmt = conn.createStatement()) {
-                    final String ddl = "create table " +
-                                    table + " (NAMESPACE VARCHAR(1024), KEY VARCHAR(1024), VALUE VARCHAR(4096))";
-                    stmt.execute(ddl);
-                    LOG.info("SQLite table [{}] created.", new Object[] { table });
+                    final String tableDDL = "create table "   +
+                                           getSchemaKeyword() +
+                                           table              +
+                                           " (NAMESPACE VARCHAR(1024), KEY VARCHAR(1024), VALUE VARCHAR(4096))";
+                    stmt.execute(tableDDL);
+                    LOG.info("Database table [{}] created.", new Object[] { getSchemaKeyword() + table });
+                    final String idxDDL = "create unique index IDX_" + table + " on " + getSchemaKeyword() + table + "(NAMESPACE, KEY)";
+                    stmt.execute(idxDDL);
+                    LOG.info("Database table index [{}] created.", new Object[] { "IDX_" + table });
                 }
             }
         } catch (SQLException e) {

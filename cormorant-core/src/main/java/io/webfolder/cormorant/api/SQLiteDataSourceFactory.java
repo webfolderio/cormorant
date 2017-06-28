@@ -14,6 +14,7 @@ public class SQLiteDataSourceFactory implements DataSourceFactory {
     public SQLiteDataSourceFactory() {
         SQLiteConfig config = new SQLiteConfig();
         config.setEncoding(UTF8);
+        config.setSharedCache(true);
         ds = new SQLiteDataSource(config);
         ds.setUrl("jdbc:sqlite:cormorant.db");
     }
