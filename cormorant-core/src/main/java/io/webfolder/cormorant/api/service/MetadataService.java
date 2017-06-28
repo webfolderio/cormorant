@@ -21,21 +21,19 @@ import java.util.Map;
 
 public interface MetadataService {
 
-    String getProperty(String namespace, String propertyName);
+    String get(String namespace, String key);
 
-    Long getPropertyLong(String namespace, String propertyName);
+    boolean contains(String namespace, String key);
 
-    boolean containsProperty(String namespace, String propertyName);
+    void update(String namespace, String key, String value);
 
-    void removeProperty(String namespace, String propertyName);
+    void add(String namespace, String key, String value);
 
-    void updateProperty(String namespace, String propertyName, String value);
+    Map<String, Object> getValues(String namespace);
 
-    void addProperty(String namespace, String propertyName, String value);
+    void setValues(String namespace, Map<String, Object> values);
 
-    Map<String, Object> getProperties(String namespace);
-
-    void setProperties(String namespace, Map<String, Object> properties);
+    void delete(String namespace, String key);
 
     void delete(String namespace);
 }

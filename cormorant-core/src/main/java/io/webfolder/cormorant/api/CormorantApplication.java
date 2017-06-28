@@ -21,8 +21,8 @@ import static io.webfolder.cormorant.api.cache.CacheFactory.ACCOUNT;
 import static io.webfolder.cormorant.api.cache.CacheFactory.CONTAINER;
 import static io.webfolder.cormorant.api.cache.CacheFactory.OBJECT;
 import static io.webfolder.cormorant.api.cache.CacheFactory.TOKENS;
-import static io.webfolder.cormorant.api.property.MetadataServiceFactory.METADATA;
-import static io.webfolder.cormorant.api.property.MetadataServiceFactory.SYSTEM_METADATA;
+import static io.webfolder.cormorant.api.metadata.MetadataServiceFactory.METADATA;
+import static io.webfolder.cormorant.api.metadata.MetadataServiceFactory.SYSTEM_METADATA;
 import static java.util.ServiceLoader.load;
 
 import java.nio.file.Path;
@@ -40,8 +40,9 @@ import io.webfolder.cormorant.api.cache.DefaultCacheFactory;
 import io.webfolder.cormorant.api.fs.FileChecksumService;
 import io.webfolder.cormorant.api.fs.PathContainerService;
 import io.webfolder.cormorant.api.fs.PathObjectService;
-import io.webfolder.cormorant.api.property.DefaultMetadataServiceFactory;
-import io.webfolder.cormorant.api.property.MetadataServiceFactory;
+import io.webfolder.cormorant.api.metadata.DefaultMetadataServiceFactory;
+import io.webfolder.cormorant.api.metadata.MetadataServiceFactory;
+import io.webfolder.cormorant.api.metadata.MetadataStorage;
 import io.webfolder.cormorant.api.service.AccountService;
 import io.webfolder.cormorant.api.service.AuthenticationService;
 import io.webfolder.cormorant.api.service.ContainerService;
@@ -148,7 +149,7 @@ public class CormorantApplication extends Application {
     }
 
     protected MetadataServiceFactory createPropertyServiceFactory(final Path propertyStore) {
-        return new DefaultMetadataServiceFactory(propertyStore);
+        return new DefaultMetadataServiceFactory(propertyStore, MetadataStorage.SQLite);
     }
 
     protected int getPathMaxCount() {

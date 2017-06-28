@@ -15,8 +15,11 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package io.webfolder.cormorant.api.property;
+package io.webfolder.cormorant.api.metadata;
 
+import static io.webfolder.cormorant.api.cache.CacheFactory.ACCOUNT;
+import static io.webfolder.cormorant.api.cache.CacheFactory.CONTAINER;
+import static io.webfolder.cormorant.api.cache.CacheFactory.OBJECT;
 import static java.nio.file.Files.createDirectories;
 import static java.nio.file.Files.exists;
 import static java.nio.file.Files.isDirectory;
@@ -30,6 +33,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.ServiceLoader;
 
+import org.sqlite.SQLiteDataSource;
+
 import io.webfolder.cormorant.api.cache.CacheFactory;
 import io.webfolder.cormorant.api.cache.DefaultCacheFactory;
 import io.webfolder.cormorant.api.exception.CormorantException;
@@ -37,14 +42,17 @@ import io.webfolder.cormorant.api.service.MetadataService;
 
 public class DefaultMetadataServiceFactory implements MetadataServiceFactory {
 
-    private final Path         root;
+    private final Path            root        ;
 
-    private final CacheFactory cacheFactory;
+    private final CacheFactory    cacheFactory;
 
-    public DefaultMetadataServiceFactory(final Path root) {
+    private final MetadataStorage storage     ;
+
+    public DefaultMetadataServiceFactory(final Path root, final MetadataStorage storage) {
         this.root                                       = root;
-        final ServiceLoader<CacheFactory> cacheLoader   = load(CacheFactory.class, getClass().getClassLoader());
-        final Iterator<CacheFactory>      cacheIterator = cacheLoader.iterator();
+        this.storage                                    = storage;
+        final ServiceLoader<CacheFactory> cacheFactory  = load(CacheFactory.class, getClass().getClassLoader());
+        final Iterator<CacheFactory>      cacheIterator = cacheFactory.iterator();
         this.cacheFactory                               = cacheIterator.hasNext()  ?
                                                           cacheIterator.next()     :
                                                           new DefaultCacheFactory();
@@ -55,8 +63,8 @@ public class DefaultMetadataServiceFactory implements MetadataServiceFactory {
                                 final String  cacheName,
                                 final String  groupName,
                                 final boolean cacheable) {
-        final ServiceLoader<MetadataService> psLoader     = load(MetadataService.class, getClass().getClassLoader());
-        final Iterator<MetadataService>      psIterator   = psLoader.iterator();
+        final ServiceLoader<MetadataService> loader       = load(MetadataService.class, getClass().getClassLoader());
+        final Iterator<MetadataService>      iterator     = loader.iterator();
         final Path                           absolutePath = root.toAbsolutePath().normalize().resolve(cacheName);
         if ( ! exists(absolutePath, NOFOLLOW_LINKS) ) {
             try {
@@ -73,9 +81,23 @@ public class DefaultMetadataServiceFactory implements MetadataServiceFactory {
         } else {
             cache = emptyMap();
         }
-        final MetadataService propertyService = psIterator.hasNext()      ?
-                                                        psIterator.next() :
-                                                        new FileMetadataService(absolutePath, groupName, cacheable, cache);
-        return propertyService;
+        if (iterator.hasNext()) {
+            return iterator.next();
+        } else {
+            if (MetadataStorage.File.equals(storage)) {
+                return new FileMetadataService(absolutePath, groupName, cacheable, cache);
+            } else {
+                String schema = "";
+                String table  = "";
+                switch (cacheName) {
+                    case ACCOUNT  : table = "ACCOUNT_META"  ; break;
+                    case CONTAINER: table = "CONTAINER_META"; break;
+                    case OBJECT   : table = groupName.contains("system") ? "OBJECT_SYS_META" : "OBJECT_META"; break;
+                }
+                SQLiteDataSource ds = new SQLiteDataSource();
+                ds.setUrl("jdbc:sqlite:cormorant.db");
+                return new SQLiteMetadaService(ds, schema, table);
+            }
+        }
     }
 }

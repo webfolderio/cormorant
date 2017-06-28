@@ -17,7 +17,7 @@
  */
 package io.webfolder.cormorant.api.fs;
 
-import static io.webfolder.cormorant.api.property.MetadataServiceFactory.MANIFEST_EXTENSION;
+import static io.webfolder.cormorant.api.metadata.MetadataServiceFactory.MANIFEST_EXTENSION;
 import static io.webfolder.cormorant.api.resource.ContentFormat.json;
 import static io.webfolder.cormorant.api.resource.ContentFormat.plain;
 import static io.webfolder.cormorant.api.resource.ContentFormat.xml;
@@ -85,7 +85,7 @@ public class PathAdapter implements ResourceAdapter<Path> {
         final String        normalizedName =  start > 0 ? name.substring(0, start) : name;
         if (isdir) {
             final String namespace = objectService.getNamespace(container, path);
-            final boolean deleted = "true".equals(systemMetadataService.getProperty(namespace, "X-Cormorant-Deleted"));
+            final boolean deleted = "true".equals(systemMetadataService.get(namespace, "X-Cormorant-Deleted"));
             if (deleted) {
                 return null;
             }

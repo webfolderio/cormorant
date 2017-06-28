@@ -18,7 +18,7 @@
 package io.webfolder.cormorant.api.fs;
 
 import static io.webfolder.cormorant.api.Json.read;
-import static io.webfolder.cormorant.api.property.MetadataServiceFactory.MANIFEST_EXTENSION;
+import static io.webfolder.cormorant.api.metadata.MetadataServiceFactory.MANIFEST_EXTENSION;
 import static java.nio.channels.Channels.newReader;
 import static java.nio.channels.FileChannel.open;
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -349,7 +349,7 @@ public class PathObjectService implements ObjectService<Path> {
             }
         } else if (Files.isRegularFile(object, NOFOLLOW_LINKS)) {
             final String namespace = getNamespace(container, object);
-            final String objectManifest = systemMetadataService.getProperty(namespace, X_OBJECT_MANIFEST);
+            final String objectManifest = systemMetadataService.get(namespace, X_OBJECT_MANIFEST);
             if (objectManifest == null) {
                 return emptyList();
             }

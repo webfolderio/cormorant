@@ -18,7 +18,7 @@
 package io.webfolder.cormorant.internal.jaxrs;
 
 import static io.webfolder.cormorant.api.Json.read;
-import static io.webfolder.cormorant.api.property.MetadataServiceFactory.MANIFEST_EXTENSION;
+import static io.webfolder.cormorant.api.metadata.MetadataServiceFactory.MANIFEST_EXTENSION;
 import static java.lang.Boolean.TRUE;
 import static java.lang.Double.compare;
 import static java.lang.Long.parseLong;
@@ -218,7 +218,7 @@ public class ObjectController<T> {
         // dynamic large object that has X_OBJECT_MANIFEST
         if ( object != null ) {
             final String  namespace     = objectService.getNamespace(container, object);
-                         objectManifest = removeLeadingSlash(systemMetadataService.getProperty(namespace, X_OBJECT_MANIFEST));
+                         objectManifest = removeLeadingSlash(systemMetadataService.get(namespace, X_OBJECT_MANIFEST));
             if ( objectManifest != null ) {
                 final String manifestContainer = objectManifest.substring(0, objectManifest.indexOf(FORWARD_SLASH));
                 container = containerService.getContainer(request.getAccount(), manifestContainer);
@@ -240,7 +240,7 @@ public class ObjectController<T> {
                 final T directory = objectService.getDirectory(container, request.getObject());
                 if ( directory != null ) {
                     final String  manifestNamespace = objectService.getNamespace(container, directory);
-                                     objectManifest = systemMetadataService.getProperty(manifestNamespace, X_OBJECT_MANIFEST);
+                                     objectManifest = systemMetadataService.get(manifestNamespace, X_OBJECT_MANIFEST);
                     if ( objectManifest != null ) {
                         final String directoryPath = removeLeadingSlash(objectManifest);
                         final String containerName = directoryPath.indexOf(FORWARD_SLASH) > 0 ? directoryPath.substring(0, directoryPath.indexOf(FORWARD_SLASH)) : null;
@@ -273,17 +273,17 @@ public class ObjectController<T> {
         final long    lastModified       = objectService.getLastModified(object);
         final long    creationTime       = objectService.getCreationTime(object);
         final String  etag               = dynamicLargeObjectEtag != null ? dynamicLargeObjectEtag : checksumService.calculateChecksum(container, object);
-        final String  contentDisposition = systemMetadataService.getProperty(namespace, CONTENT_DISPOSITION);
+        final String  contentDisposition = systemMetadataService.get(namespace, CONTENT_DISPOSITION);
 
         final Map<String, String> headers = new HashMap<>();
-        for (Map.Entry<String, Object> entry : metadataService.getProperties(namespace).entrySet()) {
+        for (Map.Entry<String, Object> entry : metadataService.getValues(namespace).entrySet()) {
             final String key         = entry.getKey();
             final Object headerValue = entry.getValue();
             final String headerName  = "X-Object-Meta-" + key;
             headers.put(headerName, valueOf(headerValue));
         }
 
-        final Map<String, Object> systemMetadata = systemMetadataService.getProperties(namespace);
+        final Map<String, Object> systemMetadata = systemMetadataService.getValues(namespace);
 
         if ( systemMetadata.containsKey(CONTENT_ENCODING)) {
             headers.put(CONTENT_ENCODING, (String) systemMetadata.get(CONTENT_ENCODING));
@@ -331,7 +331,7 @@ public class ObjectController<T> {
             }
         } else {
             staticSegments = emptyList();
-            contentType = systemMetadataService.getProperty( ! dynamicLargeObjects.isEmpty() ?
+            contentType = systemMetadataService.get( ! dynamicLargeObjects.isEmpty() ?
                                     objectService.getNamespace(container, dynamicLargeObjects.get(0)) : namespace, CONTENT_TYPE);
             size = dynamicLargeObject ? objectService.getDyanmicObjectSize(container, object) : objectService.getSize(object);
         }
@@ -432,20 +432,20 @@ public class ObjectController<T> {
         }
         final String namespace = objectService.getNamespace(container, object);
         if (dir) {
-            final boolean deleted = "deleted".equals(systemMetadataService.getProperty(namespace, "X-Cormorant-Deleted"));
+            final boolean deleted = "deleted".equals(systemMetadataService.get(namespace, "X-Cormorant-Deleted"));
             if (deleted) {
                 return status(NOT_FOUND).build();
             }
         }
         final ObjectHeadResponse response = new ObjectHeadResponse();
         final ResponseBuilder    builder  = ok().entity(response);
-        for (Map.Entry<String, Object> entry : metadataService.getProperties(namespace).entrySet()) {
+        for (Map.Entry<String, Object> entry : metadataService.getValues(namespace).entrySet()) {
             final String key         = entry.getKey();
             final Object headerValue = entry.getValue();
             final String headerName  = "X-Object-Meta-" + key;
             builder.header(headerName, headerValue);
         }
-        final Map<String, Object> properties = systemMetadataService.getProperties(namespace);
+        final Map<String, Object> properties = systemMetadataService.getValues(namespace);
 
         final boolean dynamicLargeObject = properties.containsKey(X_OBJECT_MANIFEST);
         final boolean staticLargeObject  = objectService.isStaticLargeObject(object);
@@ -458,7 +458,7 @@ public class ObjectController<T> {
             String etag = (String) properties.get(ETAG);
             if (dynamicLargeObject) {
                 if ( object != null ) {
-                    final String objectManifest = removeLeadingSlash(systemMetadataService.getProperty(namespace, X_OBJECT_MANIFEST));
+                    final String objectManifest = removeLeadingSlash(systemMetadataService.get(namespace, X_OBJECT_MANIFEST));
                     if ( objectManifest != null ) {
                         container = containerService.getContainer(request.getAccount(), objectManifest.substring(0, objectManifest.indexOf(FORWARD_SLASH)));
                         final String manifestPath = objectManifest.substring(objectManifest.indexOf(FORWARD_SLASH) + 1, objectManifest.length());
@@ -556,11 +556,11 @@ public class ObjectController<T> {
         final boolean emptyDirectory = isDirectory && objectService.isEmptyDirectory(container, object);
         if ( isDirectory && ! emptyDirectory ) {
             final String namespace = objectService.getNamespace(container, object);
-            final String deleted   = systemMetadataService.getProperty(namespace, "X-Cormorant-Deleted");
+            final String deleted   = systemMetadataService.get(namespace, "X-Cormorant-Deleted");
             if (deleted == null) {
                 systemMetadataService.delete(namespace);
                 metadataService.delete(namespace);
-                systemMetadataService.addProperty(namespace, "X-Cormorant-Deleted", "true");
+                systemMetadataService.add(namespace, "X-Cormorant-Deleted", "true");
             }
             return status(NO_CONTENT)
                     .build();
@@ -615,7 +615,7 @@ public class ObjectController<T> {
 
             final long size = objectService.getSize(object);
 
-            final String objectManifest = systemMetadataService.getProperty(namespace, X_OBJECT_MANIFEST);
+            final String objectManifest = systemMetadataService.get(namespace, X_OBJECT_MANIFEST);
             final boolean dynamicLargeObject = objectManifest != null;
             if (dynamicLargeObject && size == 0) {
                 final String manifestContainerName = objectManifest.substring(0, objectManifest.indexOf(FORWARD_SLASH));
@@ -714,7 +714,7 @@ public class ObjectController<T> {
             if ( dynamicLargeObjectContainer != null && objectManifest != null ) {
                 systemMetadata.put(X_OBJECT_MANIFEST, objectManifest);
             }
-            systemMetadataService.setProperties(namespace, systemMetadata);
+            systemMetadataService.setValues(namespace, systemMetadata);
 
             putSystemMetadata(namespace, builder);
 
@@ -775,12 +775,12 @@ public class ObjectController<T> {
                     systemMetadataService.delete(targetNamespace);
                     metadataService.delete(targetNamespace);
                     final String  sourceNamespace = objectService.getNamespace(sourceContainer, sourceDirectory);
-                    final Map<String, Object> systemMetadata = systemMetadataService.getProperties(sourceNamespace);
-                    systemMetadataService.setProperties(targetNamespace, systemMetadata);
+                    final Map<String, Object> systemMetadata = systemMetadataService.getValues(sourceNamespace);
+                    systemMetadataService.setValues(targetNamespace, systemMetadata);
                     if ( request.getFreshMetadata() == null || ! TRUE.equals(request.getFreshMetadata()) ) {
-                        final Map<String, Object> metadata = metadataService.getProperties(sourceNamespace);
+                        final Map<String, Object> metadata = metadataService.getValues(sourceNamespace);
                         if ( ! metadata.isEmpty() ) {
-                            metadataService.setProperties(targetNamespace, metadata);
+                            metadataService.setValues(targetNamespace, metadata);
                         }
                     }
                     return status(CREATED).entity(new ObjectCopyResponse()).build();
@@ -812,15 +812,15 @@ public class ObjectController<T> {
             metadataService.delete(targetNamespace);
         }
 
-        final Map<String, Object> systemMetadata = systemMetadataService.getProperties(sourceNamespace);
-        systemMetadataService.setProperties(targetNamespace, systemMetadata);
+        final Map<String, Object> systemMetadata = systemMetadataService.getValues(sourceNamespace);
+        systemMetadataService.setValues(targetNamespace, systemMetadata);
 
         if ( request.getFreshMetadata() == null || ! TRUE.equals(request.getFreshMetadata()) ) {
-            final Map<String, Object> sourceMetadata = metadataService.getProperties(sourceNamespace);
+            final Map<String, Object> sourceMetadata = metadataService.getValues(sourceNamespace);
             if ( ! sourceMetadata.isEmpty() ) {
-                HashMap<String, Object> targetAllMetadata = new HashMap<>(metadataService.getProperties(targetNamespace));
+                HashMap<String, Object> targetAllMetadata = new HashMap<>(metadataService.getValues(targetNamespace));
                 targetAllMetadata.putAll(sourceMetadata);
-                metadataService.setProperties(targetNamespace, targetAllMetadata);
+                metadataService.setValues(targetNamespace, targetAllMetadata);
             }
         }
 
@@ -840,7 +840,7 @@ public class ObjectController<T> {
         final String contentType = httpHeaders.getHeaderString(CONTENT_TYPE);
         if ( contentType != null ) {
             systemMetadata.put(CONTENT_TYPE, contentType);
-            systemMetadataService.updateProperty(targetNamespace, CONTENT_TYPE, contentType);
+            systemMetadataService.update(targetNamespace, CONTENT_TYPE, contentType);
         }
 
         final ResponseBuilder builder = status(CREATED).entity(response);
@@ -848,7 +848,7 @@ public class ObjectController<T> {
         final String namespace = objectService.getNamespace(targetContainer, targetObject);
         putSystemMetadata(namespace, builder);
 
-        for (Map.Entry<String, Object> entry : metadataService.getProperties(targetNamespace).entrySet()) {
+        for (Map.Entry<String, Object> entry : metadataService.getValues(targetNamespace).entrySet()) {
             final String key         = entry.getKey();
             final Object headerValue = entry.getValue();
             final String headerName  = "X-Object-Meta-" + key;
@@ -879,23 +879,23 @@ public class ObjectController<T> {
     }
 
     protected void putSystemMetadata(final String namespace, final ResponseBuilder builder) {
-        if ( systemMetadataService.getProperty(namespace, CONTENT_TYPE) != null ) {
-            response.setContentType(systemMetadataService.getProperty(namespace, CONTENT_TYPE));
+        if ( systemMetadataService.get(namespace, CONTENT_TYPE) != null ) {
+            response.setContentType(systemMetadataService.get(namespace, CONTENT_TYPE));
         }
-        if ( systemMetadataService.getProperty(namespace, CONTENT_ENCODING) != null ) {
-            builder.header(CONTENT_ENCODING, systemMetadataService.getProperty(namespace, CONTENT_ENCODING));
+        if ( systemMetadataService.get(namespace, CONTENT_ENCODING) != null ) {
+            builder.header(CONTENT_ENCODING, systemMetadataService.get(namespace, CONTENT_ENCODING));
         }
-        if ( systemMetadataService.getProperty(namespace, CONTENT_DISPOSITION) != null ) {
-            builder.header(CONTENT_DISPOSITION, systemMetadataService.getProperty(namespace, CONTENT_DISPOSITION));
+        if ( systemMetadataService.get(namespace, CONTENT_DISPOSITION) != null ) {
+            builder.header(CONTENT_DISPOSITION, systemMetadataService.get(namespace, CONTENT_DISPOSITION));
         }
-        if ( systemMetadataService.getProperty(namespace, X_DELETE_AT) != null ) {
-            builder.header(X_DELETE_AT, systemMetadataService.getProperty(namespace, X_DELETE_AT));
+        if ( systemMetadataService.get(namespace, X_DELETE_AT) != null ) {
+            builder.header(X_DELETE_AT, systemMetadataService.get(namespace, X_DELETE_AT));
         }
-        if ( systemMetadataService.getProperty(namespace, X_DELETE_AFTER) != null ) {
-            builder.header(X_DELETE_AFTER, systemMetadataService.getProperty(namespace, X_DELETE_AFTER));
+        if ( systemMetadataService.get(namespace, X_DELETE_AFTER) != null ) {
+            builder.header(X_DELETE_AFTER, systemMetadataService.get(namespace, X_DELETE_AFTER));
         }
-        if ( systemMetadataService.getProperty(namespace, X_OBJECT_MANIFEST) != null ) {
-            builder.header(X_OBJECT_MANIFEST, systemMetadataService.getProperty(namespace, X_OBJECT_MANIFEST));
+        if ( systemMetadataService.get(namespace, X_OBJECT_MANIFEST) != null ) {
+            builder.header(X_OBJECT_MANIFEST, systemMetadataService.get(namespace, X_OBJECT_MANIFEST));
         }
     }
 
@@ -910,28 +910,28 @@ public class ObjectController<T> {
                 // A metadata key without a value.
                 // The metadata key already exists for the account.
                 if (value == null) {
-                    if (metadataService.containsProperty(namespace, name)) {
+                    if (metadataService.contains(namespace, name)) {
                         // The API removes the metadata item from the account.
-                        metadataService.removeProperty(namespace, name);
+                        metadataService.delete(namespace, name);
                     }
                 } else {
                     // A metadata key value.
                     // The metadata key already exists for the account.
-                    if (metadataService.containsProperty(namespace, name)) {
+                    if (metadataService.contains(namespace, name)) {
                         // The API updates the metadata key value for the account.
-                        metadataService.updateProperty(namespace, name, value);
+                        metadataService.update(namespace, name, value);
                     } else {
                         // A metadata key value.
                         // The metadata key does not already exist for the account.
                         // The API adds the metadata key and value pair, or item, to the account.
-                        metadataService.addProperty(namespace, name, value);
+                        metadataService.add(namespace, name, value);
                     }
                 }
             }
             if (key.startsWith(META_REMOVE_PREFIX)) {
                 String name = key.substring(META_REMOVE_PREFIX.length(), key.length());
-                if (metadataService.containsProperty(namespace, name)) {
-                    metadataService.removeProperty(namespace, name);
+                if (metadataService.contains(namespace, name)) {
+                    metadataService.delete(namespace, name);
                 }
             }
         }
@@ -1057,16 +1057,16 @@ public class ObjectController<T> {
         final Map<String, Object> sourceSystemMetadata;
         if (copy) {
             final String              sourceNamespace      = objectService.getNamespace(sourceContainer, sourceObject);
-            final Map<String, Object> sourceMetadata       = metadataService.getProperties(sourceNamespace);
-                                      sourceSystemMetadata = systemMetadataService.getProperties(sourceNamespace);
+            final Map<String, Object> sourceMetadata       = metadataService.getValues(sourceNamespace);
+                                      sourceSystemMetadata = systemMetadataService.getValues(sourceNamespace);
 
             systemMetadataService.delete(targetNamespace);
             metadataService.delete(targetNamespace);
             if ( ! sourceMetadata.isEmpty() ) {
                 if ( request.getFreshMetadata() == null || ! TRUE.equals(request.getFreshMetadata()) ) {
-                    final Map<String, Object> metadata = metadataService.getProperties(sourceNamespace);
+                    final Map<String, Object> metadata = metadataService.getValues(sourceNamespace);
                     if ( ! metadata.isEmpty() ) {
-                        metadataService.setProperties(targetNamespace, sourceMetadata);
+                        metadataService.setValues(targetNamespace, sourceMetadata);
                     }
                 }
             }
@@ -1125,7 +1125,7 @@ public class ObjectController<T> {
 
         updateMetadata(targetNamespace);
 
-        systemMetadataService.setProperties(targetNamespace, systemMetadata);
+        systemMetadataService.setValues(targetNamespace, systemMetadata);
 
         final String lastModified = FORMATTER.format(ofInstant(ofEpochMilli(objectService.getLastModified(targetObject)), GMT));
         response.setLastModified(lastModified);

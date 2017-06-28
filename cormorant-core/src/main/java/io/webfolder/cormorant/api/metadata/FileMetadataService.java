@@ -15,11 +15,10 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package io.webfolder.cormorant.api.property;
+package io.webfolder.cormorant.api.metadata;
 
 import static io.webfolder.cormorant.api.Json.object;
-import static io.webfolder.cormorant.api.property.MetadataServiceFactory.METADATA_EXTENSION;
-import static java.lang.Long.parseLong;
+import static io.webfolder.cormorant.api.metadata.MetadataServiceFactory.METADATA_EXTENSION;
 import static java.lang.String.valueOf;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.nio.file.Files.createDirectories;
@@ -63,7 +62,7 @@ public class FileMetadataService implements MetadataService {
     }
 
     @Override
-    public String getProperty(final String namespace, final String propertyName) {
+    public String get(final String namespace, final String propertyName) {
         final Json json = read(namespace);
         if (json == null) {
             return null;
@@ -78,30 +77,7 @@ public class FileMetadataService implements MetadataService {
     }
 
     @Override
-    public Long getPropertyLong(final String namespace, final String propertyName) {
-        final Json json = read(namespace);
-        if (json == null) {
-            return null;
-        }
-        final Json properties = json.at(groupName);
-        if ( ! properties.isObject() ) {
-            return null;
-        }
-        final Json value = properties.at(propertyName);
-        if (value == null) {
-            return null;
-        }
-        if (value.isNumber()) {
-            return value.asLong();
-        } else if (value.isString()) {
-            return parseLong(value.asString());
-        } else {
-            return null;
-        }
-    }
-
-    @Override
-    public boolean containsProperty(final String namespace, final String propertyName) {
+    public boolean contains(final String namespace, final String propertyName) {
         final Json json = read(namespace);
         if (json == null) {
             return false;
@@ -114,7 +90,7 @@ public class FileMetadataService implements MetadataService {
     }
 
     @Override
-    public void removeProperty(final String namespace, final String propertyName) {
+    public void delete(final String namespace, final String propertyName) {
         final Json json = read(namespace);
         if ( json == null ) {
             return;
@@ -130,12 +106,12 @@ public class FileMetadataService implements MetadataService {
     }
 
     @Override
-    public void updateProperty(final String namespace, String propertyName, final String value) {
-        addProperty(namespace, propertyName, value);
+    public void update(final String namespace, String propertyName, final String value) {
+        add(namespace, propertyName, value);
     }
 
     @Override
-    public void addProperty(final String namespace, final String propertyName, final String value) {
+    public void add(final String namespace, final String propertyName, final String value) {
         Json json = read(namespace);
         if (json == null) {
             json = object();
@@ -158,7 +134,7 @@ public class FileMetadataService implements MetadataService {
     }
 
     @Override
-    public Map<String, Object> getProperties(final String namespace) {
+    public Map<String, Object> getValues(final String namespace) {
         final Json json = read(namespace);
         if ( json == null ) {
             return new HashMap<>();
@@ -172,7 +148,7 @@ public class FileMetadataService implements MetadataService {
     }
 
     @Override
-    public void setProperties(
+    public void setValues(
                         final String namespace,
                         final Map<String, Object> map) {
         Json json = read(namespace);

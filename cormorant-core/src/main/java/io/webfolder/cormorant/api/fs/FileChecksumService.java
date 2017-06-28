@@ -106,7 +106,7 @@ public class FileChecksumService implements ChecksumService<Path> {
                 return mimeType != null ? mimeType : DEFAULT_MIME_TYPE;
             } else {
                 final String namespace = objectService.getNamespace(container, object);
-                String mimeType = headerService.getProperty(namespace, CONTENT_TYPE);
+                String mimeType = headerService.get(namespace, CONTENT_TYPE);
                 return mimeType != null ? mimeType : DEFAULT_MIME_TYPE;
             }
         }
@@ -117,8 +117,8 @@ public class FileChecksumService implements ChecksumService<Path> {
                         final Path container,
                         final Path object) {
         final String  namespace         = objectService.getNamespace(container, object);
-        final String  precalculatedETag = headerService.getProperty(namespace, ETAG);
-        final String  contentLength     = headerService.getProperty(namespace, CONTENT_LENGTH);
+        final String  precalculatedETag = headerService.get(namespace, ETAG);
+        final String  contentLength     = headerService.get(namespace, CONTENT_LENGTH);
         if ( precalculatedETag == null          ||
              precalculatedETag.trim().isEmpty() ||
              contentLength == null              ||

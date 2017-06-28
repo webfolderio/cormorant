@@ -19,6 +19,7 @@ package io.webfolder.cormorant.api.fs;
 
 import static io.webfolder.cormorant.api.fs.PathNullStream.EMPTY_STREAM;
 import static java.lang.Integer.MAX_VALUE;
+import static java.lang.Long.parseLong;
 import static java.nio.file.Files.createDirectory;
 import static java.nio.file.Files.exists;
 import static java.nio.file.Files.isDirectory;
@@ -183,21 +184,21 @@ public class PathContainerService implements ContainerService<Path> {
 
     @Override
     public long getMaxQuotaBytes(String accountName, String containerName) {
-        final Long value = metadataService.getPropertyLong(containerName, "quota-bytes");
+        final String value = metadataService.get(containerName, "quota-bytes");
         if (value == null) {
             return Long.MAX_VALUE;
         } else {
-            return value.longValue();
+            return parseLong(value);
         }
     }
 
     @Override
     public long getMaxQuotaCount(String accountName, String containerName) {
-        final Long value = metadataService.getPropertyLong(containerName, "quota-count");
+        final String value = metadataService.get(containerName, "quota-count");
         if (value == null) {
             return Long.MAX_VALUE;
         } else {
-            return value.longValue();
+            return parseLong(value);
         }
     }
 

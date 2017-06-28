@@ -162,7 +162,7 @@ public class AccountController {
                 response.setAccountBytesUsed(account.getTotalBytesUsed());
                 response.setAccountObjectCount(account.getTotalObjectCount());
                 response.setAccountContainerCount(account.getTotalContainerCount());
-                for (Map.Entry<String, Object> entry : metadataService.getProperties(account.getName()).entrySet()) {
+                for (Map.Entry<String, Object> entry : metadataService.getValues(account.getName()).entrySet()) {
                     final String key = entry.getKey();
                     final Object headerValue = entry.getValue();
                     final String headerName = "X-Account-Meta-" + key;
@@ -195,28 +195,28 @@ public class AccountController {
                     // A metadata key without a value.
                     // The metadata key already exists for the account.
                     if (value == null || value.isEmpty()) {
-                        if (metadataService.containsProperty(account, name)) {
+                        if (metadataService.contains(account, name)) {
                             // The API removes the metadata item from the account.
-                            metadataService.removeProperty(account, name);
+                            metadataService.delete(account, name);
                         }
                     } else {
                         // A metadata key value.
                         // The metadata key already exists for the account.
-                        if (metadataService.containsProperty(account, name)) {
+                        if (metadataService.contains(account, name)) {
                             // The API updates the metadata key value for the account.
-                            metadataService.updateProperty(account, name, value);
+                            metadataService.update(account, name, value);
                         } else {
                             // A metadata key value.
                             // The metadata key does not already exist for the account.
                             // The API adds the metadata key and value pair, or item, to the account.
-                            metadataService.addProperty(account, name, value);
+                            metadataService.add(account, name, value);
                         }
                     }
                 }
                 if (key.startsWith(META_REMOVE_PREFIX)) {
                     String name = key.substring(META_REMOVE_PREFIX.length(), key.length());
-                    if (metadataService.containsProperty(account, name)) {
-                        metadataService.removeProperty(account, name);
+                    if (metadataService.contains(account, name)) {
+                        metadataService.delete(account, name);
                     }
                 }
             }

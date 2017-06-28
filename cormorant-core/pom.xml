@@ -160,6 +160,11 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
+            <groupId>org.xerial</groupId>
+            <artifactId>sqlite-jdbc</artifactId>
+            <version>3.19.3</version>
+        </dependency>
+        <dependency>
             <groupId>org.jboss.spec.javax.annotation</groupId>
             <artifactId>jboss-annotations-api_1.2_spec</artifactId>
             <version>1.0.0.Final</version>

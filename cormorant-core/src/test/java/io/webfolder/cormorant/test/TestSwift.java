@@ -108,6 +108,12 @@ public class TestSwift {
 
         Map<String, User> users = new HashMap<>();
 
+        try {
+            Files.delete(Paths.get("cormorant.db"));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
         User user = new User("myaccount",
                              "mypassword",
                              "test@example.com",

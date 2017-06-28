@@ -190,7 +190,7 @@ public class ContainerController<T> {
             response.setAcceptRanges("bytes");
             response.setTimestamp(container.getTimestamp());
             response.setStoragePolicy("default");
-            for (Map.Entry<String, Object> entry : metadataService.getProperties(request.getContainer()).entrySet()) {
+            for (Map.Entry<String, Object> entry : metadataService.getValues(request.getContainer()).entrySet()) {
                 final String key         = entry.getKey();
                 final Object headerValue = entry.getValue();
                 final String headerName  = "X-Container-Meta-" + key;
@@ -214,28 +214,28 @@ public class ContainerController<T> {
                 // A metadata key without a value.
                 // The metadata key already exists for the account.
                 if (value == null || value.isEmpty()) {
-                    if (metadataService.containsProperty(container, name)) {
+                    if (metadataService.contains(container, name)) {
                         // The API removes the metadata item from the account.
-                        metadataService.removeProperty(container, name);
+                        metadataService.delete(container, name);
                     }
                 } else {
                     // A metadata key value.
                     // The metadata key already exists for the account.
-                    if (metadataService.containsProperty(container, name)) {
+                    if (metadataService.contains(container, name)) {
                         // The API updates the metadata key value for the account.
-                        metadataService.updateProperty(container, name, value);
+                        metadataService.update(container, name, value);
                     } else {
                         // A metadata key value.
                         // The metadata key does not already exist for the account.
                         // The API adds the metadata key and value pair, or item, to the account.
-                        metadataService.addProperty(container, name, value);
+                        metadataService.add(container, name, value);
                     }
                 }
             }
             if (key.startsWith(META_REMOVE_PREFIX)) {
                 String name = key.substring(META_REMOVE_PREFIX.length(), key.length());
-                if (metadataService.containsProperty(container, name)) {
-                    metadataService.removeProperty(container, name);
+                if (metadataService.contains(container, name)) {
+                    metadataService.delete(container, name);
                 }
             }
         }

@@ -101,7 +101,7 @@ class SecurityFilter<T> implements ContainerRequestFilter {
                 if (unixTime > currentTimeMillis()) {
                     final String hmacBody = format("%s\n%s\n%s", requestContext.getMethod(), tue, contextPath + requestContext.getUriInfo().getPath());
                     final String account = requestContext.getUriInfo().getPathParameters().getFirst("account");
-                    String tempUrlKey = accountMetadataService.getProperty(account, "temp-url-key");
+                    String tempUrlKey = accountMetadataService.get(account, "temp-url-key");
                     if ( tempUrlKey != null && ! tempUrlKey.isEmpty() ) {
                         String hash = calculateHash(hmacBody, tempUrlKey);
                         if (  tus.equalsIgnoreCase(hash) ) {
