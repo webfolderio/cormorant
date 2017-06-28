@@ -129,6 +129,8 @@ public class TestBase {
                                                     "",
                                                     "myaccount");
 
+        application.setEnableMetadataCache(true);
+
         application.setMetadataStorage(MetadataStorage.File);
         server.deploy(application);
 

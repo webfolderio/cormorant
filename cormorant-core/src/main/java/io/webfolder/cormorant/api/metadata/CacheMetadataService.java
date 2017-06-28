@@ -18,79 +18,97 @@ public class CacheMetadataService implements MetadataService {
 
     private final MetadataService delegate;
 
+    private final Object mutex = new Object();
+
     public CacheMetadataService(final MetadataService delegate) {
         this.delegate = delegate;
     }
 
     @Override
-    public synchronized String get(String namespace, String key) throws SQLException {
-        String value = cache.get(namespace, key);
-        if ( value != null ) {
-            return value;
+    public String get(String namespace, String key) throws SQLException {
+        synchronized (mutex) {
+            String value = cache.get(namespace, key);
+            if ( value != null ) {
+                return value;
+            }
+            return delegate.get(namespace, key);
         }
-        return delegate.get(namespace, key);
     }
 
     @Override
-    public synchronized boolean contains(String namespace, String key) throws SQLException {
-        return get(namespace, key) != null;
+    public boolean contains(String namespace, String key) throws SQLException {
+        synchronized (mutex) {
+            return get(namespace, key) != null;
+        }
     }
 
     @Override
-    public synchronized void update(String namespace, String key, String value) throws SQLException {
-        delegate.update(namespace, key, value);
-        cache.removeMultiKey(namespace, key);
-        cache.put(namespace, key, value);
+    public void update(String namespace, String key, String value) throws SQLException {
+        synchronized (mutex) {
+            delegate.update(namespace, key, value);
+            cache.removeMultiKey(namespace, key);
+            cache.put(namespace, key, value);
+        }
     }
 
     @Override
-    public synchronized void add(String namespace, String key, String value) throws SQLException {
-        delegate.add(namespace, key, value);
-        cache.removeMultiKey(namespace, key);
-        cache.put(namespace, key, value);
+    public void add(String namespace, String key, String value) throws SQLException {
+        synchronized (mutex) {
+            delegate.add(namespace, key, value);
+            cache.removeMultiKey(namespace, key);
+            cache.put(namespace, key, value);
+        }
     }
 
     @Override
     @SuppressWarnings({ "rawtypes" })
-    public synchronized Map<String, Object> getValues(String namespace) throws SQLException {
-        final MapIterator<MultiKey<? extends String>, String> iter = cache.mapIterator();
-        final Map<String, Object> map = new HashMap<>();
-        if (iter.hasNext()) {
-            while (iter.hasNext()) {
-                final MultiKey multiKey = iter.next();
-                final Object[] keys = multiKey.getKeys();
-                if (keys.length == 2 && namespace.equals(keys[0])) {
-                    String key = (String) keys[1];
-                    String value = cache.get(namespace, key);
-                    map.put(key, value);
+    public Map<String, Object> getValues(String namespace) throws SQLException {
+        synchronized (mutex) {
+            final MapIterator<MultiKey<? extends String>, String> iter = cache.mapIterator();
+            final Map<String, Object> map = new HashMap<>();
+            if (iter.hasNext()) {
+                while (iter.hasNext()) {
+                    final MultiKey multiKey = iter.next();
+                    final Object[] keys = multiKey.getKeys();
+                    if (keys.length == 2 && namespace.equals(keys[0])) {
+                        String key = (String) keys[1];
+                        String value = cache.get(namespace, key);
+                        map.put(key, value);
+                    }
                 }
             }
-        }
-        if ( ! map.isEmpty() ) {
-            return map;
-        }
-        return delegate.getValues(namespace);
-    }
-
-    @Override
-    public synchronized void setValues(String namespace, Map<String, Object> values) throws SQLException {
-        delegate.setValues(namespace, values);
-        cache.removeAll(namespace);
-        for (String key : values.keySet()) {
-            final Object value = values.get(key);
-            cache.put(namespace, key, value != null ? valueOf(value) : null);
+            if ( ! map.isEmpty() ) {
+                return map;
+            }
+            return delegate.getValues(namespace);
         }
     }
 
     @Override
-    public synchronized void delete(String namespace, String key) throws SQLException {
-        delegate.delete(namespace, key);
-        cache.removeMultiKey(namespace, key);
+    public void setValues(String namespace, Map<String, Object> values) throws SQLException {
+        synchronized (mutex) {
+            delegate.setValues(namespace, values);
+            cache.removeAll(namespace);
+            for (String key : values.keySet()) {
+                final Object value = values.get(key);
+                cache.put(namespace, key, value != null ? valueOf(value) : null);
+            }
+        }
     }
 
     @Override
-    public synchronized void delete(String namespace) throws SQLException {
-        delegate.delete(namespace);
-        cache.removeAll(namespace);
+    public void delete(String namespace, String key) throws SQLException {
+        synchronized (mutex) {
+            delegate.delete(namespace, key);
+            cache.removeMultiKey(namespace, key);
+        }
+    }
+
+    @Override
+    public void delete(String namespace) throws SQLException {
+        synchronized (mutex) {
+            delegate.delete(namespace);
+            cache.removeAll(namespace);
+        }
     }
 }

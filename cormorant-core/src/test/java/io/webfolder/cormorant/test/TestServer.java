@@ -85,15 +85,18 @@ public class TestServer {
         AccountService accountService = new TestAccountService(objectStore);
         AuthenticationService authenticationService = new DefaultAuthenticationService(users);
 
-        server.deploy(
-                new CormorantApplication(objectStore,
-                                         metadataStore,
-                                         accountService,
-                                         authenticationService,
-                                         server.getHost(),
-                                         server.getPort(),
-                                         "",
-                                         "myaccount"));
+        CormorantApplication application = new CormorantApplication(objectStore,
+                                                metadataStore,
+                                                accountService,
+                                                authenticationService,
+                                                server.getHost(),
+                                                server.getPort(),
+                                                "",
+                                                "myaccount");
+
+        application.setEnableMetadataCache(true);
+
+        server.deploy(application);
 
         CountDownLatch latch = new CountDownLatch(1);
 

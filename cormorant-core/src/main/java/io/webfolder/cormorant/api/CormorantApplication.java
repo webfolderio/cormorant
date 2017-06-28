@@ -17,12 +17,14 @@
  */
 package io.webfolder.cormorant.api;
 
+import static io.webfolder.cormorant.api.metadata.MetadataStorage.*;
 import static io.webfolder.cormorant.api.metadata.CacheNames.ACCOUNT;
 import static io.webfolder.cormorant.api.metadata.CacheNames.CONTAINER;
 import static io.webfolder.cormorant.api.metadata.CacheNames.OBJECT;
 import static io.webfolder.cormorant.api.metadata.CacheNames.OBJECT_SYS;
-import static java.util.Collections.synchronizedMap;
 import static java.util.concurrent.TimeUnit.DAYS;
+import static net.jodah.expiringmap.ExpirationPolicy.CREATED;
+import static net.jodah.expiringmap.ExpiringMap.builder;
 
 import java.nio.file.Path;
 import java.security.Principal;
@@ -31,9 +33,6 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.ws.rs.core.Application;
-
-import org.apache.commons.collections4.map.LRUMap;
-import org.apache.commons.collections4.map.PassiveExpiringMap;
 
 import io.webfolder.cormorant.api.fs.FileChecksumService;
 import io.webfolder.cormorant.api.fs.PathContainerService;
@@ -75,6 +74,8 @@ public class CormorantApplication extends Application {
 
     private MetadataStorage              metadataStorage;
 
+    private boolean                      enableMetadataCache;
+
     public CormorantApplication(
                 final Path objectStore,
                 final Path metadataStore,
@@ -92,7 +93,8 @@ public class CormorantApplication extends Application {
         this.port                   = port;
         this.contextPath            = contextPath;
         this.accountName            = accountName;
-        setMetadataStorage(MetadataStorage.SQLite);
+        setMetadataStorage(SQLite);
+        setEnableMetadataCache(false);
     }
 
     @Override
@@ -101,10 +103,10 @@ public class CormorantApplication extends Application {
 
         final MetadataServiceFactory metadataServiceFactory = new DefaultMetadataServiceFactory(metadataStore, getMetadataStorage());
 
-        final MetadataService accountMetadataService   = metadataServiceFactory.create(ACCOUNT   , isCacheable(ACCOUNT));
-        final MetadataService containerMetadataService = metadataServiceFactory.create(CONTAINER , isCacheable(CONTAINER));
-        final MetadataService objectMetadataService    = metadataServiceFactory.create(OBJECT    , isCacheable(OBJECT));
-        final MetadataService systemMetadataService    = metadataServiceFactory.create(OBJECT_SYS, isCacheable(OBJECT));
+        final MetadataService accountMetadataService   = metadataServiceFactory.create(ACCOUNT   , isEnableMetadataCache());
+        final MetadataService containerMetadataService = metadataServiceFactory.create(CONTAINER , isEnableMetadataCache());
+        final MetadataService objectMetadataService    = metadataServiceFactory.create(OBJECT    , isEnableMetadataCache());
+        final MetadataService systemMetadataService    = metadataServiceFactory.create(OBJECT_SYS, isEnableMetadataCache());
 
         final FileChecksumService    checksumService  = new FileChecksumService(objectMetadataService);
         final ContainerService<Path> containerService = new PathContainerService(objectStore, pathMaxCount, checksumService, containerMetadataService, systemMetadataService);
@@ -113,7 +115,11 @@ public class CormorantApplication extends Application {
         containerService.setObjectService(objectService);
         checksumService.setObjectService(objectService);
 
-        final Map<String, Principal> tokens = synchronizedMap(new PassiveExpiringMap<>(1, DAYS, new LRUMap<>(100_000)));
+        final Map<String, Principal> tokens = builder()
+                                                .expirationPolicy(CREATED)
+                                                .expiration(1, DAYS)
+                                                .maxSize(100_000)
+                                            .build();
 
         singletons.add(new HealthCheckController());
 
@@ -159,5 +165,13 @@ public class CormorantApplication extends Application {
 
     public void setMetadataStorage(MetadataStorage metadataStorage) {
         this.metadataStorage = metadataStorage;
+    }
+
+    public boolean isEnableMetadataCache() {
+        return enableMetadataCache;
+    }
+
+    public void setEnableMetadataCache(boolean enableMetadataCache) {
+        this.enableMetadataCache = enableMetadataCache;
     }
 }
