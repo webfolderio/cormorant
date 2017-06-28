@@ -30,6 +30,7 @@ import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
 import org.junit.Test;
+import org.junit.runner.JUnitCore;
 import org.pmw.tinylog.Configurator;
 import org.pmw.tinylog.Level;
 import org.pmw.tinylog.writers.ConsoleWriter;
@@ -132,5 +133,9 @@ public class TestServer {
             e.printStackTrace();
             System.exit(-2);
         }
+
+        server.stop();
+
+        JUnitCore.main(TestCormorant.class.getName());
     }
 }

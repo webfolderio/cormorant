@@ -273,7 +273,8 @@
                                 <exclude>io/webfolder/cormorant/internal/request/**</exclude>
                                 <exclude>io/webfolder/cormorant/internal/response/**</exclude>
                             </excludes>
-                            <append>true</append>
+                            <append>false</append>
+                            <sourceEncoding>utf-8</sourceEncoding>
                         </configuration>
                     </plugin>
                 </plugins>

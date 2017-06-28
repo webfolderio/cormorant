@@ -99,7 +99,7 @@ public class TestBase {
         Configurator
                 .defaultConfig()
                 .writer(new ConsoleWriter())
-                .level(Level.INFO)
+                .level("error".equals(System.getProperty("log.level", "info")) ? Level.ERROR : Level.INFO)
                 .formatPattern("{{level}|min-size=8} {date} {message}")
                 .activate();
 

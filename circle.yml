@@ -41,7 +41,7 @@ jobs:
           name: mvn test
           command: |
               cd cormorant-core
-              mvn -Preport-jacoco test jacoco:report
+              mvn -q -Dlog.level=error test
               rm -rf mydir
               rm -rf mymetadata
               mkdir mydir
