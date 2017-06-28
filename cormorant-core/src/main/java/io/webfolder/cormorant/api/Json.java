@@ -96,11 +96,6 @@ public class Json {
     }
 
     @Override
-    public String toString() {
-        return delegate.toString();
-    }
-
-    @Override
     public int hashCode() {
         return delegate.hashCode();
     }

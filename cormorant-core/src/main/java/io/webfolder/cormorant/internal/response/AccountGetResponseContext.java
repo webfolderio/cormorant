@@ -33,9 +33,4 @@ public class AccountGetResponseContext {
     public List<AccountGetResponseBody> getBody() {
         return body;
     }
-
-    @Override
-    public String toString() {
-        return "AccountGetResponseContext [response=" + response + ", body=" + body + "]";
-    }
 }

@@ -36,9 +36,4 @@ public class ContainerGetResponseContext<T> {
     public ResourceStream<T> getBody() {
         return body;
     }
-
-    @Override
-    public String toString() {
-        return "ContainerGetResponseContext [response=" + response + ", body=" + body + "]";
-    }
 }

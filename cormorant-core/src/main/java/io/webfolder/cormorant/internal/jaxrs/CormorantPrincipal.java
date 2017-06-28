@@ -64,10 +64,4 @@ class CormorantPrincipal implements Principal {
     public String getAuditId() {
         return auditId;
     }
-
-    @Override
-    public String toString() {
-        return "CormorantPrincipal [name=" + name + ", token=" + token + ", expires=" + expires + ", auditId=" + auditId
-                + "]";
-    }
 }
