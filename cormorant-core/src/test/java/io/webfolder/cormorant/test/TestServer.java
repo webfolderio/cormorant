@@ -21,6 +21,8 @@ import static io.undertow.Handlers.predicate;
 import static io.undertow.Handlers.requestDump;
 import static io.undertow.predicate.Predicates.path;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
@@ -47,6 +49,14 @@ public class TestServer {
     @Test
     public void startServer() {
         CormorantServer server = new CormorantServer();
+
+        try {
+            if (Files.exists(Paths.get("cormorant.db"))) {
+                Files.delete(Paths.get("cormorant.db"));
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
         System.setProperty("org.jboss.logging.provider", "slf4j");
 
