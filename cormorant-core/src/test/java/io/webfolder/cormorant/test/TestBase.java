@@ -120,23 +120,19 @@ public class TestBase {
         AccountService accountService = new TestAccountService(objectStore);
         AuthenticationService authenticationService = new DefaultAuthenticationService(users);
 
-        boolean startServer = "true".equals(System.getProperty("start.server", "true"));
+        CormorantApplication application = new CormorantApplication(objectStore,
+                                                    metadataStore,
+                                                    accountService,
+                                                    authenticationService,
+                                                    server.getHost(),
+                                                    server.getPort(),
+                                                    "",
+                                                    "myaccount");
 
-        if (startServer) {
-            CormorantApplication application = new CormorantApplication(objectStore,
-                                                        metadataStore,
-                                                        accountService,
-                                                        authenticationService,
-                                                        server.getHost(),
-                                                        server.getPort(),
-                                                        "",
-                                                        "myaccount");
+        application.setMetadataStorage(MetadataStorage.File);
+        server.deploy(application);
 
-            application.setMetadataStorage(MetadataStorage.File);
-            server.deploy(application);
-
-            server.start((root) -> { return Handlers.requestDump(root); });
-        }
+        server.start((root) -> { return Handlers.requestDump(root); });
 
         Iterable<Module> modules = ImmutableSet.<Module>of(
                                             new SLF4JLoggingModule());
