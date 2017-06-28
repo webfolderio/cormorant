@@ -36,7 +36,7 @@ public class JdbcMetadaService implements MetadataService {
         this.ds         = ds;
         this.schema     = schema;
         this.table      = table;
-        createTable();
+        init();
     }
 
     @Override
@@ -149,7 +149,7 @@ public class JdbcMetadaService implements MetadataService {
         return schema.isEmpty() ? "" : schema + ".";
     }
 
-    protected void createTable() {
+    protected void init() {
         try (Connection conn = ds.getConnection()) {
             ResultSet rs = conn.getMetaData().getTables(null, schema.isEmpty() ? null : schema, table, new String[] { "TABLE" });
             if ( ! rs.next() ) {
@@ -162,7 +162,7 @@ public class JdbcMetadaService implements MetadataService {
                     LOG.info("Database table [{}] created.", new Object[] { getSchemaKeyword() + table });
                     final String idxDDL = "create index IDX_" + table + " on " + getSchemaKeyword() + table + "(NAMESPACE, KEY)";
                     stmt.execute(idxDDL);
-                    LOG.info("Database table index [{}] created.", new Object[] { "IDX_" + table });
+                    LOG.info("Table index [{}] created.", new Object[] { "IDX_" + table });
                 }
             }
         } catch (SQLException e) {
