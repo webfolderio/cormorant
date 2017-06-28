@@ -160,7 +160,7 @@ public class JdbcMetadaService implements MetadataService {
                                            " (NAMESPACE VARCHAR(1024), KEY VARCHAR(1024), VALUE VARCHAR(4096))";
                     stmt.execute(tableDDL);
                     LOG.info("Database table [{}] created.", new Object[] { getSchemaKeyword() + table });
-                    final String idxDDL = "create unique index IDX_" + table + " on " + getSchemaKeyword() + table + "(NAMESPACE, KEY)";
+                    final String idxDDL = "create index IDX_" + table + " on " + getSchemaKeyword() + table + "(NAMESPACE, KEY)";
                     stmt.execute(idxDDL);
                     LOG.info("Database table index [{}] created.", new Object[] { "IDX_" + table });
                 }
