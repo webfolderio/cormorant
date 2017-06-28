@@ -46,19 +46,11 @@ public class FileMetadataService implements MetadataService {
 
     private final String groupName;
 
-    private final boolean cacheable;
-
-    private final Map<String, Object> cache;
-
     public FileMetadataService(
                 final Path                root     ,
-                final String              groupName,
-                final boolean             cacheable,
-                final Map<String, Object> cache) {
+                final String              groupName) {
         this.root      = root;
         this.groupName = groupName;
-        this.cacheable = cacheable;
-        this.cache     = cache;
     }
 
     @Override
@@ -182,11 +174,7 @@ public class FileMetadataService implements MetadataService {
         if ( ! path.startsWith(root) ) {
             throw new CormorantException("Unable to read property. Invalid path ["+ path.toString() + "].");
         }
-        if (cacheable) {
-            return (Json) cache.computeIfAbsent(namespace, key -> read(path));
-        } else {
-            return read(path);
-        }
+        return read(path);
     }
 
     protected void write(final String namespace, final Json json) {
@@ -205,10 +193,6 @@ public class FileMetadataService implements MetadataService {
             move(temp, dataFile, ATOMIC_MOVE, NOFOLLOW_LINKS);
         } catch (IOException e) {
             throw new CormorantException(e);
-        } finally {
-            if (cacheable) {
-                cache.remove(namespace);
-            }
         }
     }
 
@@ -242,7 +226,6 @@ public class FileMetadataService implements MetadataService {
                 exists(dataFile, NOFOLLOW_LINKS) &&
                 isRegularFile(dataFile, NOFOLLOW_LINKS) ) {
             try {
-                cache.remove(namespace);
                 Files.delete(dataFile);
             } catch (IOException e) {
                 throw new CormorantException("Unable to delete metadata file.", e);

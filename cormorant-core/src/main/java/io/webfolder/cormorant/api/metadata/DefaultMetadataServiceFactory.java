@@ -25,27 +25,21 @@ import static java.nio.file.Files.createDirectories;
 import static java.nio.file.Files.exists;
 import static java.nio.file.Files.isDirectory;
 import static java.nio.file.LinkOption.NOFOLLOW_LINKS;
-import static java.util.Collections.emptyMap;
 import static java.util.ServiceLoader.load;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.ServiceLoader;
 
 import io.webfolder.cormorant.api.DataSourceFactory;
 import io.webfolder.cormorant.api.SQLiteDataSourceFactory;
-import io.webfolder.cormorant.api.cache.CacheFactory;
-import io.webfolder.cormorant.api.cache.DefaultCacheFactory;
 import io.webfolder.cormorant.api.exception.CormorantException;
 import io.webfolder.cormorant.api.service.MetadataService;
 
 public class DefaultMetadataServiceFactory implements MetadataServiceFactory {
 
     private final Path            root        ;
-
-    private final CacheFactory    cacheFactory;
 
     private final DataSourceFactory dsFactory ;
 
@@ -54,11 +48,6 @@ public class DefaultMetadataServiceFactory implements MetadataServiceFactory {
     public DefaultMetadataServiceFactory(final Path root, final MetadataStorage storage) {
         this.root                                       = root;
         this.storage                                    = storage;
-        final ServiceLoader<CacheFactory> cacheFactory  = load(CacheFactory.class, getClass().getClassLoader());
-        final Iterator<CacheFactory>      cacheIterator = cacheFactory.iterator();
-        this.cacheFactory                               = cacheIterator.hasNext()  ?
-                                                          cacheIterator.next()     :
-                                                          new DefaultCacheFactory();
         final ServiceLoader<DataSourceFactory> dsServFactory = load(DataSourceFactory.class, getClass().getClassLoader());
         final Iterator<DataSourceFactory> dsServIterator = dsServFactory.iterator();
         this.dsFactory = dsServIterator.hasNext() ? dsServIterator.next() : SQLite.equals(storage) ? new SQLiteDataSourceFactory() : null;
@@ -81,17 +70,12 @@ public class DefaultMetadataServiceFactory implements MetadataServiceFactory {
         } else if ( ! isDirectory(absolutePath, NOFOLLOW_LINKS) ) {
             throw new CormorantException("Invalid property directory [" + absolutePath + "], namespace [" + cacheName + "].");
         }
-        final Map<String, Object> cache;
-        if (cacheable) {
-            cache = cacheFactory.create(cacheName);
-        } else {
-            cache = emptyMap();
-        }
         if (iterator.hasNext()) {
             return iterator.next();
         } else {
+            MetadataService metadataService;
             if (MetadataStorage.File.equals(storage)) {
-                return new FileMetadataService(absolutePath, groupName, cacheable, cache);
+                metadataService = new FileMetadataService(absolutePath, groupName);
             } else {
                 String schema = "";
                 String table  = "";
@@ -100,7 +84,12 @@ public class DefaultMetadataServiceFactory implements MetadataServiceFactory {
                     case CONTAINER: table = "CONTAINER_META"; break;
                     case OBJECT   : table = groupName.contains("system") ? "OBJECT_SYS_META" : "OBJECT_META"; break;
                 }
-                return new JdbcMetadaService(dsFactory.get(), schema, table);
+                metadataService = new JdbcMetadaService(dsFactory.get(), schema, table);
+            }
+            if (cacheable) {
+                return new CacheMetadataService(metadataService);
+            } else {
+                return metadataService;
             }
         }
     }
