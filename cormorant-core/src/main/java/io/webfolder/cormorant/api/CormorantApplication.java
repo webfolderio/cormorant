@@ -20,17 +20,20 @@ package io.webfolder.cormorant.api;
 import static io.webfolder.cormorant.api.metadata.CacheNames.ACCOUNT;
 import static io.webfolder.cormorant.api.metadata.CacheNames.CONTAINER;
 import static io.webfolder.cormorant.api.metadata.CacheNames.OBJECT;
-import static io.webfolder.cormorant.api.metadata.MetadataServiceFactory.METADATA;
-import static io.webfolder.cormorant.api.metadata.MetadataServiceFactory.SYSTEM_METADATA;
+import static io.webfolder.cormorant.api.metadata.CacheNames.OBJECT_SYS;
+import static java.util.Collections.synchronizedMap;
+import static java.util.concurrent.TimeUnit.DAYS;
 
 import java.nio.file.Path;
 import java.security.Principal;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 import javax.ws.rs.core.Application;
+
+import org.apache.commons.collections4.map.LRUMap;
+import org.apache.commons.collections4.map.PassiveExpiringMap;
 
 import io.webfolder.cormorant.api.fs.FileChecksumService;
 import io.webfolder.cormorant.api.fs.PathContainerService;
@@ -98,10 +101,10 @@ public class CormorantApplication extends Application {
 
         final MetadataServiceFactory metadataServiceFactory = new DefaultMetadataServiceFactory(metadataStore, getMetadataStorage());
 
-        final MetadataService accountMetadataService   = metadataServiceFactory.create(ACCOUNT  , METADATA       , isCacheable(ACCOUNT));
-        final MetadataService containerMetadataService = metadataServiceFactory.create(CONTAINER, METADATA       , isCacheable(CONTAINER));
-        final MetadataService objectMetadataService    = metadataServiceFactory.create(OBJECT   , METADATA       , isCacheable(OBJECT));
-        final MetadataService systemMetadataService    = metadataServiceFactory.create(OBJECT   , SYSTEM_METADATA, isCacheable(OBJECT));
+        final MetadataService accountMetadataService   = metadataServiceFactory.create(ACCOUNT   , isCacheable(ACCOUNT));
+        final MetadataService containerMetadataService = metadataServiceFactory.create(CONTAINER , isCacheable(CONTAINER));
+        final MetadataService objectMetadataService    = metadataServiceFactory.create(OBJECT    , isCacheable(OBJECT));
+        final MetadataService systemMetadataService    = metadataServiceFactory.create(OBJECT_SYS, isCacheable(OBJECT));
 
         final FileChecksumService    checksumService  = new FileChecksumService(objectMetadataService);
         final ContainerService<Path> containerService = new PathContainerService(objectStore, pathMaxCount, checksumService, containerMetadataService, systemMetadataService);
@@ -110,7 +113,7 @@ public class CormorantApplication extends Application {
         containerService.setObjectService(objectService);
         checksumService.setObjectService(objectService);
 
-        final Map<String, Principal> tokens = new ConcurrentHashMap<>();
+        final Map<String, Principal> tokens = synchronizedMap(new PassiveExpiringMap<>(1, DAYS, new LRUMap<>(100_000)));
 
         singletons.add(new HealthCheckController());
 

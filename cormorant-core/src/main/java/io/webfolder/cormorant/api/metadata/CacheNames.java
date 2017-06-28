@@ -19,13 +19,15 @@ package io.webfolder.cormorant.api.metadata;
 
 public interface CacheNames {
 
-    String ACCOUNT   = "metadata/account"     ;
+    String ACCOUNT    = "metadata/account"     ;
 
-    String CONTAINER = "metadata/container"   ;
+    String CONTAINER  = "metadata/container"   ;
 
-    String OBJECT    = "metadata/object"      ;
+    String OBJECT     = "metadata/object"      ;
 
-    String TOKENS    = "authentication/tokens";
+    String OBJECT_SYS = "metadata/object-sys"  ;
 
-    String USERS     = "authentication/users" ;
+    String TOKENS     = "authentication/tokens";
+
+    String USERS      = "authentication/users" ;
 }

@@ -20,6 +20,7 @@ package io.webfolder.cormorant.api.metadata;
 import static io.webfolder.cormorant.api.metadata.CacheNames.ACCOUNT;
 import static io.webfolder.cormorant.api.metadata.CacheNames.CONTAINER;
 import static io.webfolder.cormorant.api.metadata.CacheNames.OBJECT;
+import static io.webfolder.cormorant.api.metadata.CacheNames.OBJECT_SYS;
 import static io.webfolder.cormorant.api.metadata.MetadataStorage.SQLite;
 import static java.nio.file.Files.createDirectories;
 import static java.nio.file.Files.exists;
@@ -56,7 +57,6 @@ public class DefaultMetadataServiceFactory implements MetadataServiceFactory {
     @Override
     public MetadataService create(
                                 final String  cacheName,
-                                final String  groupName,
                                 final boolean cacheable) {
         final ServiceLoader<MetadataService> loader       = load(MetadataService.class, getClass().getClassLoader());
         final Iterator<MetadataService>      iterator     = loader.iterator();
@@ -70,27 +70,28 @@ public class DefaultMetadataServiceFactory implements MetadataServiceFactory {
         } else if ( ! isDirectory(absolutePath, NOFOLLOW_LINKS) ) {
             throw new CormorantException("Invalid property directory [" + absolutePath + "], namespace [" + cacheName + "].");
         }
+        MetadataService metadataService;
         if (iterator.hasNext()) {
-            return iterator.next();
+            metadataService = iterator.next();
         } else {
-            MetadataService metadataService;
             if (MetadataStorage.File.equals(storage)) {
-                metadataService = new FileMetadataService(absolutePath, groupName);
+                metadataService = new FileMetadataService(absolutePath, cacheName);
             } else {
                 String schema = "";
                 String table  = "";
                 switch (cacheName) {
-                    case ACCOUNT  : table = "ACCOUNT_META"  ; break;
-                    case CONTAINER: table = "CONTAINER_META"; break;
-                    case OBJECT   : table = groupName.contains("system") ? "OBJECT_SYS_META" : "OBJECT_META"; break;
+                    case ACCOUNT   : table = "ACCOUNT_META"   ; break;
+                    case CONTAINER : table = "CONTAINER_META" ; break;
+                    case OBJECT    : table = "OBJECT_META"    ; break;
+                    case OBJECT_SYS: table = "OBJECT_META_SYS"; break;
                 }
                 metadataService = new JdbcMetadaService(dsFactory.get(), schema, table);
             }
-            if (cacheable) {
-                return new CacheMetadataService(metadataService);
-            } else {
-                return metadataService;
-            }
+        }
+        if (cacheable) {
+            return new CacheMetadataService(metadataService);
+        } else {
+            return metadataService;
         }
     }
 }

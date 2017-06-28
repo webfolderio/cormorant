@@ -42,15 +42,19 @@ import io.webfolder.cormorant.api.service.MetadataService;
 
 public class FileMetadataService implements MetadataService {
 
+    private final String METADATA            = "metadata"       ;
+
+    private final String SYSTEM_METADATA     = "system-metadata";
+
     private final Path root;
 
     private final String groupName;
 
     public FileMetadataService(
                 final Path                root     ,
-                final String              groupName) {
+                final String              cacheName) {
         this.root      = root;
-        this.groupName = groupName;
+        this.groupName = cacheName.endsWith("-sys") ? SYSTEM_METADATA : METADATA;
     }
 
     @Override
