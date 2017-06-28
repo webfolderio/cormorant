@@ -40,6 +40,7 @@ jobs:
       - run:
           name: mvn test
           command: |
+              cd cormorant-core
               mvn -q -Preport-jacoco test jacoco:report
               rm -rf mydir
               rm -rf mymetadata
