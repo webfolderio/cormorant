@@ -98,7 +98,7 @@ public class PathContainerService implements ContainerService<Path> {
                     visitorPath = visitorPath.resolve(next);
                 }
             }
-        } else if (FORWARD_SLASH.equals(delimiter) || ( delimiter == null && prefix != null )) {
+        } else if (FORWARD_SLASH.equals(delimiter) || ( delimiter == null && path == null && prefix != null )) {
             recursive = false;
             if ( prefix != null ) {
                 for (String next : prefix.split(FORWARD_SLASH)) {
