@@ -1,3 +1,20 @@
+/**
+ * cormorant - Object Storage Server
+ * Copyright © 2017 WebFolder OÜ (support@webfolder.io)
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package io.webfolder.cormorant.api.metadata;
 
 import static java.lang.String.valueOf;
@@ -58,15 +75,7 @@ public class JdbcMetadaService implements MetadataService {
 
     @Override
     public boolean contains(final String namespace, final String key) throws SQLException {
-        final String sql = "select KEY from " + getSchemaKeyword() + table + " where NAMESPACE = ? and KEY = ?";
-        try (Connection conn = ds.getConnection();
-                PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, namespace);
-            pstmt.setString(2, key);
-            try (ResultSet rs = pstmt.executeQuery()) {
-                return rs.next();
-            }
-        }
+        return get(namespace, key) != null;
     }
 
     @Override

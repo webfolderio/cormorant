@@ -155,10 +155,6 @@ public class CormorantApplication extends Application {
         return 10_000;
     }
 
-    protected boolean isCacheable(final String cacheName) {
-        return true;
-    }
-
     public MetadataStorage getMetadataStorage() {
         return metadataStorage;
     }

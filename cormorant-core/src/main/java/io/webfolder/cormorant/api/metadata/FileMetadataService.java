@@ -74,15 +74,7 @@ public class FileMetadataService implements MetadataService {
 
     @Override
     public boolean contains(final String namespace, final String propertyName) {
-        final Json json = read(namespace);
-        if (json == null) {
-            return false;
-        }
-        final Json properties = json.at(groupName);
-        if ( properties == null || ! properties.isObject() ) {
-            return false;
-        }
-        return properties.has(propertyName);
+        return get(namespace, propertyName) != null;
     }
 
     @Override
