@@ -93,13 +93,19 @@ public class PathContainerService implements ContainerService<Path> {
         if ( path != null ) {
             recursive = false;
             visitorPath = visitorPath.resolve(path);
-        } else if ( prefix != null ) {
-            recursive = false;
-            visitorPath = visitorPath.resolve(prefix);
         }
 
         if (FORWARD_SLASH.equals(delimiter)) {
             recursive = false;
+            if ( prefix != null ) {
+                visitorPath = visitorPath.resolve(prefix);
+            }
+        }
+
+        visitorPath = visitorPath.toAbsolutePath();
+
+        if ( ! visitorPath.startsWith(container) ) {
+            throw new CormorantException("Invalid path [" + visitorPath.toString() + "]");
         }
 
         if ( ! recursive && ! exists(visitorPath) ) {
