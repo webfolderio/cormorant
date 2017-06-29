@@ -58,17 +58,20 @@ class PathVisitor extends SimpleFileVisitor<Path> implements  DirectoryStream<Pa
 
     private final boolean reverse;
 
+    private Path prefixPath;
+
     public PathVisitor(
                     final ListContainerOptions options,
                     final Path root,
                     final int pathMaxCount) {
-        this.delimiter = options.getDelimiter();
-        this.prefix    = options.getPrefix();
-        this.root      = root;
-        this.limit     = options.getLimit()     == null ? pathMaxCount           : options.getLimit();
-        this.marker    = options.getMarker()    != null ? options.getMarker()    : null;
-        this.endMarker = options.getEndMarker() != null ? options.getEndMarker() : null;
-        this.reverse   = TRUE.equals(options.getReverse());
+        this.delimiter  = options.getDelimiter();
+        this.prefix     = options.getPrefix();
+        this.root       = root;
+        this.limit      = options.getLimit()     == null ? pathMaxCount           : options.getLimit();
+        this.marker     = options.getMarker()    != null ? options.getMarker()    : null;
+        this.endMarker  = options.getEndMarker() != null ? options.getEndMarker() : null;
+        this.reverse    = TRUE.equals(options.getReverse());
+        this.prefixPath = prefix != null ? root.resolve(prefix).toAbsolutePath() : null;
     }
 
     @Override
@@ -92,7 +95,9 @@ class PathVisitor extends SimpleFileVisitor<Path> implements  DirectoryStream<Pa
     }
 
     protected FileVisitResult visit(final Path file) {
-        if ( delimiter == null &&
+        if ( prefixPath != null && prefixPath.equals(file) ) {
+            return CONTINUE;
+        } else if ( delimiter == null &&
                 prefix != null &&
                 ! getRelative(file).startsWith(prefix) ) {
             return CONTINUE;
