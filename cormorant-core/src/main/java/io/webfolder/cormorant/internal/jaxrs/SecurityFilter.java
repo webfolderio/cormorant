@@ -17,7 +17,6 @@
  */
 package io.webfolder.cormorant.internal.jaxrs;
 
-import static io.webfolder.cormorant.api.model.Permission.ADMIN;
 import static java.lang.Long.parseLong;
 import static java.lang.String.format;
 import static java.lang.System.currentTimeMillis;
@@ -139,7 +138,7 @@ class SecurityFilter<T> implements ContainerRequestFilter {
 
         // Let the authenticated user delete its own account
         // This logic is required to pass tempest (TokensV3Test.test_create_token)
-        boolean deleteSelf = ADMIN.equals(permission) &&
+        boolean deleteSelf = "cormorant-admin".equals(permission) &&
                                 "DELETE".equalsIgnoreCase(requestContext.getMethod()) &&
                                 principal.getName().equals(requestContext.getUriInfo().getPathParameters().getFirst("userId"));
 

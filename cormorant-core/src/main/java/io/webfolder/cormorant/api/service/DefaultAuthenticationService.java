@@ -17,7 +17,6 @@
  */
 package io.webfolder.cormorant.api.service;
 
-import static io.webfolder.cormorant.api.model.Permission.ADMIN;
 import static io.webfolder.cormorant.api.model.Role.Admin;
 import static io.webfolder.cormorant.api.model.Role.None;
 import static io.webfolder.cormorant.api.model.Role.valueOf;
@@ -65,7 +64,7 @@ public class DefaultAuthenticationService implements AuthenticationService {
         if (None.equals(user.getRole())) {
             return false;
         }
-        if ( ADMIN.equals(permission) && ! Admin.equals(user.getRole()) ) {
+        if ( "cormorant-admin".equals(permission) && ! Admin.equals(user.getRole()) ) {
             return false;
         }
         return true;

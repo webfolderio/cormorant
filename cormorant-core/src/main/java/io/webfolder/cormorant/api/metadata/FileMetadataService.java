@@ -64,9 +64,6 @@ public class FileMetadataService implements MetadataService {
             return null;
         }
         final Json properties = json.at(groupName);
-        if ( properties == null || ! properties.isObject() ) {
-            return null;
-        }
         final Map<String, Object> map = properties.asMap();
         final Object value = map.get(propertyName);
         return value == null ? null : valueOf(value);
@@ -80,13 +77,7 @@ public class FileMetadataService implements MetadataService {
     @Override
     public void delete(final String namespace, final String propertyName) {
         final Json json = read(namespace);
-        if ( json == null ) {
-            return;
-        }
         final Json properties = json.at(groupName);
-        if ( ! properties.isObject() ) {
-            return;
-        }
         if (properties.has(propertyName)) {
             properties.delAt(propertyName);
             write(namespace, json);
@@ -128,9 +119,6 @@ public class FileMetadataService implements MetadataService {
             return new HashMap<>();
         }
         final Json properties = json.at(groupName);
-        if ( properties == null || ! properties.isObject() ) {
-            return new HashMap<>();
-        }
         final Map<String, Object> map = properties.asMap();
         return map;
     }
@@ -147,19 +135,12 @@ public class FileMetadataService implements MetadataService {
         if ( properties == null ) {
             properties = json.set(groupName, object());
         }
-        Json group = json.at(groupName);
-        if (group == null) {
-            group = object();
-        }
         for (Map.Entry<String, Object> next : map.entrySet()) {
             final String key = next.getKey();
             final Object value = next.getValue();
             if ( value != null ) {
                 json.at(groupName)
                     .set(key, valueOf(value));
-            } else if (json.at(groupName).has(key)) {
-                json.at(groupName)
-                    .delAt(key);
             }
         }
         write(namespace, json);
@@ -204,9 +185,6 @@ public class FileMetadataService implements MetadataService {
             throw new CormorantException(e);
         }
         final String str = new String(content, UTF_8);
-        if (str.isEmpty()) {
-            return null;
-        }
         final Json json = Json.read(str);
         if ( ! json.isObject() ) {
             return null;

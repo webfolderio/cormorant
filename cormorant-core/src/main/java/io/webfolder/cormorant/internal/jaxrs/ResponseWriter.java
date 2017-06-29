@@ -306,6 +306,10 @@ public class ResponseWriter implements MessageBodyWriter {
 
         responseHeaders.add(VARY, "X-Auth-Token");
 
+        if (content != null && !"OK".equals(content)) {
+            System.err.println(content.toString());
+        }
+
         if ( content != null && ! content.trim().isEmpty() ) {
             try (OutputStream os = entityStream) {
                 os.write(content.getBytes(UTF_8));
