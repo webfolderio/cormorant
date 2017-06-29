@@ -108,7 +108,7 @@ public class CormorantApplication extends Application {
         final MetadataService objectMetadataService    = metadataServiceFactory.create(OBJECT    , isEnableMetadataCache());
         final MetadataService systemMetadataService    = metadataServiceFactory.create(OBJECT_SYS, isEnableMetadataCache());
 
-        final FileChecksumService    checksumService  = new FileChecksumService(objectMetadataService);
+        final FileChecksumService    checksumService  = new FileChecksumService(systemMetadataService);
         final ContainerService<Path> containerService = new PathContainerService(objectStore, pathMaxCount, checksumService, containerMetadataService, systemMetadataService);
         final ObjectService<Path>    objectService    = new PathObjectService(containerService, systemMetadataService, checksumService);
 

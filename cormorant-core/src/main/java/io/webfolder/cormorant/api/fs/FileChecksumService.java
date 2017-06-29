@@ -63,12 +63,12 @@ public class FileChecksumService implements ChecksumService<Path> {
 
     private final Map<String, String> mimeTypes    = loadMimeTypes();
 
-    private final MetadataService headerService;
+    private final MetadataService metadataService;
 
     private ObjectService<Path> objectService;
 
-    public FileChecksumService(final MetadataService headerService) {
-        this.headerService = headerService;
+    public FileChecksumService(final MetadataService metadataService) {
+        this.metadataService = metadataService;
     }
 
     @Override
@@ -107,7 +107,7 @@ public class FileChecksumService implements ChecksumService<Path> {
                 return mimeType != null ? mimeType : DEFAULT_MIME_TYPE;
             } else {
                 final String namespace = objectService.getNamespace(container, object);
-                String mimeType = headerService.get(namespace, CONTENT_TYPE);
+                String mimeType = metadataService.get(namespace, CONTENT_TYPE);
                 return mimeType != null ? mimeType : DEFAULT_MIME_TYPE;
             }
         }
@@ -118,8 +118,8 @@ public class FileChecksumService implements ChecksumService<Path> {
                         final Path container,
                         final Path object) throws IOException, SQLException {
         final String  namespace         = objectService.getNamespace(container, object);
-        final String  precalculatedETag = headerService.get(namespace, ETAG);
-        final String  contentLength     = headerService.get(namespace, CONTENT_LENGTH);
+        final String  precalculatedETag = metadataService.get(namespace, ETAG);
+        final String  contentLength     = metadataService.get(namespace, CONTENT_LENGTH);
         if ( precalculatedETag == null          ||
              precalculatedETag.trim().isEmpty() ||
              contentLength == null              ||
