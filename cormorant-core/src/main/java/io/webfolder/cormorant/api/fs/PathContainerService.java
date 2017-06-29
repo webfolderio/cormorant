@@ -90,21 +90,16 @@ public class PathContainerService implements ContainerService<Path> {
         final String prefix    = options.getPrefix();
         final String path      = options.getPath();
 
-        if ( prefix    == null &&
-             path      != null ) {
+        if ( path != null ) {
             recursive = false;
-            if ( path != null ) {
-                for (String next : path.split(FORWARD_SLASH)) {
-                    visitorPath = visitorPath.resolve(next);
-                }
-            }
-        } else if (FORWARD_SLASH.equals(delimiter)) {
+            visitorPath = visitorPath.resolve(path);
+        } else if ( prefix != null ) {
             recursive = false;
-            if ( prefix != null ) {
-                for (String next : prefix.split(FORWARD_SLASH)) {
-                    visitorPath = visitorPath.resolve(next);
-                }
-            }
+            visitorPath = visitorPath.resolve(prefix);
+        }
+
+        if (FORWARD_SLASH.equals(delimiter)) {
+            recursive = false;
         }
 
         if ( ! recursive && ! exists(visitorPath) ) {
