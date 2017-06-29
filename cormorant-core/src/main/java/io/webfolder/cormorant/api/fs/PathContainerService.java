@@ -91,7 +91,6 @@ public class PathContainerService implements ContainerService<Path> {
         final String path      = options.getPath();
 
         if ( prefix    == null &&
-             prefix    == null &&
              path      != null ) {
             recursive = false;
             if ( path != null ) {
@@ -99,7 +98,7 @@ public class PathContainerService implements ContainerService<Path> {
                     visitorPath = visitorPath.resolve(next);
                 }
             }
-        } else if (FORWARD_SLASH.equals(delimiter)) {
+        } else if (FORWARD_SLASH.equals(delimiter) || ( delimiter == null && prefix != null )) {
             recursive = false;
             if ( prefix != null ) {
                 for (String next : prefix.split(FORWARD_SLASH)) {
