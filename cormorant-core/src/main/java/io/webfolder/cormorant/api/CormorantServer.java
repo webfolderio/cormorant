@@ -64,9 +64,9 @@ public class CormorantServer {
 
     public static final String  DEFAULT_CONTEXT_PATH = "";
 
-    private static final long   SHUTDOWN_TIMEOUT = MINUTES.toSeconds(1);
+    private static final long   SHUTDOWN_TIMEOUT     = MINUTES.toSeconds(1);
 
-    private static final Logger LOG              = getLogger(CormorantServer.class);
+    private static final Logger LOG                  = getLogger(CormorantServer.class);
 
     private final PathHandler root = new PathHandler();
 
