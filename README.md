@@ -38,7 +38,6 @@ The following list describes the support status for current features:
 ### Supported Clients
 
 * [CloudBerry Explorer for OpenStack](https://www.cloudberrylab.com/explorer/openstack.aspx)
-* [ExpanDrive](http://www.expandrive.com/)
 * [rclone](https://rclone.org/)
 
 ### Supported Client Libraries (SDKs)
