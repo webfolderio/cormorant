@@ -54,8 +54,6 @@ import io.webfolder.cormorant.internal.jaxrs.ObjectController;
 
 public class CormorantApplication extends Application {
 
-    private final int pathMaxCount     = getPathMaxCount();
-
     private final Path                   objectStore;
 
     private final Path                   metadataStore;
@@ -70,6 +68,8 @@ public class CormorantApplication extends Application {
 
     private boolean                      enableMetadataCache;
 
+    private int                          pathMaxCount;
+
     public CormorantApplication(
                 final Path objectStore,
                 final Path metadataStore,
@@ -81,6 +81,7 @@ public class CormorantApplication extends Application {
         this.accountService         = accountService;
         this.authenticationService  = authenticationService;
         this.accountName            = accountName;
+        setPathMaxCount(10_000);
         setMetadataStorage(SQLite);
         setEnableMetadataCache(false);
     }
@@ -135,8 +136,12 @@ public class CormorantApplication extends Application {
         return singletons;
     }
 
-    protected int getPathMaxCount() {
-        return 10_000;
+    public int getPathMaxCount() {
+        return pathMaxCount;
+    }
+
+    public void setPathMaxCount(int pathMaxCount) {
+        this.pathMaxCount = pathMaxCount;
     }
 
     public MetadataStorage getMetadataStorage() {
