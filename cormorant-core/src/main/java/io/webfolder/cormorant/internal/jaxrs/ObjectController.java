@@ -447,7 +447,10 @@ public class ObjectController<T> {
         final boolean staticLargeObject  = objectService.isStaticLargeObject(object);
         final boolean largeObject        = dynamicLargeObject || staticLargeObject;
 
-        sysMetadata.put(ETAG, checksumService.calculateChecksum(container, object));
+        if ( ! largeObject ) {
+            sysMetadata.put(ETAG, checksumService.calculateChecksum(container, object));
+        }
+        
         sysMetadata.put(CONTENT_LENGTH, objectService.getSize(object));
 
         // Etag value of a large object is enclosed in double-quotations.

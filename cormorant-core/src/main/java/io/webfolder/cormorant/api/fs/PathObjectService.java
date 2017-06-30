@@ -75,19 +75,19 @@ public class PathObjectService implements ObjectService<Path> {
 
     private static final char    BACKWARD_SLASH    = '/';
 
-    private static final String  X_OBJECT_MANIFEST = "X-Object-Manifest";
-
     private static final Pattern LEADING_SLASH     = compile("^/+");
+
+    private static final String  X_OBJECT_MANIFEST = "X-Object-Manifest";
 
     private static final String  DEFAULT_MIME_TYPE = "application/octet-stream";
 
     private static final String DIRECTORY          = "application/directory";
 
+    private final Map<String, String> mimeTypes    = loadMimeTypes();
+
     private final ContainerService<Path> containerService;
 
     private final MetadataService systemMetadataService;
-
-    private final Map<String, String> mimeTypes    = loadMimeTypes();
 
     public PathObjectService(
                 final ContainerService<Path> containerService,

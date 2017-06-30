@@ -178,8 +178,8 @@ public class JdbcMetadaService implements MetadataService {
                                     table              +
                                     " (NAMESPACE VARCHAR(1024), KEY VARCHAR(1024), VALUE VARCHAR(4096))";
         final String idxDDL   = "create index IDX_" + table + " on " + getSchemaKeyword() + table + "(NAMESPACE, KEY)";
-        LOG.error("Executing DDL: " + tableDDL);
-        LOG.error("Executing DDL: " + idxDDL  );
+        LOG.info("Executing DDL: " + tableDDL);
+        LOG.info("Executing DDL: " + idxDDL  );
         try (Connection conn = ds.getConnection()) {
             ResultSet rs = conn.getMetaData().getTables(null, schema.isEmpty() ? null : schema, table, new String[] { "TABLE" });
             if ( ! rs.next() ) {
