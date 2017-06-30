@@ -59,23 +59,6 @@ public class FileChecksumService implements ChecksumService<Path> {
     }
 
     @Override
-    public String calculateChecksum(final Path object) {
-        try (InputStream is = newInputStream(open(object, NOFOLLOW_LINKS, READ))) {
-            final MessageDigest md     = getInstance(CHECKSUM_ALGORITHM);
-            final byte[]        buffer = new byte[BUFFER_SIZE];
-            int read;
-            while((read = is.read(buffer)) > 0) {
-                md.update(buffer, 0, read);
-            }
-            final byte[] hash     = md.digest();
-            final String checksum = format("%032x", new BigInteger(1, hash));
-            return checksum;
-        } catch (IOException | NoSuchAlgorithmException e) {
-            throw new CormorantException(e);
-        }
-    }
-
-    @Override
     public String calculateChecksum(
                         final Path container,
                         final Path object) throws IOException, SQLException {
@@ -153,5 +136,21 @@ public class FileChecksumService implements ChecksumService<Path> {
         final String checksum = format("%032x", new BigInteger(1, hash));
         cache.put(cacheKey.toString(), checksum);
         return checksum;
+    }
+
+    protected String calculateChecksum(final Path object) {
+        try (InputStream is = newInputStream(open(object, NOFOLLOW_LINKS, READ))) {
+            final MessageDigest md     = getInstance(CHECKSUM_ALGORITHM);
+            final byte[]        buffer = new byte[BUFFER_SIZE];
+            int read;
+            while((read = is.read(buffer)) > 0) {
+                md.update(buffer, 0, read);
+            }
+            final byte[] hash     = md.digest();
+            final String checksum = format("%032x", new BigInteger(1, hash));
+            return checksum;
+        } catch (IOException | NoSuchAlgorithmException e) {
+            throw new CormorantException(e);
+        }
     }
 }

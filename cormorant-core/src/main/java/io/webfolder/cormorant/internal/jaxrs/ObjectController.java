@@ -1001,7 +1001,7 @@ public class ObjectController<T> {
 
         final Container           containerInfo  = accountService.getContainer(request.getAccount(), request.getContainer());
         final Map<String, Object> systemMetadata = new HashMap<>();
-        final String              etag           = checksumService.calculateChecksum(sourceObject);
+        final String              etag           = checksumService.calculateChecksum(sourceContainer, sourceObject);
         final String              requestETag    = httpHeaders.getHeaderString(ETAG);
         // ----------------------------------------------------------------------------------
         // Ensure object integrity
@@ -1220,9 +1220,10 @@ public class ObjectController<T> {
                     WritableByteChannel writableChannel = objectService.getWritableChannel(tempObject)) {
             write(readableChannel, writableChannel, 0L, contentLength);
             final T object = objectService.moveTempObject(request.getAccount(),
-                                                            tempObject, container,
+                                                            tempObject,
+                                                            container,
                                                             request.getObject() + MANIFEST_EXTENSION);
-            final String eTag = checksumService.calculateChecksum(object);
+            final String eTag = checksumService.calculateChecksum(container, object);
             response.setETag("\"" + eTag + "\"");
             response.setContentType(APPLICATION_JSON);
             response.setLastModified(valueOf(objectService.getLastModified(object)));

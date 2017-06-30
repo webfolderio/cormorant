@@ -23,8 +23,6 @@ import java.util.List;
 
 public interface ChecksumService<T> {
 
-    String calculateChecksum(T object);
-
     String calculateChecksum(T container, T object) throws IOException, SQLException;
 
     String calculateChecksum(List<T> objects) throws IOException;
