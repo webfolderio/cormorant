@@ -490,12 +490,6 @@ public class ObjectController<T> {
             }
         }
 
-        if ( "0".equals(sysMetadata.get(CONTENT_LENGTH)) || ! sysMetadata.containsKey(CONTENT_LENGTH) ) {
-            sysMetadata.put(ETAG,
-                    (sysMetadata.containsKey(ETAG) && sysMetadata.get(ETAG).toString().contains("\"") ? "\"" : "") + MD5_OF_EMPTY_STRING +
-                    (sysMetadata.containsKey(ETAG) && sysMetadata.get(ETAG).toString().contains("\"") ? "\"" : ""));
-        }
-
         if (staticLargeObject) {
             List<Segment<T>> segments = objectService.listStaticLargeObject(request.getAccount(), object);
             long totalSize = 0L;
@@ -503,6 +497,12 @@ public class ObjectController<T> {
                 totalSize += next.getSize();
             }
             sysMetadata.put(CONTENT_LENGTH, totalSize);
+        }
+
+        if ( "0".equals(sysMetadata.get(CONTENT_LENGTH)) || ! sysMetadata.containsKey(CONTENT_LENGTH) ) {
+            sysMetadata.put(ETAG,
+                    (sysMetadata.containsKey(ETAG) && sysMetadata.get(ETAG).toString().contains("\"") ? "\"" : "") + MD5_OF_EMPTY_STRING +
+                    (sysMetadata.containsKey(ETAG) && sysMetadata.get(ETAG).toString().contains("\"") ? "\"" : ""));
         }
 
         for (Map.Entry<String, Object> entry : sysMetadata.entrySet()) {
