@@ -64,39 +64,48 @@ public class FileMetadataService implements MetadataService {
     }
 
     @Override
-    public String get(final String namespace, final String propertyName) {
+    public String get(final String namespace, final String key) {
         final Json json = read(namespace);
         if (json == null) {
             return null;
         }
         final Json properties = json.at(groupName);
         final Map<String, Object> map = properties.asMap();
-        final Object value = map.get(propertyName);
+        final Object value = map.get(key);
         return value == null ? null : valueOf(value);
     }
 
     @Override
-    public boolean contains(final String namespace, final String propertyName) {
-        return get(namespace, propertyName) != null;
+    public boolean contains(final String namespace, final String key) {
+        return get(namespace, key) != null;
     }
 
     @Override
-    public void delete(final String namespace, final String propertyName) {
+    public void delete(final String namespace, final String key) {
         final Json json = read(namespace);
         final Json properties = json.at(groupName);
-        if (properties.has(propertyName)) {
-            properties.delAt(propertyName);
+        if (properties.has(key)) {
+            properties.delAt(key);
             write(namespace, json);
         }
     }
 
     @Override
-    public void update(final String namespace, String propertyName, final String value) {
-        add(namespace, propertyName, value);
+    public void update(final String namespace, String key, final String value) {
+        if (value == null) {
+            if (contains(namespace, key)) {
+                delete(namespace, key);
+            }
+            return;
+        }
+        add(namespace, key, value);
     }
 
     @Override
-    public void add(final String namespace, final String propertyName, final String value) {
+    public void add(final String namespace, final String key, final String value) {
+        if (value == null) {
+            return;
+        }
         Json json = read(namespace);
         if (json == null) {
             json = object();
@@ -110,14 +119,11 @@ public class FileMetadataService implements MetadataService {
         }
         if ( value != null ) {
             String data = valueOf(value);
-            if (DECODES.contains(propertyName)) {
+            if (DECODES.contains(key)) {
                 data = data.replace("%2F", "/");
             }
             json.at(groupName)
-                .set(propertyName, data);
-        } else if (json.at(groupName).has(propertyName)) {
-            json.at(groupName)
-                .delAt(propertyName);
+                .set(key, data);
         }
         write(namespace, json);
     }
