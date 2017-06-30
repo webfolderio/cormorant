@@ -128,7 +128,6 @@ public class TestBase {
                                                     metadataStore,
                                                     accountService,
                                                     authenticationService,
-                                                    "",
                                                     "myaccount");
 
         application.setEnableMetadataCache(true);

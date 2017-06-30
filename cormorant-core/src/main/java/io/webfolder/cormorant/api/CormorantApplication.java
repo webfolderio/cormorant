@@ -75,7 +75,6 @@ public class CormorantApplication extends Application {
                 final Path metadataStore,
                 final AccountService accountService,
                 final AuthenticationService authenticationService,
-                final String contextPath,
                 final String accountName) {
         this.objectStore            = objectStore;
         this.metadataStore          = metadataStore;

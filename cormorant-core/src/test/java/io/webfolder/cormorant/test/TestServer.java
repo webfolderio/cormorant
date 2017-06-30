@@ -103,7 +103,6 @@ public class TestServer {
                                                 metadataStore,
                                                 accountService,
                                                 authenticationService,
-                                                "",
                                                 "myaccount");
 
         application.setEnableMetadataCache(true);
