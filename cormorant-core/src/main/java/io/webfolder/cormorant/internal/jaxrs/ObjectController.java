@@ -447,6 +447,7 @@ public class ObjectController<T> {
         final boolean staticLargeObject  = objectService.isStaticLargeObject(object);
         final boolean largeObject        = dynamicLargeObject || staticLargeObject;
 
+        sysMetadata.put(ETAG, checksumService.calculateChecksum(container, object));
         sysMetadata.put(CONTENT_LENGTH, objectService.getSize(object));
 
         // Etag value of a large object is enclosed in double-quotations.
@@ -1039,7 +1040,7 @@ public class ObjectController<T> {
         final Long size = dynamicObject ? objectService.getDyanmicObjectSize(targetContainer, targetObject) : objectService.getSize(targetObject);
         containerInfo.addBytesUsed(size);
         final String contentType = ! dynamicObject && TRUE.equals(request.getDetectContentType())     ?
-                                     checksumService.getMimeType(sourceContainer, targetObject, true) :
+                                     objectService.getMimeType(sourceContainer, targetObject, true) :
                                      httpHeaders.getHeaderString(CONTENT_TYPE)                        ;
 
         final String targetNamespace = objectService.getNamespace(targetContainer, targetObject);
@@ -1096,23 +1097,6 @@ public class ObjectController<T> {
             }
         }
 
-        if ( ! dynamicObject ) {
-            systemMetadata.put(CONTENT_LENGTH, size);
-            systemMetadata.put(ETAG, etag);
-        } else {
-            systemMetadata.remove(CONTENT_LENGTH);
-            systemMetadata.remove(ETAG);
-        }
-
-        if (chunked) {
-            systemMetadata.remove(CONTENT_LENGTH);
-            systemMetadata.remove(ETAG);
-        }
-
-        if ( "0".equals(systemMetadata.get(CONTENT_LENGTH)) ||  ! systemMetadata.containsKey(CONTENT_LENGTH) ) {
-            systemMetadata.put(ETAG, MD5_OF_EMPTY_STRING);
-        }
-
         updateMetadata(targetNamespace);
 
         systemMetadataService.setValues(targetNamespace, systemMetadata);
@@ -1122,7 +1106,7 @@ public class ObjectController<T> {
         response.setContentType(copy ? (String) systemMetadata.get(CONTENT_TYPE) : contentType);
 
         if ( ! dynamicObject ) {
-            response.setETag(copy ?(String) systemMetadata.get(ETAG) : etag);
+            response.setETag(etag);
         } else {
             final List<T> objects                = objectService.listDynamicLargeObject(targetContainer, targetObject);
             final String  dynamicLargeObjectEtag = checksumService.calculateChecksum(objects);

@@ -17,65 +17,40 @@
  */
 package io.webfolder.cormorant.api.fs;
 
-import static java.lang.Long.parseLong;
 import static java.lang.String.format;
 import static java.nio.channels.Channels.newInputStream;
 import static java.nio.channels.FileChannel.open;
-import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.nio.file.Files.readAttributes;
 import static java.nio.file.LinkOption.NOFOLLOW_LINKS;
 import static java.nio.file.StandardOpenOption.READ;
 import static java.security.MessageDigest.getInstance;
-import static java.util.Collections.unmodifiableMap;
-import static java.util.Locale.ENGLISH;
 import static java.util.concurrent.TimeUnit.DAYS;
-import static javax.ws.rs.core.HttpHeaders.CONTENT_LENGTH;
-import static javax.ws.rs.core.HttpHeaders.CONTENT_TYPE;
-import static javax.ws.rs.core.HttpHeaders.ETAG;
 import static net.jodah.expiringmap.ExpirationPolicy.CREATED;
 import static net.jodah.expiringmap.ExpiringMap.builder;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.math.BigInteger;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import io.webfolder.cormorant.api.exception.CormorantException;
 import io.webfolder.cormorant.api.service.ChecksumService;
-import io.webfolder.cormorant.api.service.MetadataService;
-import io.webfolder.cormorant.api.service.ObjectService;
 
 public class FileChecksumService implements ChecksumService<Path> {
-
-    private static final String  DEFAULT_MIME_TYPE = "application/octet-stream";
-
-    private static final String DIRECTORY          = "application/directory";
 
     private static final String CHECKSUM_ALGORITHM = "MD5";
 
     private static final int    BUFFER_SIZE        = 1024 * 64;
 
-    private final Map<String, String> mimeTypes    = loadMimeTypes();
-
-    private final MetadataService metadataService;
-
-    private ObjectService<Path> objectService;
-
     private final Map<Object, String> cache;
 
-    public FileChecksumService(final MetadataService metadataService) {
-        this.metadataService = metadataService;
+    public FileChecksumService() {
         cache = builder()
                     .expirationPolicy(CREATED)
                     .expiration(1, DAYS)
@@ -101,83 +76,28 @@ public class FileChecksumService implements ChecksumService<Path> {
     }
 
     @Override
-    public String getMimeType(
-                        final Path    container,
-                        final Path    object,
-                        final boolean autoDetect) throws IOException, SQLException {
-        final boolean isDir = Files.isDirectory(object);
-        if (isDir) {
-            return DIRECTORY;
-        } else {
-            if (autoDetect) {
-                final String fileName  = object.getFileName().toString();
-                final int    start     = fileName.lastIndexOf('.');
-                final String extension = start > 0 ? fileName
-                                                        .substring(start + 1, fileName.length())
-                                                        .toLowerCase(ENGLISH) : null;
-                final String mimeType = mimeTypes.get(extension);
-                return mimeType != null ? mimeType : DEFAULT_MIME_TYPE;
-            } else {
-                final String namespace = objectService.getNamespace(container, object);
-                String mimeType = metadataService.get(namespace, CONTENT_TYPE);
-                return mimeType != null ? mimeType : DEFAULT_MIME_TYPE;
-            }
-        }
-    }
-
-    @Override
     public String calculateChecksum(
                         final Path container,
                         final Path object) throws IOException, SQLException {
-        final String  namespace         = objectService.getNamespace(container, object);
-        final String  precalculatedETag = metadataService.get(namespace, ETAG);
-        final String  contentLength     = metadataService.get(namespace, CONTENT_LENGTH);
-        if ( precalculatedETag == null          ||
-             precalculatedETag.trim().isEmpty() ||
-             contentLength == null              ||
-             contentLength.trim().isEmpty() ) {
-            return calculateChecksum(object);
+        StringBuilder cacheKey = new StringBuilder();
+        BasicFileAttributes attributes = readAttributes(object, BasicFileAttributes.class, NOFOLLOW_LINKS);
+        String pathId = object.toString();
+        Object fileKey = attributes.fileKey();
+        if ( fileKey != null ) {
+            cacheKey.append(fileKey.toString());
         } else {
-            final long    expectedSize = parseLong(contentLength);
-            final long    actualSize   = objectService.getSize(object);
-            final boolean modified     = expectedSize != actualSize;
-            if ( ! modified ) {
-                return precalculatedETag;
-            } else {
-                final String newHash = calculateChecksum(object);
-                metadataService.add(namespace, ETAG, newHash);
-                return newHash;
-            }
+            cacheKey.append(object.toString());
         }
-    }
-
-    public void setObjectService(final ObjectService<Path> objectService) {
-        this.objectService = objectService;
-    }
-
-    protected Map<String, String> loadMimeTypes() {
-        final Map<String, String> map = new HashMap<>();
-        try (BufferedReader reader = new BufferedReader(
-                                            new InputStreamReader(
-                                                    getClass()
-                                                    .getResourceAsStream("/io/webfolder/cormorant/mime.types"), UTF_8))) {
-            Iterator<String> iter = reader.lines().iterator();
-            while (iter.hasNext()) {
-                final String line = iter.next().trim();
-                if (line.startsWith("#")) {
-                    continue;
-                }
-                final int      start      = line.indexOf(" ");
-                final String   mimeType   = line.substring(0, start).trim();
-                final String[] extensions = line.substring(start + 1, line.length()).trim().split(" ");
-                for (String extension : extensions) {
-                    map.put(extension.trim().toLowerCase(ENGLISH), mimeType);
-                }
-            }
-        } catch (IOException e) {
-            throw new CormorantException("Unable to read mime types", e);
+        cacheKey.append(pathId);
+        cacheKey.append(attributes.size());
+        cacheKey.append(attributes.lastModifiedTime().toMillis());
+        String hash = cache.get(cacheKey.toString());
+        if ( hash != null ) {
+            return hash;
         }
-        return unmodifiableMap(map);
+        hash = calculateChecksum(object);
+        cache.put(cacheKey.toString(), hash);
+        return hash;
     }
 
     @Override

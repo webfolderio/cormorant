@@ -80,4 +80,6 @@ public interface ObjectService<T> {
     String toPath(T container, T object) throws IOException;
 
     boolean exist(T container, T object) throws IOException;
+
+    String getMimeType(T container, T object, boolean autoDetect) throws IOException, SQLException;
 }

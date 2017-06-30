@@ -80,7 +80,7 @@ public class PathAdapter implements ResourceAdapter<Path> {
         final StringBuilder builder        = new StringBuilder();
         final String        location       = container.relativize(path).toString();
         final boolean       isdir          = isDirectory(path, NOFOLLOW_LINKS);
-        final String        mimeType       = checksumService.getMimeType(container, path, false);
+        final String        mimeType       = objectService.getMimeType(container, path, false);
         final String        name           = location.replace(CHAR_BACKSLASH, CHAR_FORWARD_SLASH);
         final int           start          = name.lastIndexOf(MANIFEST_EXTENSION);
         final String        normalizedName =  start > 0 ? name.substring(0, start) : name;

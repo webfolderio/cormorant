@@ -36,11 +36,15 @@ import static java.nio.file.StandardOpenOption.CREATE;
 import static java.nio.file.StandardOpenOption.READ;
 import static java.nio.file.StandardOpenOption.WRITE;
 import static java.util.Collections.emptyList;
+import static java.util.Collections.unmodifiableMap;
+import static java.util.Locale.ENGLISH;
 import static java.util.regex.Pattern.compile;
+import static javax.ws.rs.core.HttpHeaders.CONTENT_TYPE;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.SequenceInputStream;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
@@ -51,6 +55,8 @@ import java.nio.file.attribute.BasicFileAttributeView;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
@@ -59,7 +65,6 @@ import java.util.regex.Pattern;
 import io.webfolder.cormorant.api.Json;
 import io.webfolder.cormorant.api.exception.CormorantException;
 import io.webfolder.cormorant.api.model.Segment;
-import io.webfolder.cormorant.api.service.ChecksumService;
 import io.webfolder.cormorant.api.service.ContainerService;
 import io.webfolder.cormorant.api.service.MetadataService;
 import io.webfolder.cormorant.api.service.ObjectService;
@@ -74,19 +79,21 @@ public class PathObjectService implements ObjectService<Path> {
 
     private static final Pattern LEADING_SLASH     = compile("^/+");
 
+    private static final String  DEFAULT_MIME_TYPE = "application/octet-stream";
+
+    private static final String DIRECTORY          = "application/directory";
+
     private final ContainerService<Path> containerService;
 
     private final MetadataService systemMetadataService;
 
-    private final ChecksumService<Path> checksumService;
+    private final Map<String, String> mimeTypes    = loadMimeTypes();
 
     public PathObjectService(
                 final ContainerService<Path> containerService,
-                final MetadataService        systemMetadataService,
-                final ChecksumService<Path>  checksumService) {
+                final MetadataService        systemMetadataService) {
         this.containerService      = containerService;
         this.systemMetadataService = systemMetadataService;
-        this.checksumService       = checksumService;
     }
 
     @Override
@@ -345,7 +352,7 @@ public class PathObjectService implements ObjectService<Path> {
                         final Path object = getObject(accountName, containerName, objectPath);
                         if ( object != null ) {
                             final long size = getSize(object);
-                            final String contentType = checksumService.getMimeType(container, object, true);
+                            final String contentType = getMimeType(container, object, true);
                             Segment<Path> segment = new Segment<>(contentType, size, object);
                             segments.add(segment);
                         }
@@ -366,8 +373,58 @@ public class PathObjectService implements ObjectService<Path> {
     }
 
     @Override
+    public String getMimeType(
+                        final Path    container,
+                        final Path    object,
+                        final boolean autoDetect) throws IOException, SQLException {
+        final boolean isDir = Files.isDirectory(object);
+        if (isDir) {
+            return DIRECTORY;
+        } else {
+            if (autoDetect) {
+                final String fileName  = object.getFileName().toString();
+                final int    start     = fileName.lastIndexOf('.');
+                final String extension = start > 0 ? fileName
+                                                        .substring(start + 1, fileName.length())
+                                                        .toLowerCase(ENGLISH) : null;
+                final String mimeType = mimeTypes.get(extension);
+                return mimeType != null ? mimeType : DEFAULT_MIME_TYPE;
+            } else {
+                final String namespace = getNamespace(container, object);
+                String mimeType = systemMetadataService.get(namespace, CONTENT_TYPE);
+                return mimeType != null ? mimeType : DEFAULT_MIME_TYPE;
+            }
+        }
+    }
+
+    @Override
     public boolean exist(Path container, Path object) {
         return Files.exists(object);
+    }
+
+    protected Map<String, String> loadMimeTypes() {
+        final Map<String, String> map = new HashMap<>();
+        try (BufferedReader reader = new BufferedReader(
+                                            new InputStreamReader(
+                                                    getClass()
+                                                    .getResourceAsStream("/io/webfolder/cormorant/mime.types"), UTF_8))) {
+            Iterator<String> iter = reader.lines().iterator();
+            while (iter.hasNext()) {
+                final String line = iter.next().trim();
+                if (line.startsWith("#")) {
+                    continue;
+                }
+                final int      start      = line.indexOf(" ");
+                final String   mimeType   = line.substring(0, start).trim();
+                final String[] extensions = line.substring(start + 1, line.length()).trim().split(" ");
+                for (String extension : extensions) {
+                    map.put(extension.trim().toLowerCase(ENGLISH), mimeType);
+                }
+            }
+        } catch (IOException e) {
+            throw new CormorantException("Unable to read mime types", e);
+        }
+        return unmodifiableMap(map);
     }
 
     protected String removeLeadingSlash(String path) {

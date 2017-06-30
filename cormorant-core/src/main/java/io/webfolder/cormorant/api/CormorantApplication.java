@@ -97,12 +97,11 @@ public class CormorantApplication extends Application {
         final MetadataService objectMetadataService    = metadataServiceFactory.create(OBJECT    , isCacheMetadata());
         final MetadataService systemMetadataService    = metadataServiceFactory.create(OBJECT_SYS, isCacheMetadata());
 
-        final FileChecksumService    checksumService  = new FileChecksumService(systemMetadataService);
+        final FileChecksumService    checksumService  = new FileChecksumService();
         final ContainerService<Path> containerService = new PathContainerService(objectStore, pathMaxCount, checksumService, containerMetadataService, systemMetadataService);
-        final ObjectService<Path>    objectService    = new PathObjectService(containerService, systemMetadataService, checksumService);
+        final ObjectService<Path>    objectService    = new PathObjectService(containerService, systemMetadataService);
 
         containerService.setObjectService(objectService);
-        checksumService.setObjectService(objectService);
 
         final Map<String, Principal> tokens = builder()
                                                 .expirationPolicy(CREATED)
