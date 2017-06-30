@@ -86,6 +86,12 @@ public class JdbcMetadaService implements MetadataService {
 
     @Override
     public void update(final String namespace, final String key, final String value) throws SQLException {
+        if (value == null) {
+            if (contains(namespace, key)) {
+                delete(namespace, key);
+            }
+            return;
+        }
         final String sql = "update " + getSchemaKeyword() + table + " set VALUE = ? where NAMESPACE = ? and KEY = ?";
         try (Connection conn = ds.getConnection();
                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -102,6 +108,9 @@ public class JdbcMetadaService implements MetadataService {
 
     @Override
     public void add(final String namespace, final String key, final String value) throws SQLException {
+        if (value == null) {
+            return;
+        }
         final String sql = "insert into " + getSchemaKeyword() + table + " (NAMESPACE, KEY, VALUE) VALUES (?, ?, ?)";
         try (Connection conn = ds.getConnection();
                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
