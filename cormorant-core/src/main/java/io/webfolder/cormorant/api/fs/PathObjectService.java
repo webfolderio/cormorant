@@ -71,7 +71,7 @@ public class PathObjectService implements ObjectService<Path> {
     private static final char    BACKWARD_SLASH    = '/';
 
     private static final String  X_OBJECT_MANIFEST = "X-Object-Manifest";
-    
+
     private static final Pattern LEADING_SLASH     = compile("^/+");
 
     private final ContainerService<Path> containerService;
@@ -299,32 +299,28 @@ public class PathObjectService implements ObjectService<Path> {
         } else if (Files.isRegularFile(object, NOFOLLOW_LINKS)) {
             final String namespace = getNamespace(container, object);
             final String objectManifest = systemMetadataService.get(namespace, X_OBJECT_MANIFEST);
-            if (objectManifest == null) {
-                return emptyList();
-            }
-            final int start = objectManifest.lastIndexOf(BACKWARD_SLASH);
-            if (start >= 0) {
-                DyanmicLargeObjectVisitor visitor = new DyanmicLargeObjectVisitor(null);
-                final Path manifestContainer = containerService.getContainer(null,
-                                                    objectManifest.substring(0, objectManifest.indexOf(BACKWARD_SLASH)));
-                Path manifestDir = manifestContainer.resolve(objectManifest.substring(objectManifest.indexOf(BACKWARD_SLASH) + 1, objectManifest.length()));
-                if ( ! Files.isDirectory(manifestDir) ) {
-                    manifestDir = object.getParent();
-                    final String prefix = objectManifest.substring(start + 1, objectManifest.length());
-                    visitor = new DyanmicLargeObjectVisitor(prefix);
+            if (objectManifest != null) {
+                final int start = objectManifest.lastIndexOf(BACKWARD_SLASH);
+                if (start >= 0) {
+                    DyanmicLargeObjectVisitor visitor = new DyanmicLargeObjectVisitor(null);
+                    final Path manifestContainer = containerService.getContainer(null,
+                                                        objectManifest.substring(0, objectManifest.indexOf(BACKWARD_SLASH)));
+                    if ( manifestContainer != null ) {
+                        Path manifestDir = manifestContainer.resolve(objectManifest.substring(objectManifest.indexOf(BACKWARD_SLASH) + 1, objectManifest.length()));
+                        if ( exist(container, object) && ! Files.isDirectory(object) && getSize(object) == 0 ) {
+                            manifestDir = object.getParent();
+                            final String prefix = objectManifest.substring(start + 1, objectManifest.length());
+                            visitor = new DyanmicLargeObjectVisitor(prefix);
+                        }
+                        if ( Files.isDirectory(manifestDir)) {
+                            Files.walkFileTree(manifestDir, visitor);
+                            return visitor.getFiles();
+                        }
+                    }
                 }
-                if ( Files.isDirectory(manifestDir)) {
-                    Files.walkFileTree(manifestDir, visitor);
-                    return visitor.getFiles();
-                } else {
-                    return emptyList();
-                }
-            } else {
-                return emptyList();
             }
-        } else {
-            return emptyList();
         }
+        return emptyList();
     }
 
     @SuppressWarnings("unchecked")

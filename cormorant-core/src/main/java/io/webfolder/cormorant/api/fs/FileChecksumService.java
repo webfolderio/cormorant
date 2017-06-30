@@ -132,19 +132,9 @@ public class FileChecksumService implements ChecksumService<Path> {
             if ( ! modified ) {
                 return precalculatedETag;
             } else {
-                // ----------------------------------------------------------------
-                // Inconsistency
-                // ----------------------------------------------------------------
-                //
-                // Is object modified externally? Yes, probably.
-                //
-                // Or is it due to broken upload? It might be.
-                // Although object upload is atomic something might be goes wrong.
-                //
-                // ----------------------------------------------------------------
-                throw new CormorantException("Invalid Object size: [" +
-                                expectedSize + "]. Actual object size is: [" + actualSize + "]." +
-                                "Please update the ETag and size with correct values.");
+                final String newHash = calculateChecksum(object);
+                metadataService.add(namespace, ETAG, newHash);
+                return newHash;
             }
         }
     }

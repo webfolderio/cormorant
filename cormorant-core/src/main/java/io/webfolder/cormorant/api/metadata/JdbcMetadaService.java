@@ -18,6 +18,8 @@
 package io.webfolder.cormorant.api.metadata;
 
 import static java.lang.String.valueOf;
+import static java.util.Arrays.asList;
+import static java.util.Collections.unmodifiableSet;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -25,7 +27,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.Map.Entry;
 
 import javax.sql.DataSource;
@@ -44,7 +48,9 @@ public class JdbcMetadaService implements MetadataService {
 
     private final String     table;
 
-    private static final Logger LOG = LoggerFactory.getLogger(JdbcMetadaService.class);
+    private final Set<String> DECODES = unmodifiableSet(new HashSet<>(asList("X-Object-Manifest")));
+
+    private static final Logger LOG   = LoggerFactory.getLogger(JdbcMetadaService.class);
 
     public JdbcMetadaService(
                 final DataSource ds,
@@ -83,7 +89,11 @@ public class JdbcMetadaService implements MetadataService {
         final String sql = "update " + getSchemaKeyword() + table + " set VALUE = ? where NAMESPACE = ? and KEY = ?";
         try (Connection conn = ds.getConnection();
                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setObject(1, value);
+            String data = value;
+            if (DECODES.contains(key)) {
+                data = data.replace("%2F", "/");
+            }
+            pstmt.setObject(1, data);
             pstmt.setString(2, namespace);
             pstmt.setString(3, key);
             pstmt.executeUpdate();
@@ -95,9 +105,13 @@ public class JdbcMetadaService implements MetadataService {
         final String sql = "insert into " + getSchemaKeyword() + table + " (NAMESPACE, KEY, VALUE) VALUES (?, ?, ?)";
         try (Connection conn = ds.getConnection();
                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            String data = value;
+            if (DECODES.contains(key)) {
+                data = data.replace("%2F", "/");
+            }
             pstmt.setString(1, namespace);
             pstmt.setString(2, key);
-            pstmt.setObject(3, value);
+            pstmt.setObject(3, data);
             pstmt.executeUpdate();
         }
     }

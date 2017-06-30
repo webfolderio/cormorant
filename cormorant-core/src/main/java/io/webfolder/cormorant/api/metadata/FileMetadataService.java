@@ -29,12 +29,16 @@ import static java.nio.file.Files.move;
 import static java.nio.file.Files.readAllBytes;
 import static java.nio.file.LinkOption.NOFOLLOW_LINKS;
 import static java.nio.file.StandardCopyOption.ATOMIC_MOVE;
+import static java.util.Arrays.asList;
+import static java.util.Collections.unmodifiableSet;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import io.webfolder.cormorant.api.Json;
 import io.webfolder.cormorant.api.exception.CormorantException;
@@ -45,6 +49,8 @@ public class FileMetadataService implements MetadataService {
     private final String METADATA            = "metadata"       ;
 
     private final String SYSTEM_METADATA     = "system-metadata";
+
+    private final Set<String> DECODES        = unmodifiableSet(new HashSet<>(asList("X-Object-Manifest")));
 
     private final Path root;
 
@@ -103,8 +109,12 @@ public class FileMetadataService implements MetadataService {
             return;
         }
         if ( value != null ) {
+            String data = valueOf(value);
+            if (DECODES.contains(propertyName)) {
+                data = data.replace("%2F", "/");
+            }
             json.at(groupName)
-                .set(propertyName, valueOf(value));
+                .set(propertyName, data);
         } else if (json.at(groupName).has(propertyName)) {
             json.at(groupName)
                 .delAt(propertyName);
@@ -137,7 +147,10 @@ public class FileMetadataService implements MetadataService {
         }
         for (Map.Entry<String, Object> next : map.entrySet()) {
             final String key = next.getKey();
-            final Object value = next.getValue();
+            Object value = next.getValue();
+            if (DECODES.contains(key) && value instanceof String) {
+                value = ((String) value).replace("%2F", "/");
+            }
             if ( value != null ) {
                 json.at(groupName)
                     .set(key, valueOf(value));
