@@ -130,7 +130,7 @@ public class TestBase {
                                                     authenticationService,
                                                     "myaccount");
 
-        application.setEnableMetadataCache(true);
+        application.setCacheMetadata(true);
 
         application.setMetadataStorage(MetadataStorage.File);
         server.deploy(application);

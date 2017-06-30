@@ -441,17 +441,17 @@ public class ObjectController<T> {
             final String headerName  = "X-Object-Meta-" + key;
             builder.header(headerName, headerValue);
         }
-        final Map<String, Object> properties = systemMetadataService.getValues(namespace);
+        final Map<String, Object> sysMetadata = systemMetadataService.getValues(namespace);
 
-        final boolean dynamicLargeObject = properties.containsKey(X_OBJECT_MANIFEST);
+        final boolean dynamicLargeObject = sysMetadata.containsKey(X_OBJECT_MANIFEST);
         final boolean staticLargeObject  = objectService.isStaticLargeObject(object);
         final boolean largeObject        = dynamicLargeObject || staticLargeObject;
 
-        properties.put(CONTENT_LENGTH, objectService.getSize(object));
+        sysMetadata.put(CONTENT_LENGTH, objectService.getSize(object));
 
         // Etag value of a large object is enclosed in double-quotations.
         if (largeObject) {
-            String etag = (String) properties.get(ETAG);
+            String etag = (String) sysMetadata.get(ETAG);
             if (dynamicLargeObject) {
                 if ( object != null ) {
                     final String objectManifest = removeLeadingSlash(systemMetadataService.get(namespace, X_OBJECT_MANIFEST));
@@ -469,7 +469,7 @@ public class ObjectController<T> {
                     etag = checksumService.calculateChecksum(objects);
                 }
                 final long size = objectService.getDyanmicObjectSize(container, object);
-                properties.put(CONTENT_LENGTH, size);
+                sysMetadata.put(CONTENT_LENGTH, size);
             }
             if (etag == null) {
                 etag = checksumService.calculateChecksum(container, object);
@@ -478,14 +478,14 @@ public class ObjectController<T> {
                     ! etag.trim().isEmpty() &&
                     ! etag.startsWith("\"") &&
                     ! etag.endsWith("\"") ) {
-                properties.put(ETAG, "\"" + etag + "\"");
+                sysMetadata.put(ETAG, "\"" + etag + "\"");
             }
         }
 
-        if ( "0".equals(properties.get(CONTENT_LENGTH)) || ! properties.containsKey(CONTENT_LENGTH) ) {
-            properties.put(ETAG,
-                    (properties.containsKey(ETAG) && properties.get(ETAG).toString().contains("\"") ? "\"" : "") + MD5_OF_EMPTY_STRING +
-                    (properties.containsKey(ETAG) && properties.get(ETAG).toString().contains("\"") ? "\"" : ""));
+        if ( "0".equals(sysMetadata.get(CONTENT_LENGTH)) || ! sysMetadata.containsKey(CONTENT_LENGTH) ) {
+            sysMetadata.put(ETAG,
+                    (sysMetadata.containsKey(ETAG) && sysMetadata.get(ETAG).toString().contains("\"") ? "\"" : "") + MD5_OF_EMPTY_STRING +
+                    (sysMetadata.containsKey(ETAG) && sysMetadata.get(ETAG).toString().contains("\"") ? "\"" : ""));
         }
 
         if (staticLargeObject) {
@@ -494,17 +494,17 @@ public class ObjectController<T> {
             for (Segment<T> next : segments) {
                 totalSize += next.getSize();
             }
-            properties.put(CONTENT_LENGTH, totalSize);
+            sysMetadata.put(CONTENT_LENGTH, totalSize);
         }
 
-        for (Map.Entry<String, Object> entry : properties.entrySet()) {
+        for (Map.Entry<String, Object> entry : sysMetadata.entrySet()) {
             final String headerName  = entry.getKey();
             final Object headerValue = entry.getValue();
             builder.header(headerName, headerValue);
         }
 
-        if (properties.containsKey(CONTENT_TYPE)) {
-            response.setContentType((String) properties.get(CONTENT_TYPE));
+        if (sysMetadata.containsKey(CONTENT_TYPE)) {
+            response.setContentType((String) sysMetadata.get(CONTENT_TYPE));
         }
 
         if (dir) {
@@ -516,7 +516,7 @@ public class ObjectController<T> {
 
         if (staticLargeObject) {
             builder.header(X_STATIC_LARGE_OBJECT, "True");
-            if ( ! properties.containsKey(CONTENT_TYPE) || response.getContentType() == null ) {
+            if ( ! sysMetadata.containsKey(CONTENT_TYPE) || response.getContentType() == null ) {
                 response.setContentType(APPLICATION_JSON);
             }
         }

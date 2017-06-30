@@ -105,7 +105,7 @@ public class TestServer {
                                                 authenticationService,
                                                 "myaccount");
 
-        application.setEnableMetadataCache(true);
+        application.setCacheMetadata(true);
 
         server.deploy(application);
 

@@ -61,14 +61,13 @@ public class HealthCheckController {
                 .header(DATE, FORMATTER.format(now()))
                 .header(X_TRANS_ID, "tx" + part1 + "-" + (part2.length() > 10 ? part2.substring(0, 10) : part2))
                 .entity("OK")
-                .build();
+            .build();
     }
 
     protected String leadingZeros(final String str, final int length) {
         if (str.length() >= length) {
             return str;
-        }
-        else {
+        } else {
             return String.format("%0" + (length-str.length()) + "d%s", 0, str);
         }
     }

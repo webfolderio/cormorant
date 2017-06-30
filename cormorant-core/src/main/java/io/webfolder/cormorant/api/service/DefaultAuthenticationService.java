@@ -20,8 +20,8 @@ package io.webfolder.cormorant.api.service;
 import static io.webfolder.cormorant.api.model.Role.Admin;
 import static io.webfolder.cormorant.api.model.Role.None;
 import static io.webfolder.cormorant.api.model.Role.valueOf;
+import static java.util.Collections.unmodifiableMap;
 
-import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -139,10 +139,10 @@ public class DefaultAuthenticationService implements AuthenticationService {
     }
 
     protected Map<String, Project> getProjects() {
-        return Collections.unmodifiableMap(projects);
+        return unmodifiableMap(projects);
     }
 
     protected Map<String, User> getUsers() {
-        return Collections.unmodifiableMap(users);
+        return unmodifiableMap(users);
     }
 }

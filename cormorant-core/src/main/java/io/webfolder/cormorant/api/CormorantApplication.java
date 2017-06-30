@@ -17,11 +17,11 @@
  */
 package io.webfolder.cormorant.api;
 
-import static io.webfolder.cormorant.api.metadata.MetadataStorage.*;
 import static io.webfolder.cormorant.api.metadata.CacheNames.ACCOUNT;
 import static io.webfolder.cormorant.api.metadata.CacheNames.CONTAINER;
 import static io.webfolder.cormorant.api.metadata.CacheNames.OBJECT;
 import static io.webfolder.cormorant.api.metadata.CacheNames.OBJECT_SYS;
+import static io.webfolder.cormorant.api.metadata.MetadataStorage.SQLite;
 import static java.util.concurrent.TimeUnit.DAYS;
 import static net.jodah.expiringmap.ExpirationPolicy.CREATED;
 import static net.jodah.expiringmap.ExpiringMap.builder;
@@ -66,16 +66,16 @@ public class CormorantApplication extends Application {
 
     private MetadataStorage              metadataStorage;
 
-    private boolean                      enableMetadataCache;
+    private boolean                      cacheMetadata;
 
     private int                          pathMaxCount;
 
     public CormorantApplication(
-                final Path objectStore,
-                final Path metadataStore,
-                final AccountService accountService,
+                final Path                  objectStore,
+                final Path                  metadataStore,
+                final AccountService        accountService,
                 final AuthenticationService authenticationService,
-                final String accountName) {
+                final String                accountName) {
         this.objectStore            = objectStore;
         this.metadataStore          = metadataStore;
         this.accountService         = accountService;
@@ -83,7 +83,7 @@ public class CormorantApplication extends Application {
         this.accountName            = accountName;
         setPathMaxCount(10_000);
         setMetadataStorage(SQLite);
-        setEnableMetadataCache(false);
+        setCacheMetadata(false);
     }
 
     @Override
@@ -92,10 +92,10 @@ public class CormorantApplication extends Application {
 
         final MetadataServiceFactory metadataServiceFactory = new DefaultMetadataServiceFactory(metadataStore, getMetadataStorage());
 
-        final MetadataService accountMetadataService   = metadataServiceFactory.create(ACCOUNT   , isEnableMetadataCache());
-        final MetadataService containerMetadataService = metadataServiceFactory.create(CONTAINER , isEnableMetadataCache());
-        final MetadataService objectMetadataService    = metadataServiceFactory.create(OBJECT    , isEnableMetadataCache());
-        final MetadataService systemMetadataService    = metadataServiceFactory.create(OBJECT_SYS, isEnableMetadataCache());
+        final MetadataService accountMetadataService   = metadataServiceFactory.create(ACCOUNT   , isCacheMetadata());
+        final MetadataService containerMetadataService = metadataServiceFactory.create(CONTAINER , isCacheMetadata());
+        final MetadataService objectMetadataService    = metadataServiceFactory.create(OBJECT    , isCacheMetadata());
+        final MetadataService systemMetadataService    = metadataServiceFactory.create(OBJECT_SYS, isCacheMetadata());
 
         final FileChecksumService    checksumService  = new FileChecksumService(systemMetadataService);
         final ContainerService<Path> containerService = new PathContainerService(objectStore, pathMaxCount, checksumService, containerMetadataService, systemMetadataService);
@@ -152,11 +152,11 @@ public class CormorantApplication extends Application {
         this.metadataStorage = metadataStorage;
     }
 
-    public boolean isEnableMetadataCache() {
-        return enableMetadataCache;
+    public boolean isCacheMetadata() {
+        return cacheMetadata;
     }
 
-    public void setEnableMetadataCache(boolean enableMetadataCache) {
-        this.enableMetadataCache = enableMetadataCache;
+    public void setCacheMetadata(boolean cacheMetadata) {
+        this.cacheMetadata = cacheMetadata;
     }
 }
