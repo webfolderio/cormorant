@@ -345,12 +345,12 @@ public class ObjectController<T> {
             objectEtag = size == 0L ? MD5_OF_EMPTY_STRING : etag;
         }
 
-        final Resource<T> resource = new Resource<>(container   , object,
-                                                    size        , lastModified,
-                                                    creationTime, objectEtag,
-                                                    contentType , contentDisposition,
-                                                    isStaticLargeObject    , dynamicLargeObject,
-                                                    headers     , staticSegments);
+        final Resource<T> resource = new Resource<>(container          , object,
+                                                    size               , lastModified,
+                                                    creationTime       , objectEtag,
+                                                    contentType        , contentDisposition,
+                                                    isStaticLargeObject, dynamicLargeObject,
+                                                    headers            , staticSegments);
 
         final ResourceHandler<T> handler = new ResourceHandler<>(
                                                 objectService,
