@@ -193,6 +193,7 @@ public class FileChecksumService implements ChecksumService<Path> {
                 cacheKey.append(next.toString());
             }
             cacheKey.append(pathId);
+            cacheKey.append(attributes.size());
             cacheKey.append(attributes.lastModifiedTime().toMillis());
         }
         String hashedChecksum = cache.get(cacheKey.toString());
@@ -217,6 +218,7 @@ public class FileChecksumService implements ChecksumService<Path> {
                 cacheKey.append(next.toString());
             }
             cacheKey.append(pathId);
+            cacheKey.append(attributes.size());
             cacheKey.append(attributes.lastModifiedTime().toMillis());
 
             try (InputStream is = newInputStream(open(next, NOFOLLOW_LINKS, READ))) {
