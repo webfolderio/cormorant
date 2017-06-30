@@ -69,9 +69,23 @@ public class TestServer {
                 .activate();
 
         Path objectStore = Paths.get("mydir");
-
         Path metadataStore = Paths.get("mymetadata");
 
+        if ( ! Files.exists(objectStore) ) {
+            try {
+                Files.createDirectory(objectStore);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        if ( ! Files.exists(metadataStore) ) {
+            try {
+                Files.createDirectory(metadataStore);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        
         Map<String, User> users = new HashMap<>();
 
         User user = new User("myaccount",
@@ -89,8 +103,6 @@ public class TestServer {
                                                 metadataStore,
                                                 accountService,
                                                 authenticationService,
-                                                server.getHost(),
-                                                server.getPort(),
                                                 "",
                                                 "myaccount");
 
