@@ -22,14 +22,18 @@ import static java.lang.String.format;
 import static java.nio.channels.Channels.newInputStream;
 import static java.nio.channels.FileChannel.open;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.nio.file.Files.readAttributes;
 import static java.nio.file.LinkOption.NOFOLLOW_LINKS;
 import static java.nio.file.StandardOpenOption.READ;
 import static java.security.MessageDigest.getInstance;
 import static java.util.Collections.unmodifiableMap;
 import static java.util.Locale.ENGLISH;
+import static java.util.concurrent.TimeUnit.DAYS;
 import static javax.ws.rs.core.HttpHeaders.CONTENT_LENGTH;
 import static javax.ws.rs.core.HttpHeaders.CONTENT_TYPE;
 import static javax.ws.rs.core.HttpHeaders.ETAG;
+import static net.jodah.expiringmap.ExpirationPolicy.CREATED;
+import static net.jodah.expiringmap.ExpiringMap.builder;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -38,6 +42,7 @@ import java.io.InputStreamReader;
 import java.math.BigInteger;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
@@ -67,8 +72,15 @@ public class FileChecksumService implements ChecksumService<Path> {
 
     private ObjectService<Path> objectService;
 
+    private final Map<Object, String> cache;
+
     public FileChecksumService(final MetadataService metadataService) {
         this.metadataService = metadataService;
+        cache = builder()
+                    .expirationPolicy(CREATED)
+                    .expiration(1, DAYS)
+                    .maxSize(100_000)
+                .build();
     }
 
     @Override
@@ -170,14 +182,44 @@ public class FileChecksumService implements ChecksumService<Path> {
 
     @Override
     public String calculateChecksum(List<Path> objects) throws IOException {
+        StringBuilder cacheKey = new StringBuilder();
+        for (final Path next : objects) {
+            BasicFileAttributes attributes = readAttributes(next, BasicFileAttributes.class, NOFOLLOW_LINKS);
+            String pathId = next.toString();
+            Object fileKey = attributes.fileKey();
+            if ( fileKey != null ) {
+                cacheKey.append(fileKey.toString());
+            } else {
+                cacheKey.append(next.toString());
+            }
+            cacheKey.append(pathId);
+            cacheKey.append(attributes.lastModifiedTime().toMillis());
+        }
+        String hashedChecksum = cache.get(cacheKey.toString());
+        if ( hashedChecksum != null ) {
+            return hashedChecksum;
+        }
         MessageDigest md;
         try {
             md = getInstance(CHECKSUM_ALGORITHM);
         } catch (NoSuchAlgorithmException e) {
             throw new CormorantException(e);
         }
-        for (final Path object : objects) {
-            try (InputStream is = newInputStream(open(object, NOFOLLOW_LINKS, READ))) {
+        cacheKey = new StringBuilder();
+        for (final Path next : objects) {
+
+            BasicFileAttributes attributes = readAttributes(next, BasicFileAttributes.class, NOFOLLOW_LINKS);
+            String pathId = next.toString();
+            Object fileKey = attributes.fileKey();
+            if ( fileKey != null ) {
+                cacheKey.append(fileKey.toString());
+            } else {
+                cacheKey.append(next.toString());
+            }
+            cacheKey.append(pathId);
+            cacheKey.append(attributes.lastModifiedTime().toMillis());
+
+            try (InputStream is = newInputStream(open(next, NOFOLLOW_LINKS, READ))) {
                 final byte[] buffer = new byte[BUFFER_SIZE];
                 int read;
                 while((read = is.read(buffer)) > 0) {
@@ -187,6 +229,7 @@ public class FileChecksumService implements ChecksumService<Path> {
         }
         final byte[] hash = md.digest();
         final String checksum = format("%032x", new BigInteger(1, hash));
+        cache.put(cacheKey.toString(), checksum);
         return checksum;
     }
 }
