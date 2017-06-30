@@ -130,7 +130,8 @@ jobs:
             go test -run "(TestDLONoSegmentContainer)"
             go test -run "(TestDLOCreateMissingSegmentsInList)"
             go test -run "(TestDLOCreateIncorrectSize)"
-            go test -run "(TestDLOConcurrentWrite)"
+# Disable long running test
+#           go test -run "(TestDLOConcurrentWrite)"
             go test -run "(TestDLOSegmentation)"
             go test -run "(TestDLOSegmentationBuffered)"
             go test -run "(TestSLOCreate)"
