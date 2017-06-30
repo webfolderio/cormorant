@@ -58,9 +58,11 @@ import io.webfolder.cormorant.api.exception.CormorantException;
 
 public class CormorantServer {
 
-    public static final String  DEFAULT_HOST     = "localhost";
+    public static final String  DEFAULT_HOST         = "localhost";
 
-    public static final int     DEFAULT_PORT     = 5000;
+    public static final int     DEFAULT_PORT         = 5000;
+
+    public static final String  DEFAULT_CONTEXT_PATH = "";
 
     private static final long   SHUTDOWN_TIMEOUT = MINUTES.toSeconds(1);
 
@@ -84,9 +86,12 @@ public class CormorantServer {
 
     private int port;
 
+    private String contextPath;
+
     public CormorantServer() {
         setHost(DEFAULT_HOST);
         setPort(DEFAULT_PORT);
+        setContextPath(DEFAULT_CONTEXT_PATH);
     }
 
     public CormorantServer deploy(
@@ -126,7 +131,7 @@ public class CormorantServer {
                         .addServletContextAttribute(ResteasyDeployment.class.getName(), deployment)
                         .addFilter(filterInfo)
                         .addFilterUrlMapping("RestEasyFilter", "/*", REQUEST)
-                        .setContextPath("/")
+                        .setContextPath(getContextPath())
                         .setDeploymentName("cormorant")
                         .setDisplayName("cormorant")
                         .setAuthenticationMode(CONSTRAINT_DRIVEN)
@@ -214,5 +219,13 @@ public class CormorantServer {
 
     public void setPort(int port) {
         this.port = port;
+    }
+
+    public String getContextPath() {
+        return contextPath;
+    }
+
+    public void setContextPath(String contextPath) {
+        this.contextPath = contextPath;
     }
 }

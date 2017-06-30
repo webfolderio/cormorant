@@ -90,6 +90,8 @@ public class TestBase {
 
     protected static OkHttpClient client;
 
+    protected static String contextPath = "/cormorant";
+
     @BeforeClass
     public static void start() {
         Locale.setDefault(ENGLISH);
@@ -106,6 +108,8 @@ public class TestBase {
         server        = new CormorantServer();
         objectStore   = Paths.get("mydir");
         metadataStore = Paths.get("mymetadata");
+
+        server.setContextPath(contextPath);
 
         Map<String, User> users = new HashMap<>();
 
@@ -124,8 +128,6 @@ public class TestBase {
                                                     metadataStore,
                                                     accountService,
                                                     authenticationService,
-                                                    server.getHost(),
-                                                    server.getPort(),
                                                     "",
                                                     "myaccount");
 
@@ -140,7 +142,7 @@ public class TestBase {
                                             new SLF4JLoggingModule());
 
         swiftApi = newBuilder("openstack-swift")
-                    .endpoint("http://" + server.getHost() + ":5000" + "/v2.0")
+                    .endpoint("http://" + server.getHost() + ":" + server.getPort() + contextPath + "/v2.0")
                     .credentials("myaccount", "mypassword")
                     .modules(modules)
                     .buildApi(SwiftApi.class);
@@ -153,7 +155,7 @@ public class TestBase {
         overrides.setProperty("jclouds.mpu.parallel.degree", "1");
 
         RegionScopedBlobStoreContext buildView = newBuilder("openstack-swift")
-                                                    .endpoint("http://" + server.getHost() + ":5000" + "/v2.0")
+                                                    .endpoint("http://" + server.getHost() + ":" + server.getPort() + contextPath + "/v2.0")
                                                     .credentials("myaccount", "mypassword")
                                                     .overrides(overrides)
                                                     .modules(modules)
@@ -178,20 +180,20 @@ public class TestBase {
 
         jossConfig.setUsername("myaccount");
         jossConfig.setPassword("mypassword");
-        jossConfig.setAuthUrl("http://localhost:5000/auth/v1.0");
+        jossConfig.setAuthUrl("http://localhost:" + server.getPort() + contextPath + "/auth/v1.0");
         jossConfig.setAuthenticationMethod(AuthenticationMethod.BASIC);
 
         jossAccount = new AccountFactory(jossConfig).createAccount();
 
         client = new OkHttpClient();
         try {
-            client.newCall(new Request.Builder().get().url(getUrl() + "/v2.0").build()).execute();
+            client.newCall(new Request.Builder().get().url(getUrl() + contextPath + "/v2.0").build()).execute();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
         Response response;
         try {
-            response = client.newCall(new Request.Builder().get().url(getUrl() + "/auth/v1.0").header("X-Auth-User", "myaccount").header("X-Auth-Key", "mypassword").build()).execute();
+            response = client.newCall(new Request.Builder().get().url(getUrl() + contextPath + "/auth/v1.0").header("X-Auth-User", "myaccount").header("X-Auth-Key", "mypassword").build()).execute();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

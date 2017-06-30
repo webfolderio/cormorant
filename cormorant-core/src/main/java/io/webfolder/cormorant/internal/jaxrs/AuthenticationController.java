@@ -55,8 +55,8 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.core.Response.ResponseBuilder;
+import javax.ws.rs.core.UriInfo;
 
 import io.webfolder.cormorant.api.Json;
 import io.webfolder.cormorant.api.exception.CormorantException;
@@ -97,12 +97,6 @@ public class AuthenticationController {
 
     private final AuthenticationService authenticationService;
 
-    private final String host;
-
-    private final int port;
-
-    private final String contextPath;
-
     private final String accountName;
 
     @Context
@@ -111,14 +105,9 @@ public class AuthenticationController {
     public AuthenticationController(
                 final Map<String, Principal> tokens,
                 final AuthenticationService  authenticationService,
-                final String                 host,
-                final int                    port,
-                final String                 contextPath,
                 final String                 accountName) {
         this.tokens                = tokens;
         this.authenticationService = authenticationService;
-        this.host                  = host;
-        this.port                  = port;
         this.authTemplateV2        = loadResource("/io/webfolder/cormorant/auth-v2.json");
         this.authTemplateV3        = loadResource("/io/webfolder/cormorant/auth-v3.json");
         this.domainsTemplateV3     = loadResource("/io/webfolder/cormorant/domains-v3.json");
@@ -126,7 +115,6 @@ public class AuthenticationController {
         this.userTemplateV3        = loadResource("/io/webfolder/cormorant/user-v3.json");
         this.rolesTemplateV3       = loadResource("/io/webfolder/cormorant/roles-v3.json");
         this.infoV2                = loadResource("/io/webfolder/cormorant/info-v2.json");
-        this.contextPath           = contextPath;
         this.accountName           = accountName;
     }
 
@@ -150,7 +138,7 @@ public class AuthenticationController {
         CormorantPrincipal principal = new CormorantPrincipal(username, token, expires);
         tokens.put(token, principal);
 
-        final String publicUrl = "http://" + host + ":" + port + contextPath + "/v1/" + accountName;
+        final String publicUrl = uriInfo.getBaseUri().toString() + "v1/" + accountName;
 
         return ok()
                 .header(X_AUTH_TOKEN, token)
@@ -200,7 +188,7 @@ public class AuthenticationController {
         final ResponseBuilder builder = ok();
         String response = authTemplateV2;
 
-        final String publicUrl = "http://" + host + ":" + port + contextPath + "/v1/" + accountName;
+        final String publicUrl = uriInfo.getBaseUri().toString() + "v1/" + accountName;
 
         response = response.replace("__TOKEN__"      , token);
         response = response.replace("__TENANT_ID__"  , "default");
@@ -371,8 +359,8 @@ public class AuthenticationController {
         final ResponseBuilder builder = status(CREATED);
         String response = authTemplateV3;
 
-        response = response.replace("__KEYSTONE_URL__"     , "http://" + host + ":" + contextPath + port);
-        response = response.replace("__OBJECT_STORE_URL__" , "http://" + host + ":" + port + contextPath + "/v1/" + accountName);
+        response = response.replace("__KEYSTONE_URL__"     , uriInfo.getBaseUri().toString());
+        response = response.replace("__OBJECT_STORE_URL__" , uriInfo.getBaseUri().toString() + "v1/" + accountName);
         response = response.replace("__EXPIRES_AT__"       , expires.toString());
         response = response.replace("__USER_ID__"          , authUsername);
         response = response.replace("__USER__"             , authUsername);

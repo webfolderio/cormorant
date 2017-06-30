@@ -41,19 +41,15 @@ public class CormorantAuthenticationFeature<T> implements DynamicFeature {
 
     private final ContainerService<T>    containerService;
 
-    private final String contextPath;
-
     public CormorantAuthenticationFeature(
                         final Map<String, Principal> tokens,
                         final AuthenticationService  authenticationService,
                         final MetadataService        accountMetadataService,
-                        final ContainerService<T>    containerService,
-                        final String contextPath) {
+                        final ContainerService<T>    containerService) {
         this.tokens                 = tokens;
         this.authenticationService  = authenticationService;
         this.accountMetadataService = accountMetadataService;
         this.containerService       = containerService;
-        this.contextPath            = contextPath;
     }
 
     @Override
@@ -79,8 +75,7 @@ public class CormorantAuthenticationFeature<T> implements DynamicFeature {
                                         role,
                                         authenticationService,
                                         accountMetadataService,
-                                        containerService,
-                                        contextPath));
+                                        containerService));
         }
     }
 }

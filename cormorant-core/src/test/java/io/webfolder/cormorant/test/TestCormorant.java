@@ -121,7 +121,7 @@ public class TestCormorant extends TestBase {
 
     @Test
     public void t003TestXmlResponse() throws IOException {
-        Response response = client.newCall(new Request.Builder().url(getUrl() + "/v1/myaccount?format=xml").build()).execute();
+        Response response = client.newCall(new Request.Builder().url(getUrl() + contextPath + "/v1/myaccount?format=xml").build()).execute();
         String content = response.body().string();
         assertTrue(content.contains("<account name=\"myaccount\"><container><name>container1</name><count>0</count><bytes>0</bytes></container></account>"));
         assertEquals("application/xml; charset=utf-8", response.header("Content-Type"));
@@ -370,7 +370,7 @@ public class TestCormorant extends TestBase {
 
     @Test
     public void t20containerListNegativeLimit() throws IOException {
-        Response response = client.newCall(new Request.Builder().url(getUrl() + "/v1/myaccount/container1?limit=-1").build()).execute();
+        Response response = client.newCall(new Request.Builder().url(getUrl() + contextPath + "/v1/myaccount/container1?limit=-1").build()).execute();
         assertEquals(400, response.code());
         assertEquals("limit must be >= 0", response.body().string());
     }
@@ -378,7 +378,7 @@ public class TestCormorant extends TestBase {
     @Test
     public void t21containerPutNegativeTest() throws IOException {
         Response response = client.newCall(
-                    new Request.Builder().url(getUrl() + "/v1/myaccount/" + String.join("", Collections.nCopies(257, "x")))
+                    new Request.Builder().url(getUrl() + contextPath + "/v1/myaccount/" + String.join("", Collections.nCopies(257, "x")))
                     .put(RequestBody.create(MediaType.parse("text/plain"), new byte[] { })).build()).execute();
         assertEquals(400, response.code());
         assertEquals("Container name length must in range between 1 to 256.", response.body().string());
@@ -386,14 +386,14 @@ public class TestCormorant extends TestBase {
 
     @Test
     public void t22DeleteAbsentContainer() throws IOException {
-        Response response = client.newCall(new Request.Builder().url(getUrl() + "/v1/myaccount/foooobarrrrr").delete().build()).execute();
+        Response response = client.newCall(new Request.Builder().url(getUrl() + contextPath + "/v1/myaccount/foooobarrrrr").delete().build()).execute();
         assertEquals(404, response.code());
         assertEquals("Container [foooobarrrrr] does not exist.", response.body().string());
     }
 
     @Test
     public void t23ListContainerXML() throws IOException {
-        Response response = client.newCall(new Request.Builder().url(getUrl() + "/v1/myaccount/container1?format=xml").get().build()).execute();
+        Response response = client.newCall(new Request.Builder().url(getUrl() + contextPath + "/v1/myaccount/container1?format=xml").get().build()).execute();
         String content = response.body().string();
         assertTrue(content.contains("<?xml version=\"1.0\" encoding=\"UTF-8\"?>"));
         assertTrue(content.contains("<object><name>hello</name><hash>"));
@@ -401,14 +401,14 @@ public class TestCormorant extends TestBase {
 
     @Test
     public void t24TestFavicon() throws IOException {
-        Response response = client.newCall(new Request.Builder().url(getUrl() + "/favicon.ico").get().build()).execute();
+        Response response = client.newCall(new Request.Builder().url(getUrl() + contextPath + "/favicon.ico").get().build()).execute();
         assertEquals("image/x-icon", response.header("Content-Type"));
         assertEquals(200, response.code());
     }
 
     @Test
     public void t25TestInfo() throws IOException {
-        Response response = client.newCall(new Request.Builder().url(getUrl() + "/v2.0").get().build()).execute();
+        Response response = client.newCall(new Request.Builder().url(getUrl() + contextPath + "/v2.0").get().build()).execute();
         assertEquals(200, response.code());
         assertEquals("application/json", response.header("Content-Type"));
     }
@@ -432,7 +432,8 @@ public class TestCormorant extends TestBase {
         org.javaswift.joss.model.Container container = jossAccount.list().iterator().next();
         StoredObject object = container.getObject("foobar.txt");
         object.uploadObject("hello, world!".getBytes());
-        assertEquals("http://localhost:5000/v1/myaccount/container1/foobar.txt", object.getURL());
+        String url = "http://localhost:5000" + contextPath + "/v1/myaccount/container1/foobar.txt";
+        assertEquals(url, object.getURL());
         String content = new String(object.downloadObject(), UTF_8);
         assertEquals("hello, world!", content);
     }

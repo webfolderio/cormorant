@@ -64,12 +64,6 @@ public class CormorantApplication extends Application {
 
     private final AuthenticationService  authenticationService;
 
-    private final String                 host;
-
-    private final int                    port;
-
-    private final String                 contextPath;
-
     private final String                 accountName;
 
     private MetadataStorage              metadataStorage;
@@ -81,17 +75,12 @@ public class CormorantApplication extends Application {
                 final Path metadataStore,
                 final AccountService accountService,
                 final AuthenticationService authenticationService,
-                final String host,
-                final int port,
                 final String contextPath,
                 final String accountName) {
         this.objectStore            = objectStore;
         this.metadataStore          = metadataStore;
         this.accountService         = accountService;
         this.authenticationService  = authenticationService;
-        this.host                   = host;
-        this.port                   = port;
-        this.contextPath            = contextPath;
         this.accountName            = accountName;
         setMetadataStorage(SQLite);
         setEnableMetadataCache(false);
@@ -123,9 +112,9 @@ public class CormorantApplication extends Application {
 
         singletons.add(new HealthCheckController());
 
-        singletons.add(new CormorantFeature<>(tokens, authenticationService, accountMetadataService, containerService, getContextPath()));
+        singletons.add(new CormorantFeature<>(tokens, authenticationService, accountMetadataService, containerService));
 
-        singletons.add(new AuthenticationController(tokens, authenticationService, host, port, getContextPath(), accountName));
+        singletons.add(new AuthenticationController(tokens, authenticationService, accountName));
 
         singletons.add(new AccountController(accountService,
                                                     accountMetadataService));
@@ -145,10 +134,6 @@ public class CormorantApplication extends Application {
         singletons.add(new FaviconController());
 
         return singletons;
-    }
-
-    public String getContextPath() {
-        return contextPath;
     }
 
     protected int getPathMaxCount() {

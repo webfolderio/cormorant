@@ -66,21 +66,17 @@ class SecurityFilter<T> implements ContainerRequestFilter {
 
     private final ContainerService<T> containerService;
 
-    private final String contextPath;
-
     public SecurityFilter(
                 final Map<String, Principal> tokens,
                 final String                 permission,
                 final AuthenticationService  authenticationService,
                 final MetadataService        accountMetadataService,
-                final ContainerService<T>    containerService,
-                final String                 contextPath) {
+                final ContainerService<T>    containerService) {
         this.tokens                 = tokens;
         this.permission             = permission;
         this.authenticationService  = authenticationService;
         this.accountMetadataService = accountMetadataService;
         this.containerService       = containerService;
-        this.contextPath            = contextPath;
     }
 
     @Override
@@ -99,7 +95,7 @@ class SecurityFilter<T> implements ContainerRequestFilter {
                 }
                 final long unixTime = expires * 1000L;
                 if (unixTime > currentTimeMillis()) {
-                    final String hmacBody = format("%s\n%s\n%s", requestContext.getMethod(), tue, contextPath + requestContext.getUriInfo().getPath());
+                    final String hmacBody = format("%s\n%s\n%s", requestContext.getMethod(), tue, requestContext.getUriInfo().getAbsolutePath().getPath());
                     final String account = requestContext.getUriInfo().getPathParameters().getFirst("account");
                     String tempUrlKey;
                     try {
