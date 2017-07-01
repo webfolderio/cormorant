@@ -877,7 +877,7 @@ public class ObjectController<T> {
 
     protected void putSystemMetadata(final String namespace, final ResponseBuilder builder) throws SQLException {
         if ( systemMetadataService.get(namespace, CONTENT_TYPE) != null ) {
-            response.setContentType(systemMetadataService.get(namespace, CONTENT_TYPE));
+            builder.header(CONTENT_TYPE, systemMetadataService.get(namespace, CONTENT_TYPE));
         }
         if ( systemMetadataService.get(namespace, CONTENT_ENCODING) != null ) {
             builder.header(CONTENT_ENCODING, systemMetadataService.get(namespace, CONTENT_ENCODING));
