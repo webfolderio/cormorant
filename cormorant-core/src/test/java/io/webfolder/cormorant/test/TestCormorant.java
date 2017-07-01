@@ -407,17 +407,28 @@ public class TestCormorant extends TestBase {
     }
 
     @Test
-    public void t25TestInfo() throws IOException {
+    public void t26TestInfo() throws IOException {
         Response response = client.newCall(new Request.Builder().url(getUrl() + contextPath + "/v2.0").get().build()).execute();
         assertEquals(200, response.code());
         assertEquals("application/json", response.header("Content-Type"));
     }
 
     @Test
-    public void t25TestPathNullStream() {        
+    public void t27TestPathNullStream() {        
         PathNullStream stream = new PathNullStream();
         assertNull(stream.iterator().next());
         assertNull(stream.convert(null, null, null));
+    }
+
+    @Test
+    public void t28TestNonLatinChars() {
+        ObjectApi objectApi = swiftApi.getObjectApi(region, "container1");
+        Payload payload = Payloads.newStringPayload("Привет мир 你好，世界");
+        PutOptions options = new PutOptions();
+        objectApi.put("test-2/Привет мир 你好，世界.txt", payload, options);
+        SwiftObject object = objectApi.get("test-2/Привет мир 你好，世界.txt");
+        String str = toString((InputStream) object.getPayload().getRawContent());
+        assertEquals("Привет мир 你好，世界", str);
     }
 
     @Test
