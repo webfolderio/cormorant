@@ -71,6 +71,9 @@ jobs:
             go get github.com/ncw/swift
             git clone https://github.com/ncw/swift.git swift
             cd swift
+            cd ..
+            source ./refstack-client/.venv/bin/activate
+            ./refstack-client/refstack-client test -c tempest.conf -v --test-list cormorant-tempest.txt
             go test -run "(TestTransport)"
             go test -run "(TestV1V2Authenticate)"
             go test -run "(TestV3AuthenticateWithDomainNameAndTenantId)"
@@ -143,9 +146,6 @@ jobs:
             go test -run "(TestSLOSegmentationBuffered)"
             go test -run "(TestContainerDelete)"
             go test -run "(TestUnAuthenticate)"
-            cd ..
-            source ./refstack-client/.venv/bin/activate
-            ./refstack-client/refstack-client test -c tempest.conf -v --test-list cormorant-tempest.txt
             wget http://localhost:5000/shutdown
 
       - run:
