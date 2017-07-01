@@ -493,12 +493,12 @@ public class ObjectController<T> {
             sysMetadata.put(CONTENT_LENGTH, totalSize);
         }
 
-        if (largeObject && sysMetadata.containsKey(ETAG)) {
-            sysMetadata.put(ETAG, "\"" + sysMetadata.get(ETAG) + "\"");
-        }
-
         if ( "0".equals(sysMetadata.get(CONTENT_LENGTH)) || ! sysMetadata.containsKey(CONTENT_LENGTH) ) {
             sysMetadata.put(ETAG, MD5_OF_EMPTY_STRING);
+        }
+
+        if (largeObject && sysMetadata.containsKey(ETAG)) {
+            sysMetadata.put(ETAG, "\"" + sysMetadata.get(ETAG) + "\"");
         }
 
         for (Map.Entry<String, Object> entry : sysMetadata.entrySet()) {
