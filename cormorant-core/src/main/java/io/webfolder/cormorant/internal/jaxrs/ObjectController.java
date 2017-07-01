@@ -482,12 +482,6 @@ public class ObjectController<T> {
             if (etag == null) {
                 etag = checksumService.calculateChecksum(container, object);
             }
-            if ( etag != null &&
-                    ! etag.trim().isEmpty() &&
-                    ! etag.startsWith("\"") &&
-                    ! etag.endsWith("\"") ) {
-                sysMetadata.put(ETAG, "\"" + etag + "\"");
-            }
         }
 
         if (staticLargeObject) {
@@ -499,10 +493,8 @@ public class ObjectController<T> {
             sysMetadata.put(CONTENT_LENGTH, totalSize);
         }
 
-        if ( "0".equals(sysMetadata.get(CONTENT_LENGTH)) || ! sysMetadata.containsKey(CONTENT_LENGTH) ) {
-            sysMetadata.put(ETAG,
-                    (sysMetadata.containsKey(ETAG) && sysMetadata.get(ETAG).toString().contains("\"") ? "\"" : "") + MD5_OF_EMPTY_STRING +
-                    (sysMetadata.containsKey(ETAG) && sysMetadata.get(ETAG).toString().contains("\"") ? "\"" : ""));
+        if (largeObject && sysMetadata.containsKey(ETAG)) {
+            sysMetadata.put(ETAG, "\"" + sysMetadata.get(ETAG) + "\"");
         }
 
         for (Map.Entry<String, Object> entry : sysMetadata.entrySet()) {
