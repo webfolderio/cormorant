@@ -493,7 +493,8 @@ public class ObjectController<T> {
             sysMetadata.put(CONTENT_LENGTH, totalSize);
         }
 
-        if ( "0".equals(sysMetadata.get(CONTENT_LENGTH)) || ! sysMetadata.containsKey(CONTENT_LENGTH) ) {
+        if ( "0".equals(sysMetadata.get(CONTENT_LENGTH)) || ! sysMetadata.containsKey(CONTENT_LENGTH) ||
+                        ( largeObject && ! sysMetadata.containsKey(ETAG) ) ) {
             sysMetadata.put(ETAG, MD5_OF_EMPTY_STRING);
         }
 
