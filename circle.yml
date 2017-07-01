@@ -60,20 +60,25 @@ jobs:
           command: git clone https://github.com/openstack/refstack-client.git refstack-client
 
       - run:
+          name: Checkout ncw/swift
+          command: git clone https://github.com/ncw/swift.git swift
+
+      - run:
           name: Install refstack
           command: bash refstack-client/setup_env
+
+      - run:
+          name: Install ncw/swift
+          command: go get github.com/ncw/swift
 
       - run:
           name: Execute tempest & ncw/swift (go) test
           background: true
           command: |
             sleep 10
-            go get github.com/ncw/swift
-            git clone https://github.com/ncw/swift.git swift
-            cd swift
-            cd ..
             source ./refstack-client/.venv/bin/activate
             ./refstack-client/refstack-client test -c tempest.conf -v --test-list cormorant-tempest.txt
+            cd swift
             go test -run "(TestTransport)"
             go test -run "(TestV1V2Authenticate)"
             go test -run "(TestV3AuthenticateWithDomainNameAndTenantId)"
