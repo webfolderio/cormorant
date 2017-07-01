@@ -497,6 +497,10 @@ public class ObjectController<T> {
             sysMetadata.put(ETAG, "\"" + sysMetadata.get(ETAG) + "\"");
         }
 
+        if ( "0".equals(sysMetadata.get(CONTENT_LENGTH)) || ! sysMetadata.containsKey(CONTENT_LENGTH) ) {
+            sysMetadata.put(ETAG, MD5_OF_EMPTY_STRING);
+        }
+
         for (Map.Entry<String, Object> entry : sysMetadata.entrySet()) {
             final String headerName  = entry.getKey();
             final Object headerValue = entry.getValue();
