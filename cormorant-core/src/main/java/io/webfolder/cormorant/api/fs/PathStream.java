@@ -17,7 +17,6 @@
  */
 package io.webfolder.cormorant.api.fs;
 
-import java.nio.file.DirectoryStream;
 import java.nio.file.Path;
 
 import io.webfolder.cormorant.api.resource.AbstractResourceStream;
@@ -25,7 +24,7 @@ import io.webfolder.cormorant.api.resource.ResourceAdapter;
 
 class PathStream extends AbstractResourceStream<Path> {
 
-    public PathStream(DirectoryStream<Path> stream,
+    public PathStream(Iterable<Path> stream,
                                 ResourceAdapter<Path> resourceAdapter) {
         super(stream, resourceAdapter);
     }

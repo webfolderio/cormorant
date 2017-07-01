@@ -22,7 +22,6 @@ import static java.nio.file.FileVisitResult.CONTINUE;
 import static java.nio.file.FileVisitResult.TERMINATE;
 
 import java.io.IOException;
-import java.nio.file.DirectoryStream;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
@@ -34,7 +33,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import io.webfolder.cormorant.api.model.ListContainerOptions;
 
-class PathVisitor extends SimpleFileVisitor<Path> implements  DirectoryStream<Path> {
+class PathVisitor extends SimpleFileVisitor<Path> implements Iterable<Path> {
 
     private static final String  BACKSLASH = "\\";
 
@@ -128,9 +127,5 @@ class PathVisitor extends SimpleFileVisitor<Path> implements  DirectoryStream<Pa
             set = files.headSet(pEndMarker, inclusive);
         }
         return reverse ? set.descendingIterator() : set.iterator();
-    }
-
-    @Override
-    public void close() {
     }
 }
