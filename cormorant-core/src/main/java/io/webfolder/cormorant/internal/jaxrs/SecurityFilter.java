@@ -38,6 +38,7 @@ import javax.crypto.spec.SecretKeySpec;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.core.SecurityContext;
+import javax.ws.rs.core.UriInfo;
 
 import io.webfolder.cormorant.api.exception.CormorantException;
 import io.webfolder.cormorant.api.service.AuthenticationService;
@@ -82,9 +83,10 @@ class SecurityFilter<T> implements ContainerRequestFilter {
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
         final String authToken = requestContext.getHeaderString(AUTH_TOKEN);
+        final UriInfo uriInfo = requestContext.getUriInfo();
         if (authToken == null) {
-            final String tus = requestContext.getUriInfo().getQueryParameters().getFirst(TEMP_URL_SIG);
-            final String tue = requestContext.getUriInfo().getQueryParameters().getFirst(TEMP_URL_EXPIRES);
+            final String tus = uriInfo.getQueryParameters().getFirst(TEMP_URL_SIG);
+            final String tue = uriInfo.getQueryParameters().getFirst(TEMP_URL_EXPIRES);
 
             if  ( tus != null && tue != null ) {
                 long expires;
@@ -95,8 +97,8 @@ class SecurityFilter<T> implements ContainerRequestFilter {
                 }
                 final long unixTime = expires * 1000L;
                 if (unixTime > currentTimeMillis()) {
-                    final String hmacBody = format("%s\n%s\n%s", requestContext.getMethod(), tue, requestContext.getUriInfo().getAbsolutePath().getPath());
-                    final String account = requestContext.getUriInfo().getPathParameters().getFirst("account");
+                    final String hmacBody = format("%s\n%s\n%s", requestContext.getMethod(), tue, uriInfo.getAbsolutePath().getPath());
+                    final String account = uriInfo.getPathParameters().getFirst("account");
                     String tempUrlKey;
                     try {
                         tempUrlKey = accountMetadataService.get(account, "temp-url-key");
@@ -136,7 +138,7 @@ class SecurityFilter<T> implements ContainerRequestFilter {
         // This logic is required to pass tempest (TokensV3Test.test_create_token)
         boolean deleteSelf = "cormorant-admin".equals(permission) &&
                                 "DELETE".equalsIgnoreCase(requestContext.getMethod()) &&
-                                principal.getName().equals(requestContext.getUriInfo().getPathParameters().getFirst("userId"));
+                                principal.getName().equals(uriInfo.getPathParameters().getFirst("userId"));
 
         final boolean authorized = authenticationService.hasPermission(principal.getName(), permission, requestContext.getMethod());
         if ( ! deleteSelf && ! authorized ) {
@@ -150,8 +152,8 @@ class SecurityFilter<T> implements ContainerRequestFilter {
         }
 
         if ("cormorant-object".equals(permission)) {
-            final String accountName = requestContext.getUriInfo().getPathParameters().getFirst("account");
-            final String containerName = requestContext.getUriInfo().getPathParameters().getFirst("container");
+            final String accountName = uriInfo.getPathParameters().getFirst("account");
+            final String containerName = uriInfo.getPathParameters().getFirst("container");
             if ( ! containerService.contains(accountName, containerName) ) {
                 final String error = "Container [" + containerName + "] not found.";
                 requestContext
@@ -174,7 +176,7 @@ class SecurityFilter<T> implements ContainerRequestFilter {
         final char[] hexChars = new char[bytes.length * 2];
         for (int i = 0; i < bytes.length; i++) {
             int v = bytes[i] & 0xFF;
-            hexChars[i * 2] = HEX_ARRAY[v >>> 4];
+            hexChars[i * 2]     = HEX_ARRAY[v >>> 4];
             hexChars[i * 2 + 1] = HEX_ARRAY[v & 0x0F];
         }
         return new String(hexChars);

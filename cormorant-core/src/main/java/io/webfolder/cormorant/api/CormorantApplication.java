@@ -127,8 +127,7 @@ public class CormorantApplication extends Application {
                                                     objectService,
                                                     checksumService,
                                                     objectMetadataService,
-                                                    systemMetadataService,
-                                                    new DefaultUrlDecoder()));
+                                                    systemMetadataService));
 
         singletons.add(new FaviconController());
 

@@ -56,17 +56,16 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.Response.Status;
 
+import io.webfolder.cormorant.api.Util;
 import io.webfolder.cormorant.api.model.Segment;
 import io.webfolder.cormorant.api.service.ObjectService;
 
-class ResourceHandler<T> {
+class ResourceHandler<T> implements Util {
 
     private static final Pattern RANGE_PATTERN        = compile("^bytes=[0-9]*-[0-9]*(,[0-9]*-[0-9]*)*$");
     private static final long    ONE_SECOND_IN_MILLIS = SECONDS.toMillis(1);
     private static final int     BUFFER_SIZE          = 16 * 1024;
     private static final byte[]  NEW_LINE             = "\r\n".getBytes(UTF_8);
-    private static final char    CHAR_SLASH           = '/';
-    private static final Pattern LEADING_SLASH        = compile("^/+");
 
     private final ObjectService<T> objectService;
 
@@ -452,19 +451,5 @@ class ResourceHandler<T> {
                         final int    endIndex) {
         final String str = value.substring(beginIndex, endIndex);
         return str.isEmpty() ? -1 : parseLong(str);
-    }
-
-    protected String removeLeadingSlash(String path) {
-        if (path == null) {
-            return null;
-        }
-        String normalizedPath = path;
-        if (normalizedPath.charAt(0) == CHAR_SLASH) {
-            normalizedPath = path.substring(1, path.length());
-        }
-        if (normalizedPath.charAt(0) == CHAR_SLASH) {
-            normalizedPath = LEADING_SLASH.matcher(normalizedPath).replaceAll("");
-        }
-        return normalizedPath;
     }
 }

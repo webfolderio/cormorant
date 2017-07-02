@@ -33,7 +33,6 @@ import static java.time.format.DateTimeFormatter.ofPattern;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.Locale.ENGLISH;
-import static java.util.regex.Pattern.compile;
 import static javax.ws.rs.core.HttpHeaders.CONTENT_DISPOSITION;
 import static javax.ws.rs.core.HttpHeaders.CONTENT_ENCODING;
 import static javax.ws.rs.core.HttpHeaders.CONTENT_LENGTH;
@@ -55,6 +54,8 @@ import java.io.DataInputStream;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
@@ -67,7 +68,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
-import java.util.regex.Pattern;
 
 import javax.annotation.security.DeclareRoles;
 import javax.annotation.security.RolesAllowed;
@@ -88,6 +88,7 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 
 import io.webfolder.cormorant.api.Json;
+import io.webfolder.cormorant.api.Util;
 import io.webfolder.cormorant.api.exception.CormorantException;
 import io.webfolder.cormorant.api.model.Container;
 import io.webfolder.cormorant.api.model.Segment;
@@ -96,7 +97,6 @@ import io.webfolder.cormorant.api.service.ChecksumService;
 import io.webfolder.cormorant.api.service.ContainerService;
 import io.webfolder.cormorant.api.service.MetadataService;
 import io.webfolder.cormorant.api.service.ObjectService;
-import io.webfolder.cormorant.api.service.UrlDecoder;
 import io.webfolder.cormorant.internal.request.ObjectCopyRequest;
 import io.webfolder.cormorant.internal.request.ObjectDeleteRequest;
 import io.webfolder.cormorant.internal.request.ObjectGetRequest;
@@ -112,7 +112,7 @@ import io.webfolder.cormorant.internal.response.ObjectPutResponse;
 @Path("/v1/{account}/{container}")
 @RolesAllowed({ "cormorant-object" })
 @DeclareRoles({ "cormorant-object" })
-public class ObjectController<T> {
+public class ObjectController<T> implements Util {
 
     private static final ZoneId  GMT                    = of("GMT");
 
@@ -144,8 +144,6 @@ public class ObjectController<T> {
 
     private static final String  META_REMOVE_PREFIX     = "x-remove-object-meta-";
 
-    private static final Pattern LEADING_SLASH          = compile("^/+");
-
     private static final String ACCEPT_RANGES           = "Accept-Ranges";
 
     private static final String BYTES_RESPONSE          = "bytes";
@@ -166,8 +164,6 @@ public class ObjectController<T> {
 
     private final MetadataService     metadataService;
 
-    private final UrlDecoder          urlDecoder;
-
     @Context
     private HttpHeaders httpHeaders;
 
@@ -183,15 +179,13 @@ public class ObjectController<T> {
                     final ObjectService<T>    objectService   ,
                     final ChecksumService<T>  checksumService ,
                     final MetadataService     metadataService ,
-                    final MetadataService     systemMetadata  ,
-                    final UrlDecoder          urlDecoder) {
+                    final MetadataService     systemMetadata  ) {
         this.accountService        = accountService  ;
         this.containerService      = containerService;
         this.objectService         = objectService   ;
         this.checksumService       = checksumService ;
         this.metadataService       = metadataService ;
         this.systemMetadataService = systemMetadata  ;
-        this.urlDecoder            = urlDecoder      ;
     }
 
     @GET
@@ -726,8 +720,13 @@ public class ObjectController<T> {
                                             request.getDestinationAccount().trim().isEmpty() ?
                                             request.getAccount() : request.getDestinationAccount();
 
-        final String targetPath = urlDecoder.decode(request.getDestination());
-        final int    start      = targetPath.indexOf(FORWARD_SLASH);
+        final String targetPath;
+        try {
+            targetPath = removeLeadingSlash(new URI(request.getDestination()).getPath());
+        } catch (URISyntaxException e) {
+            throw new CormorantException(e);
+        }
+        final int start = targetPath.indexOf(FORWARD_SLASH);
 
         if (start < 0) {
             throw new CormorantException("Failed to copy object [" + targetPath + "]. Missing container name.");
@@ -1116,20 +1115,6 @@ public class ObjectController<T> {
             final String  dynamicLargeObjectEtag = checksumService.calculateChecksum(objects);
             response.setETag(dynamicLargeObjectEtag);
         }
-    }
-
-    protected String removeLeadingSlash(String path) {
-        if (path == null) {
-            return null;
-        }
-        String normalizedPath = path;
-        if (normalizedPath.charAt(0) == FORWARD_SLASH) {
-            normalizedPath = path.substring(1, path.length());
-        }
-        if (normalizedPath.charAt(0) == FORWARD_SLASH) {
-            normalizedPath = LEADING_SLASH.matcher(normalizedPath).replaceAll("");
-        }
-        return normalizedPath;
     }
 
     protected void createDirectory(

@@ -38,7 +38,6 @@ import static java.nio.file.StandardOpenOption.WRITE;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.unmodifiableMap;
 import static java.util.Locale.ENGLISH;
-import static java.util.regex.Pattern.compile;
 import static javax.ws.rs.core.HttpHeaders.CONTENT_TYPE;
 
 import java.io.BufferedReader;
@@ -60,22 +59,20 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
-import java.util.regex.Pattern;
 
 import io.webfolder.cormorant.api.Json;
+import io.webfolder.cormorant.api.Util;
 import io.webfolder.cormorant.api.exception.CormorantException;
 import io.webfolder.cormorant.api.model.Segment;
 import io.webfolder.cormorant.api.service.ContainerService;
 import io.webfolder.cormorant.api.service.MetadataService;
 import io.webfolder.cormorant.api.service.ObjectService;
 
-public class PathObjectService implements ObjectService<Path> {
+public class PathObjectService implements ObjectService<Path>, Util {
 
     private static final char    FORWARD_SLASH     = '\\';
 
     private static final char    BACKWARD_SLASH    = '/';
-
-    private static final Pattern LEADING_SLASH     = compile("^/+");
 
     private static final String  X_OBJECT_MANIFEST = "X-Object-Manifest";
 
@@ -425,19 +422,5 @@ public class PathObjectService implements ObjectService<Path> {
             throw new CormorantException("Unable to read mime types", e);
         }
         return unmodifiableMap(map);
-    }
-
-    protected String removeLeadingSlash(String path) {
-        if (path == null) {
-            return null;
-        }
-        String normalizedPath = path;
-        if (normalizedPath.charAt(0) == BACKWARD_SLASH) {
-            normalizedPath = path.substring(1, path.length());
-        }
-        if (normalizedPath.charAt(0) == BACKWARD_SLASH) {
-            normalizedPath = LEADING_SLASH.matcher(normalizedPath).replaceAll("");
-        }
-        return normalizedPath;
     }
 }

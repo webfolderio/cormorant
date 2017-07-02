@@ -62,6 +62,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import io.webfolder.cormorant.api.Util;
 import io.webfolder.cormorant.api.exception.CormorantException;
 import io.webfolder.cormorant.api.fs.PathNullStream;
 import okhttp3.MediaType;
@@ -429,6 +430,14 @@ public class TestCormorant extends TestBase {
         SwiftObject object = objectApi.get("test-2/Привет мир 你好，世界.txt");
         String str = toString((InputStream) object.getPayload().getRawContent());
         assertEquals("Привет мир 你好，世界", str);
+    }
+
+    @Test
+    public void t29TestRemoveLeadingSlash() {
+        Util util = new Util() {
+        };
+        String uri = util.removeLeadingSlash("//foo");
+        assertEquals("foo", uri);
     }
 
     @Test
