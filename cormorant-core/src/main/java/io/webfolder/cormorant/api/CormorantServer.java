@@ -141,19 +141,15 @@ public class CormorantServer {
     }
 
     public CormorantServer start() {
-        return start();
-    }
-
-    public CormorantServer start(final String host) {
-        return start(root -> root);
+        return start(null);
     }
 
     public CormorantServer start(
                                 final Function<HttpHandler, HttpHandler> function) {
         final HttpContinueReadHandler      readHandler      = new HttpContinueReadHandler(root);
         final HttpContinueAcceptingHandler acceptingHandler = new HttpContinueAcceptingHandler(readHandler);
-        final HttpHandler                  handler          = function.apply(acceptingHandler);
-                                           gracefulHandler  = gracefulShutdown(handler);
+        final HttpHandler                  handler          = function != null ? function.apply(acceptingHandler) : null;
+                                           gracefulHandler  = gracefulShutdown(handler != null ? handler : acceptingHandler);
         final AllowedMethodsHandler        allowedHandler   = new AllowedMethodsHandler(gracefulHandler,
                                                                        HEAD  , GET,
                                                                        POST  , PUT,
