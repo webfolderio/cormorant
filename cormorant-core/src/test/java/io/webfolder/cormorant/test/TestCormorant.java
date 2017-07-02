@@ -62,6 +62,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import io.webfolder.cormorant.api.Json;
 import io.webfolder.cormorant.api.Util;
 import io.webfolder.cormorant.api.exception.CormorantException;
 import io.webfolder.cormorant.api.fs.PathNullStream;
@@ -438,6 +439,13 @@ public class TestCormorant extends TestBase {
         };
         String uri = util.removeLeadingSlash("//foo");
         assertEquals("foo", uri);
+    }
+
+    @Test
+    public void t30TestJsonEqual() {
+        Json json1 = Json.read("{ \"foo\" : \"bar\" }");
+        Json json2 = Json.read("{ \"foo\" : \"bar\" }");
+        assertEquals(json1.hashCode(), json2.hashCode());
     }
 
     @Test

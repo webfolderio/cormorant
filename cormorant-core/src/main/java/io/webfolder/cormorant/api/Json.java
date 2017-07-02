@@ -40,10 +40,6 @@ public class Json {
         return delegate.asString();
     }
 
-    public Long asLong() {
-        return delegate.asLong();
-    }
-
     public boolean isObject() {
         return delegate.isObject();
     }
@@ -85,10 +81,6 @@ public class Json {
 
     public boolean isArray() {
         return delegate.isArray();
-    }
-
-    public boolean isNumber() {
-        return delegate.isNumber();
     }
 
     public List<Object> asList() {
