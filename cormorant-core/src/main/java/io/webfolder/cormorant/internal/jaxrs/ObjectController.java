@@ -86,6 +86,7 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.UriInfo;
 
 import io.webfolder.cormorant.api.Json;
 import io.webfolder.cormorant.api.Util;
@@ -144,13 +145,13 @@ public class ObjectController<T> implements Util {
 
     private static final String  META_REMOVE_PREFIX     = "x-remove-object-meta-";
 
-    private static final String ACCEPT_RANGES           = "Accept-Ranges";
+    private static final String  ACCEPT_RANGES          = "Accept-Ranges";
 
-    private static final String BYTES_RESPONSE          = "bytes";
+    private static final String  BYTES_RESPONSE         = "bytes";
 
-    private static final String MD5_OF_EMPTY_STRING     = "d41d8cd98f00b204e9800998ecf8427e";
+    private static final String  MD5_OF_EMPTY_STRING    = "d41d8cd98f00b204e9800998ecf8427e";
 
-    private static final String DIRECTORY               = "application/directory";
+    private static final String  DIRECTORY              = "application/directory";
 
     private final AccountService      accountService;
 
@@ -165,7 +166,10 @@ public class ObjectController<T> implements Util {
     private final MetadataService     metadataService;
 
     @Context
-    private HttpHeaders httpHeaders;
+    private HttpHeaders        httpHeaders;
+
+    @Context
+    private UriInfo            uriInfo;
 
     @Context
     private HttpServletRequest request;
@@ -255,7 +259,15 @@ public class ObjectController<T> implements Util {
             }
 
             if ( ! dynamicLargeObject ) {
-                return status(NOT_FOUND).build();
+                final T directory = objectService.getDirectory(container, request.getObject());
+                if ( directory != null ) {
+                    return status(NO_CONTENT)
+                                .header(CONTENT_TYPE, DIRECTORY)
+                                .header(ETAG, MD5_OF_EMPTY_STRING)
+                                .build();
+                } else {
+                    return status(NOT_FOUND).build();
+                }
             }
         }
 
@@ -362,6 +374,7 @@ public class ObjectController<T> implements Util {
                         @BeanParam final ObjectPutRequest request,
                                    final InputStream      is) throws IOException, SQLException {
 
+
         final String  transferEncoding = request.getTransferEncoding();
         final Long    contentLength    = request.getContentLength();
         final boolean chunked          = isChunked(transferEncoding);
@@ -388,7 +401,11 @@ public class ObjectController<T> implements Util {
 
         final ResponseBuilder builder = status(CREATED).entity(response);
 
-        if ("application/directory".equalsIgnoreCase(request.getContentType())) {
+        final String path       = uriInfo.getRequestUri().getPath();
+        boolean createDirectory = DIRECTORY.equalsIgnoreCase(request.getContentType()) ||
+                                            path.charAt(path.length() - 1) == FORWARD_SLASH;
+
+        if (createDirectory) {
             createDirectory(request, response, is);
         } else if ("put".equalsIgnoreCase(request.getMultipartManifest())) {
             uploadManifest(request, response, is);

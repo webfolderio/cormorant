@@ -449,6 +449,18 @@ public class TestCormorant extends TestBase {
     }
 
     @Test
+    public void t31CreateDirectory() throws IOException {
+        ObjectApi objectApi = swiftApi.getObjectApi("default", "container1");
+        objectApi.put("my-test-directory/", Payloads.newByteArrayPayload(new byte[] { }));
+        Response response = client.newCall(new Request.Builder().url(getUrl()
+                                    + contextPath + "/v1/myaccount/container1/my-test-directory").get().build()).execute();
+        assertEquals("application/directory", response.header("Content-Type"));
+        SwiftObject object = objectApi.getWithoutBody("my-test-directory");
+        assertNotNull(object);
+        assertEquals("d41d8cd98f00b204e9800998ecf8427e", object.getHeaders().get("ETag").iterator().next());
+    }
+
+    @Test
     public void t200JossListObjects() {
         org.javaswift.joss.model.Container container = jossAccount.list().iterator().next();
         Collection<StoredObject> objects = container.list();

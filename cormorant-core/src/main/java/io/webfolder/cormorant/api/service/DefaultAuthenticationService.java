@@ -129,11 +129,11 @@ public class DefaultAuthenticationService implements AuthenticationService {
         }
         final Role newRole = valueOf(role);
         final User newUser = new User(user.getUsername(),
-                                    user.getPassword(),
-                                    user.getEmail(),
-                                    user.getProjectId(),
-                                    newRole,
-                                    true);
+                                      user.getPassword(),
+                                      user.getEmail(),
+                                      user.getProjectId(),
+                                      newRole,
+                                      true);
         users.put(userId, newUser);
     }
 }

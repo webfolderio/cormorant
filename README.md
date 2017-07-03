@@ -9,24 +9,22 @@ __cormorant__ is an object storage server released under AGPL.
 [![Coverage Status](https://coveralls.io/repos/github/webfolderio/cormorant/badge.svg?branch=master)](https://coveralls.io/github/webfolderio/cormorant?branch=master)
 
 ### Features Support
-The following list describes the support status for current features:
 
-* Authentication
-* Get Account Metadata
-* List Containers
-* Delete Container
-* Create Container
-* Get Container Metadata
-* Update Container Metadata
-* Delete Container Metadata
-* List Objects
-* Create Object
-* Create Large Object
-* Delete Object
-* Get Object
-* Copy Object
-* Get Object Metadata
-* Update Object Metadata
+The cormorant API is a RESTful, HTTP-based API that is compatible with swift. Using this API, you can:
+
+* Create a container (PUT container)
+* List the containers you own (GET account)
+* List account metadata (HEAD account)
+* Check a container's metadata (HEAD container)
+* List the objects in a container (GET container)
+* Delete a container as long as the container don’t have any objects in it (DELETE container)
+* Store an object in a container (PUT object)
+* Create a directory in a container (PUT object)
+* Retrieve custom metadata for an object (HEAD object)
+* Copy an object (COPY object)
+* Retrieve an object (GET object)
+* Delete an object (DELETE object)
+* Create Large (static & dynamic) Object
 
 ### Roadmap
 * ACLs
