@@ -18,12 +18,11 @@
 package io.webfolder.cormorant.api.service;
 
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.List;
 
 public interface ChecksumService<T> {
 
-    String calculateChecksum(T container, T object) throws IOException, SQLException;
+    String calculateChecksum(T object) throws IOException;
 
     String calculateChecksum(List<T> objects) throws IOException;
 }

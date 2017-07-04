@@ -98,7 +98,7 @@ public class PathAdapter implements ResourceAdapter<Path> {
         } catch (IOException e) {
             throw new CormorantException(e);
         }
-        final String hash = isdir ? MD5_OF_EMPTY_STRING : checksumService.calculateChecksum(container, path);
+        final String hash = isdir ? MD5_OF_EMPTY_STRING : checksumService.calculateChecksum(path);
         if (json.equals(contentFormat)) {
             builder.append("{")
                    .append("\"name\":\"").append(isdir && TRUE.equals(appendForwardSlash) ? normalizedName + FORWARD_SLASH : normalizedName).append("\"").append(",")

@@ -279,7 +279,7 @@ public class ObjectController<T> implements Util {
         final String  namespace          = objectService.getNamespace(container, object);
         final long    lastModified       = objectService.getLastModified(object);
         final long    creationTime       = objectService.getCreationTime(object);
-        final String  etag               = dynamicLargeObjectEtag != null ? dynamicLargeObjectEtag : checksumService.calculateChecksum(container, object);
+        final String  etag               = dynamicLargeObjectEtag != null ? dynamicLargeObjectEtag : checksumService.calculateChecksum(object);
         final String  contentDisposition = systemMetadataService.get(namespace, CONTENT_DISPOSITION);
 
         final Map<String, String> headers = new HashMap<>();
@@ -463,7 +463,7 @@ public class ObjectController<T> implements Util {
                 sysMetadata.put(CONTENT_LENGTH, 0);
                 sysMetadata.put(ETAG, MD5_OF_EMPTY_STRING);
             } else {
-                sysMetadata.put(ETAG, checksumService.calculateChecksum(container, object));
+                sysMetadata.put(ETAG, checksumService.calculateChecksum(object));
                 sysMetadata.put(CONTENT_LENGTH, objectService.getSize(object));
             }
         }
@@ -491,7 +491,7 @@ public class ObjectController<T> implements Util {
                 sysMetadata.put(CONTENT_LENGTH, size);
             }
             if (etag == null) {
-                etag = checksumService.calculateChecksum(container, object);
+                etag = checksumService.calculateChecksum(object);
             }
         }
 
@@ -839,7 +839,7 @@ public class ObjectController<T> implements Util {
 
         updateMetadata(targetNamespace);
 
-        final String checksum           = checksumService.calculateChecksum(targetContainer, targetObject);
+        final String checksum           = checksumService.calculateChecksum(targetObject);
         final String sourceLastModified = FORMATTER.format(ofInstant(ofEpochMilli(objectService.getLastModified(sourceObject)), GMT));
         final String targetLastModified = FORMATTER.format(ofInstant(ofEpochMilli(objectService.getLastModified(targetObject)), GMT));
 
@@ -1014,7 +1014,7 @@ public class ObjectController<T> implements Util {
 
         final Container           containerInfo  = accountService.getContainer(request.getAccount(), request.getContainer());
         final Map<String, Object> systemMetadata = new HashMap<>();
-        final String              etag           = checksumService.calculateChecksum(sourceContainer, sourceObject);
+        final String              etag           = checksumService.calculateChecksum(sourceObject);
         final String              requestETag    = httpHeaders.getHeaderString(ETAG);
         // ----------------------------------------------------------------------------------
         // Ensure object integrity
@@ -1190,8 +1190,7 @@ public class ObjectController<T> implements Util {
             }
             if (map.containsKey("etag")) {
                 final String expectedChecksum = (String) map.get("etag");
-                final T      container        = containerService.getContainer(request.getAccount(), multipartContainer);
-                final String actualChecksum   = checksumService.calculateChecksum(container, segmentObject);
+                final String actualChecksum   = checksumService.calculateChecksum(segmentObject);
                 if ( ! expectedChecksum.equals(actualChecksum) ) {
                     throw new CormorantException("Segment etag [" +
                                     expectedChecksum + "] does not match with actual etag [" +
@@ -1222,7 +1221,7 @@ public class ObjectController<T> implements Util {
                                                             tempObject,
                                                             container,
                                                             request.getObject() + MANIFEST_EXTENSION);
-            final String eTag = checksumService.calculateChecksum(container, object);
+            final String eTag = checksumService.calculateChecksum(object);
             response.setETag("\"" + eTag + "\"");
             response.setContentType(APPLICATION_JSON);
             response.setLastModified(valueOf(objectService.getLastModified(object)));
