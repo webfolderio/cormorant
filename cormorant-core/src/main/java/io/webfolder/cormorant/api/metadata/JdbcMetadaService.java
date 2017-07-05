@@ -18,7 +18,7 @@
 package io.webfolder.cormorant.api.metadata;
 
 import static java.lang.String.valueOf;
-import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 import static java.util.Collections.unmodifiableSet;
 
 import java.sql.Connection;
@@ -29,8 +29,8 @@ import java.sql.Statement;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import javax.sql.DataSource;
 
@@ -48,7 +48,7 @@ public class JdbcMetadaService implements MetadataService {
 
     private final String     table;
 
-    private final Set<String> DECODES = unmodifiableSet(new HashSet<>(asList("X-Object-Manifest")));
+    private final Set<String> DECODES = unmodifiableSet(new HashSet<>(singletonList("X-Object-Manifest")));
 
     private static final Logger LOG   = LoggerFactory.getLogger(JdbcMetadaService.class);
 

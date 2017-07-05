@@ -40,15 +40,15 @@ import io.webfolder.cormorant.api.service.MetadataService;
 
 public class DefaultMetadataServiceFactory implements MetadataServiceFactory {
 
-    private final Path            root        ;
+    private final Path            root       ;
 
-    private final DataSourceFactory dsFactory ;
+    private final DataSourceFactory dsFactory;
 
-    private final MetadataStorage storage     ;
+    private final MetadataStorage storage    ;
 
     public DefaultMetadataServiceFactory(final Path root, final MetadataStorage storage) {
-        this.root                                       = root;
-        this.storage                                    = storage;
+        this.root = root;
+        this.storage = storage;
         final ServiceLoader<DataSourceFactory> dsServFactory = load(DataSourceFactory.class, getClass().getClassLoader());
         final Iterator<DataSourceFactory> dsServIterator = dsServFactory.iterator();
         this.dsFactory = dsServIterator.hasNext() ? dsServIterator.next() : SQLite.equals(storage) ? new SQLiteDataSourceFactory() : null;

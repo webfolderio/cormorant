@@ -57,8 +57,8 @@ public class FileMetadataService implements MetadataService {
     private final String groupName;
 
     public FileMetadataService(
-                final Path                root     ,
-                final String              cacheName) {
+                final Path   root,
+                final String cacheName) {
         this.root      = root;
         this.groupName = cacheName.endsWith("-sys") ? SYSTEM_METADATA : METADATA;
     }
@@ -91,7 +91,7 @@ public class FileMetadataService implements MetadataService {
     }
 
     @Override
-    public void update(final String namespace, String key, final String value) {
+    public void update(final String namespace, final String key, final String value) {
         if (value == null) {
             if (contains(namespace, key)) {
                 delete(namespace, key);
@@ -165,6 +165,21 @@ public class FileMetadataService implements MetadataService {
         write(namespace, json);
     }
 
+    @Override
+    public void delete(final String namespace) {
+        final Path path     = root.resolve(namespace).toAbsolutePath().normalize();
+        final Path dataFile = path.getParent().resolve(path.getFileName() + METADATA_EXTENSION);
+        if ( path.startsWith(root)               &&
+                exists(dataFile, NOFOLLOW_LINKS) &&
+                isRegularFile(dataFile, NOFOLLOW_LINKS) ) {
+            try {
+                Files.delete(dataFile);
+            } catch (IOException e) {
+                throw new CormorantException("Unable to delete metadata file.", e);
+            }
+        }
+    }
+
     protected Json read(final String namespace) {
         final Path path = root.resolve(namespace).toAbsolutePath().normalize();
         if ( ! path.startsWith(root) ) {
@@ -209,20 +224,5 @@ public class FileMetadataService implements MetadataService {
             return null;
         }
         return json;
-    }
-
-    @Override
-    public void delete(String namespace) {
-        final Path path     = root.resolve(namespace).toAbsolutePath().normalize();
-        final Path dataFile = path.getParent().resolve(path.getFileName() + METADATA_EXTENSION);
-        if ( path.startsWith(root)               &&
-                exists(dataFile, NOFOLLOW_LINKS) &&
-                isRegularFile(dataFile, NOFOLLOW_LINKS) ) {
-            try {
-                Files.delete(dataFile);
-            } catch (IOException e) {
-                throw new CormorantException("Unable to delete metadata file.", e);
-            }
-        }
     }
 }
