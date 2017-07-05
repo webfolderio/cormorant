@@ -69,7 +69,7 @@ public class CormorantAuthenticationFeature<T> implements DynamicFeature {
                 .equals(getClass().getPackage()) &&
                 klass.isAnnotationPresent(RolesAllowed.class)) {
             final RolesAllowed rolesAllowed = klass.getAnnotation(RolesAllowed.class);
-            final String               role = rolesAllowed.value()[0];
+            final String       role         = rolesAllowed.value()[0];
             context.register(new SecurityFilter<>(
                                         tokens,
                                         role,

@@ -22,16 +22,15 @@ import java.util.Map;
 
 import javax.ws.rs.core.Feature;
 import javax.ws.rs.core.FeatureContext;
-import javax.ws.rs.core.MediaType;
 
-import org.jboss.resteasy.spi.ResteasyProviderFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import io.webfolder.cormorant.api.exception.CormorantExceptionMapper;
-import io.webfolder.cormorant.api.service.KeystoneService;
 import io.webfolder.cormorant.api.service.ContainerService;
+import io.webfolder.cormorant.api.service.KeystoneService;
 import io.webfolder.cormorant.api.service.MetadataService;
 import io.webfolder.cormorant.internal.jaxrs.CormorantAuthenticationFeature;
-import io.webfolder.cormorant.internal.jaxrs.CormorantMediaTypeHeaderDelegate;
 import io.webfolder.cormorant.internal.jaxrs.ResponseWriter;
 
 public class CormorantFeature<T> implements Feature {
@@ -43,6 +42,8 @@ public class CormorantFeature<T> implements Feature {
     private final MetadataService        accountMetadataService;
 
     private final ContainerService<T>    containerService;
+
+    private final Logger log = LoggerFactory.getLogger(CormorantFeature.class);
 
     public CormorantFeature(
                 final Map<String, Principal> tokens,
@@ -57,8 +58,13 @@ public class CormorantFeature<T> implements Feature {
 
     @Override
     public boolean configure(FeatureContext context) {
-        ResteasyProviderFactory providerFactory = (ResteasyProviderFactory) context.getConfiguration();
-        providerFactory.addHeaderDelegate(MediaType.class, new CormorantMediaTypeHeaderDelegate());
+        try {
+            new ResteasyFeature().configure(context);
+        } catch (Exception e) {
+            if (log.isDebugEnabled()) {
+                log.debug(e.getMessage());
+            }
+        }
         context.register(new ResponseWriter());
         context.register(new CormorantExceptionMapper());
         context.register(new CormorantAuthenticationFeature<>(tokens,

@@ -211,7 +211,7 @@ public class AuthenticationController {
     @Path("/v2.0/tokens")
     public Response revokeTokensV2(@HeaderParam("AUTH_TOKEN") final String authToken) {
         return status(tokens.remove(authToken) != null ?
-                    NO_CONTENT : BAD_REQUEST).build();
+                        NO_CONTENT : BAD_REQUEST).build();
     }
 
     @HEAD

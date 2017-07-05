@@ -19,35 +19,35 @@ package io.webfolder.cormorant.api.model;
 
 public class ListContainerOptions {
 
-    private final String path;
+    private final String path     ;
 
     private final String delimiter;
 
-    private final String prefix;
+    private final String prefix   ;
 
-    private final Integer limit;
+    private final Integer limit   ;
 
-    private final String marker;
+    private final String marker   ;
 
     private final String endMarker;
 
-    private final Boolean reverse;
+    private final Boolean reverse ;
 
     public ListContainerOptions(
-                    final String path,
+                    final String path     ,
                     final String delimiter,
-                    final String prefix,
-                    final Integer limit,
-                    final String marker,
+                    final String prefix   ,
+                    final Integer limit   ,
+                    final String marker   ,
                     final String endMarker,
-                    final Boolean reverse) {
-        this.path = path;
+                    final Boolean reverse ) {
+        this.path      = path     ;
         this.delimiter = delimiter;
-        this.prefix = prefix;
-        this.limit = limit;
-        this.marker = marker;
+        this.prefix    = prefix   ;
+        this.limit     = limit    ;
+        this.marker    = marker   ;
         this.endMarker = endMarker;
-        this.reverse = reverse;
+        this.reverse   = reverse  ;
     }
 
     public String getPath() {

@@ -57,7 +57,7 @@ public class DefaultKeystoneService implements KeystoneService {
     @Override
     public boolean hasPermission(String username, String permission, String method) {
         final User user = users.get(username);
-        if ( user == null ) {
+        if (user == null) {
             return false;
         }
         if (None.equals(user.getRole())) {
