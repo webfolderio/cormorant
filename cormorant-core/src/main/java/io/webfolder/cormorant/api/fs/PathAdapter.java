@@ -31,7 +31,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.sql.SQLException;
 
-import io.webfolder.cormorant.api.exception.CormorantException;
 import io.webfolder.cormorant.api.resource.ContentFormat;
 import io.webfolder.cormorant.api.resource.ResourceAdapter;
 import io.webfolder.cormorant.api.service.MetadataService;
@@ -87,13 +86,8 @@ public class PathAdapter implements ResourceAdapter<Path> {
                 return null;
             }
         }
-        long size = isdir ? DIR_SIZE : objectService.getSize(path);
-        String lastModified = null;
-        try {
-            lastModified = getLastModifiedTime(path, NOFOLLOW_LINKS).toInstant().toString();
-        } catch (IOException e) {
-            throw new CormorantException(e);
-        }
+        final long size = isdir ? DIR_SIZE : objectService.getSize(path);
+        final String lastModified = getLastModifiedTime(path, NOFOLLOW_LINKS).toInstant().toString();
         final String hash = isdir ? MD5_OF_EMPTY_STRING : objectService.calculateChecksum(asList(path));
         if (json.equals(contentFormat)) {
             builder.append("{")

@@ -27,35 +27,35 @@ import io.webfolder.cormorant.api.model.Segment;
 
 public interface ObjectService<T> {
 
-    WritableByteChannel getWritableChannel(T object) throws IOException;
+    WritableByteChannel getWritableChannel(T object) throws IOException, SQLException;
 
-    ReadableByteChannel getReadableChannel(T object) throws IOException;
+    ReadableByteChannel getReadableChannel(T object) throws IOException, SQLException;
 
-    T getObject(String accountName, String containerName, String objectPath) throws IOException;
+    T getObject(String accountName, String containerName, String objectPath) throws IOException, SQLException;
 
-    T createTempObject(String accontName, T container) throws IOException;
+    T createTempObject(String accontName, T container) throws IOException, SQLException;
 
-    void deleteTempObject(String accountName, T container, T tempObject) throws IOException;
+    void deleteTempObject(String accountName, T container, T tempObject) throws IOException, SQLException;
 
-    T moveTempObject(String accountName, T tempObject, T targetContainer, String targetObjectPath) throws IOException;
+    T moveTempObject(String accountName, T tempObject, T targetContainer, String targetObjectPath) throws IOException, SQLException;
 
-    long getSize(T object) throws IOException;
+    long getSize(T object) throws IOException, SQLException;
 
-    void delete(T container, T object) throws IOException;
+    void delete(T container, T object) throws IOException, SQLException;
 
-    String relativize(T container, T object) throws IOException;
+    String relativize(T container, T object) throws IOException, SQLException;
 
-    String getNamespace(T container, T object) throws IOException;
+    String getNamespace(T container, T object) throws IOException, SQLException;
 
-    long getLastModified(T object) throws IOException;
+    long getLastModified(T object) throws IOException, SQLException;
 
-    T createDirectory(String accountName, T container, String objectPath) throws IOException;
+    T createDirectory(String accountName, T container, String objectPath) throws IOException, SQLException;
 
-    boolean isDirectory(T container, T object) throws IOException;
+    boolean isDirectory(T container, T object) throws IOException, SQLException;
 
-    T getDirectory(T container, String directoryPath) throws IOException;
+    T getDirectory(T container, String directoryPath) throws IOException, SQLException;
 
-    boolean isEmptyDirectory(T container, T object) throws IOException;
+    boolean isEmptyDirectory(T container, T object) throws IOException, SQLException;
 
     T copyObject(String destinationAccount,
                  T      destinationContainer,
@@ -65,11 +65,11 @@ public interface ObjectService<T> {
                  T      sourceObject,
                  String multipartManifest) throws IOException, SQLException;
 
-    boolean isValidPath(T container, String objectPath) throws IOException;
+    boolean isValidPath(T container, String objectPath) throws IOException, SQLException;
 
-    boolean isStaticLargeObject(T object) throws IOException;
+    boolean isStaticLargeObject(T object) throws IOException, SQLException;
 
-    long getCreationTime(T object) throws IOException;
+    long getCreationTime(T object) throws IOException, SQLException;
 
     List<T> listDynamicLargeObject(T container, T object) throws IOException, SQLException;
 
@@ -77,11 +77,11 @@ public interface ObjectService<T> {
 
     long getDyanmicObjectSize(T container, T object) throws IOException, SQLException;
 
-    String toPath(T container, T object) throws IOException;
+    String toPath(T container, T object) throws IOException, SQLException;
 
-    boolean exist(T container, T object) throws IOException;
+    boolean exist(T container, T object) throws IOException, SQLException;
 
     String getMimeType(T container, T object, boolean autoDetect) throws IOException, SQLException;
 
-    String calculateChecksum(List<T> objects) throws IOException;
+    String calculateChecksum(List<T> objects) throws IOException, SQLException;
 }

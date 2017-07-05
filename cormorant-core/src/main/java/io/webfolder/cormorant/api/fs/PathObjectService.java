@@ -115,7 +115,7 @@ public class PathObjectService implements ObjectService<Path>, Util {
     }
 
     @Override
-    public Path createTempObject(String accontName, Path container) throws IOException {
+    public Path createTempObject(String accontName, Path container) throws IOException, SQLException {
         return createTempFile("cormorant", ".new");
     }
 
@@ -129,7 +129,7 @@ public class PathObjectService implements ObjectService<Path>, Util {
                 final String accountName,
                 final Path   tempObject,
                 final Path   targetContainer,
-                final String targetObjectPath) throws IOException {
+                final String targetObjectPath) throws IOException, SQLException {
         final Path target       = targetContainer.resolve(targetObjectPath).toAbsolutePath().normalize();
         final Path targetParent = target.getParent();
         if ( ! exists(targetParent, NOFOLLOW_LINKS) ) {
@@ -139,17 +139,17 @@ public class PathObjectService implements ObjectService<Path>, Util {
     }
 
     @Override
-    public WritableByteChannel getWritableChannel(Path path) throws IOException {
+    public WritableByteChannel getWritableChannel(Path path) throws IOException, SQLException {
         return open(path, WRITE, CREATE, NOFOLLOW_LINKS);
     }
 
     @Override
-    public ReadableByteChannel getReadableChannel(Path path) throws IOException {
+    public ReadableByteChannel getReadableChannel(Path path) throws IOException, SQLException {
         return open(path, READ, NOFOLLOW_LINKS);
     }
 
     @Override
-    public Path getObject(final String accountName, final String containerName, final String objectPath) {
+    public Path getObject(final String accountName, final String containerName, final String objectPath) throws IOException, SQLException {
         final boolean exist = containerService.contains(accountName, containerName);
         if ( ! exist ) {
             return null;
@@ -175,38 +175,38 @@ public class PathObjectService implements ObjectService<Path>, Util {
     }
 
     @Override
-    public long getSize(Path object) throws IOException {
+    public long getSize(Path object) throws IOException, SQLException {
         return size(object);
     }
 
     @Override
-    public void delete(final Path container, final Path object) throws IOException {
+    public void delete(final Path container, final Path object) throws IOException, SQLException {
         Files.delete(object);
     }
 
     @Override
-    public String relativize(final Path container, final Path object) {
+    public String relativize(final Path container, final Path object) throws IOException, SQLException {
         return container.relativize(object).toString().replace(FORWARD_SLASH, BACKWARD_SLASH);
     }
 
     @Override
-    public String toPath(Path container, Path object) {
+    public String toPath(Path container, Path object) throws IOException, SQLException {
         return container.getParent().relativize(object).toString().replace(FORWARD_SLASH, BACKWARD_SLASH);
     }
 
     @Override
-    public String getNamespace(final Path container, final Path object) {
+    public String getNamespace(final Path container, final Path object) throws IOException, SQLException {
         final String namespace = relativize(container, object);
         return container.getFileName().toString() + BACKWARD_SLASH + namespace.replace(FORWARD_SLASH, BACKWARD_SLASH);
     }
 
     @Override
-    public long getLastModified(Path object) throws IOException {
+    public long getLastModified(Path object) throws IOException, SQLException {
         return getLastModifiedTime(object, NOFOLLOW_LINKS).toMillis();
     }
 
     @Override
-    public Path createDirectory(String accountName, Path container, String objectPath) throws IOException {
+    public Path createDirectory(String accountName, Path container, String objectPath) throws IOException, SQLException {
         if (objectPath == null || objectPath.trim().isEmpty()) {
             throw new CormorantException("Invalid directory name.");
         }
@@ -218,14 +218,14 @@ public class PathObjectService implements ObjectService<Path>, Util {
     }
 
     @Override
-    public boolean isDirectory(final Path container, final Path object) {
+    public boolean isDirectory(final Path container, final Path object) throws IOException, SQLException {
         final Path dir = container.resolve(object);
         return dir.startsWith(container) && Files.isDirectory(dir) ? true : false;
     }
 
 
     @Override
-    public Path getDirectory(Path container, String directoryPath) {
+    public Path getDirectory(Path container, String directoryPath) throws IOException, SQLException {
         final Path dir = container.resolve(directoryPath);
         if (isDirectory(container, dir)) {
             return dir;
@@ -234,7 +234,7 @@ public class PathObjectService implements ObjectService<Path>, Util {
     }
 
     @Override
-    public boolean isEmptyDirectory(final Path container, final Path object) throws IOException {
+    public boolean isEmptyDirectory(final Path container, final Path object) throws IOException, SQLException {
         final Path dir = container.resolve(object);
         if (Files.isDirectory(dir)) {
             FileSizeVisitor visitor = new FileSizeVisitor(2, true);
@@ -291,7 +291,7 @@ public class PathObjectService implements ObjectService<Path>, Util {
     }
 
     @Override
-    public boolean isValidPath(Path container, String objectPath) {
+    public boolean isValidPath(Path container, String objectPath) throws IOException, SQLException {
         try {
             return container.resolve(objectPath).startsWith(container);
         } catch (InvalidPathException e) {
@@ -300,13 +300,13 @@ public class PathObjectService implements ObjectService<Path>, Util {
     }
 
     @Override
-    public boolean isStaticLargeObject(final Path object) {
+    public boolean isStaticLargeObject(final Path object) throws IOException, SQLException {
         return object != null &&
                 object.getFileName().toString().endsWith(MANIFEST_EXTENSION) ? true : false;
     }
 
     @Override
-    public long getCreationTime(Path object) throws IOException {
+    public long getCreationTime(Path object) throws IOException, SQLException {
         BasicFileAttributeView attributeView = Files.getFileAttributeView(object, BasicFileAttributeView.class, NOFOLLOW_LINKS);
         BasicFileAttributes attributes = attributeView.readAttributes();
         return attributes.creationTime().toMillis();
@@ -416,12 +416,12 @@ public class PathObjectService implements ObjectService<Path>, Util {
     }
 
     @Override
-    public boolean exist(Path container, Path object) {
+    public boolean exist(Path container, Path object) throws IOException, SQLException {
         return Files.exists(object);
     }
 
     @Override
-    public String calculateChecksum(List<Path> objects) throws IOException {
+    public String calculateChecksum(List<Path> objects) throws IOException, SQLException {
         StringBuilder fileId = new StringBuilder();
         for (final Path next : objects) {
             BasicFileAttributes attributes = readAttributes(next, BasicFileAttributes.class, NOFOLLOW_LINKS);

@@ -21,6 +21,7 @@ import static io.webfolder.cormorant.api.metadata.CacheNames.ACCOUNT;
 import static io.webfolder.cormorant.api.metadata.CacheNames.CONTAINER;
 import static io.webfolder.cormorant.api.metadata.CacheNames.OBJECT;
 import static io.webfolder.cormorant.api.metadata.CacheNames.OBJECT_SYS;
+import static io.webfolder.cormorant.api.metadata.MetadataStorage.File;
 import static io.webfolder.cormorant.api.metadata.MetadataStorage.SQLite;
 import static java.nio.file.Files.createDirectories;
 import static java.nio.file.Files.exists;
@@ -40,11 +41,11 @@ import io.webfolder.cormorant.api.service.MetadataService;
 
 public class DefaultMetadataServiceFactory implements MetadataServiceFactory {
 
-    private final Path            root       ;
+    private final Path              root     ;
 
     private final DataSourceFactory dsFactory;
 
-    private final MetadataStorage storage    ;
+    private final MetadataStorage   storage  ;
 
     public DefaultMetadataServiceFactory(final Path root, final MetadataStorage storage) {
         this.root = root;
@@ -74,7 +75,7 @@ public class DefaultMetadataServiceFactory implements MetadataServiceFactory {
         if (iterator.hasNext()) {
             metadataService = iterator.next();
         } else {
-            if (MetadataStorage.File.equals(storage)) {
+            if (File.equals(storage)) {
                 metadataService = new FileMetadataService(absolutePath, cacheName);
             } else {
                 String schema = "";

@@ -53,21 +53,21 @@ import io.webfolder.cormorant.internal.jaxrs.ObjectController;
 
 public class CormorantApplication extends Application {
 
-    private final Path                   objectStore;
+    private final Path           objectStore;
 
-    private final Path                   metadataStore;
+    private final Path           metadataStore;
 
-    private final AccountService         accountService;
+    private final AccountService accountService;
 
-    private final KeystoneService        keystoneService;
+    private final KeystoneService keystoneService;
 
-    private final String                 accountName;
+    private final String          accountName;
 
-    private MetadataStorage              metadataStorage;
+    private MetadataStorage       metadataStorage;
 
-    private boolean                      cacheMetadata;
+    private boolean               cacheMetadata;
 
-    private int                          pathMaxCount;
+    private int                   pathMaxCount;
 
     public CormorantApplication(
                 final Path            objectStore,
