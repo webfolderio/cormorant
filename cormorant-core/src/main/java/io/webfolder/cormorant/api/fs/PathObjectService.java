@@ -88,11 +88,11 @@ public class PathObjectService implements ObjectService<Path>, Util {
 
     private static final String  DEFAULT_MIME_TYPE = "application/octet-stream";
 
-    private static final String DIRECTORY          = "application/directory";
+    private static final String  DIRECTORY         = "application/directory";
 
-    private static final String MD5_CHECKSUM       = "MD5";
+    private static final String  MD5_CHECKSUM      = "MD5";
 
-    private static final int    BUFFER_SIZE        = 1024 * 256;
+    private static final int     BUFFER_SIZE       = 1024 * 256;
 
     private final Map<String, String> mimeTypes    = loadMimeTypes();
 
@@ -398,20 +398,18 @@ public class PathObjectService implements ObjectService<Path>, Util {
         final boolean isDir = Files.isDirectory(object);
         if (isDir) {
             return DIRECTORY;
+        } else if (autoDetect) {
+            final String fileName  = object.getFileName().toString();
+            final int    start     = fileName.lastIndexOf('.');
+            final String extension = start > 0 ? fileName
+                                                    .substring(start + 1, fileName.length())
+                                                    .toLowerCase(ENGLISH) : null;
+            final String mimeType = mimeTypes.get(extension);
+            return mimeType != null ? mimeType : DEFAULT_MIME_TYPE;
         } else {
-            if (autoDetect) {
-                final String fileName  = object.getFileName().toString();
-                final int    start     = fileName.lastIndexOf('.');
-                final String extension = start > 0 ? fileName
-                                                        .substring(start + 1, fileName.length())
-                                                        .toLowerCase(ENGLISH) : null;
-                final String mimeType = mimeTypes.get(extension);
-                return mimeType != null ? mimeType : DEFAULT_MIME_TYPE;
-            } else {
-                final String namespace = getNamespace(container, object);
-                String mimeType = systemMetadataService.get(namespace, CONTENT_TYPE);
-                return mimeType != null ? mimeType : DEFAULT_MIME_TYPE;
-            }
+            final String namespace = getNamespace(container, object);
+            String mimeType = systemMetadataService.get(namespace, CONTENT_TYPE);
+            return mimeType != null ? mimeType : DEFAULT_MIME_TYPE;
         }
     }
 

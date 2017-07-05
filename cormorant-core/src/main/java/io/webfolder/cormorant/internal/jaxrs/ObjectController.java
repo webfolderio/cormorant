@@ -27,9 +27,7 @@ import static java.lang.System.currentTimeMillis;
 import static java.nio.channels.Channels.newChannel;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.time.Instant.ofEpochMilli;
-import static java.time.ZoneId.of;
 import static java.time.ZonedDateTime.ofInstant;
-import static java.time.format.DateTimeFormatter.ofPattern;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
@@ -62,8 +60,6 @@ import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
 import java.sql.SQLException;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -114,12 +110,6 @@ import io.webfolder.cormorant.internal.response.ObjectPutResponse;
 @RolesAllowed({ "cormorant-object" })
 @DeclareRoles({ "cormorant-object" })
 public class ObjectController<T> implements Util {
-
-    private static final ZoneId  GMT                    = of("GMT");
-
-    private static final DateTimeFormatter FORMATTER    = ofPattern("EEE, dd MMM yyyy HH:mm:ss 'GMT'")
-                                                                .withLocale(ENGLISH)
-                                                                .withZone(GMT);
 
     private static final String  META_PREFIX            = "x-object-meta-";
 
@@ -531,7 +521,7 @@ public class ObjectController<T> implements Util {
             }
         }
 
-        final String lastModified = FORMATTER.format(ofInstant(ofEpochMilli(objectService.getLastModified(object)), GMT));
+        final String lastModified = DATE_FORMATTER.format(ofInstant(ofEpochMilli(objectService.getLastModified(object)), GMT));
         builder.header(HttpHeaders.LAST_MODIFIED, lastModified);
         builder.header(ACCEPT_RANGES, BYTES_RESPONSE);
         return builder.entity(response).build();
@@ -834,8 +824,8 @@ public class ObjectController<T> implements Util {
         updateMetadata(targetNamespace);
 
         final String checksum           = objectService.calculateChecksum(asList(targetObject));
-        final String sourceLastModified = FORMATTER.format(ofInstant(ofEpochMilli(objectService.getLastModified(sourceObject)), GMT));
-        final String targetLastModified = FORMATTER.format(ofInstant(ofEpochMilli(objectService.getLastModified(targetObject)), GMT));
+        final String sourceLastModified = DATE_FORMATTER.format(ofInstant(ofEpochMilli(objectService.getLastModified(sourceObject)), GMT));
+        final String targetLastModified = DATE_FORMATTER.format(ofInstant(ofEpochMilli(objectService.getLastModified(targetObject)), GMT));
 
         final ObjectCopyResponse response = new ObjectCopyResponse();
         response.setCopiedFromAccount(request.getAccount());
@@ -1115,7 +1105,7 @@ public class ObjectController<T> implements Util {
 
         systemMetadataService.setValues(targetNamespace, systemMetadata);
 
-        final String lastModified = FORMATTER.format(ofInstant(ofEpochMilli(objectService.getLastModified(targetObject)), GMT));
+        final String lastModified = DATE_FORMATTER.format(ofInstant(ofEpochMilli(objectService.getLastModified(targetObject)), GMT));
         response.setLastModified(lastModified);
         response.setContentType(copy ? (String) systemMetadata.get(CONTENT_TYPE) : contentType);
 

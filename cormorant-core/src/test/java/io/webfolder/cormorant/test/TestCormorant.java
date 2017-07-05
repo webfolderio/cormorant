@@ -127,6 +127,7 @@ public class TestCormorant extends TestBase {
         String content = response.body().string();
         assertTrue(content.contains("<account name=\"myaccount\"><container><name>container1</name><count>0</count><bytes>0</bytes></container></account>"));
         assertEquals("application/xml; charset=utf-8", response.header("Content-Type"));
+        response.close();
     }
 
     @Test
@@ -375,6 +376,7 @@ public class TestCormorant extends TestBase {
         Response response = client.newCall(new Request.Builder().url(getUrl() + contextPath + "/v1/myaccount/container1?limit=-1").build()).execute();
         assertEquals(400, response.code());
         assertEquals("limit must be >= 0", response.body().string());
+        response.close();
     }
 
     @Test
@@ -384,6 +386,7 @@ public class TestCormorant extends TestBase {
                     .put(RequestBody.create(MediaType.parse("text/plain"), new byte[] { })).build()).execute();
         assertEquals(400, response.code());
         assertEquals("Container name length must in range between 1 to 256.", response.body().string());
+        response.close();
     }
 
     @Test
@@ -391,6 +394,7 @@ public class TestCormorant extends TestBase {
         Response response = client.newCall(new Request.Builder().url(getUrl() + contextPath + "/v1/myaccount/foooobarrrrr").delete().build()).execute();
         assertEquals(404, response.code());
         assertEquals("Container [foooobarrrrr] does not exist.", response.body().string());
+        response.close();
     }
 
     @Test
@@ -399,6 +403,7 @@ public class TestCormorant extends TestBase {
         String content = response.body().string();
         assertTrue(content.contains("<?xml version=\"1.0\" encoding=\"UTF-8\"?>"));
         assertTrue(content.contains("<object><name>hello</name><hash>"));
+        response.close();
     }
 
     @Test
@@ -406,6 +411,7 @@ public class TestCormorant extends TestBase {
         Response response = client.newCall(new Request.Builder().url(getUrl() + contextPath + "/favicon.ico").get().build()).execute();
         assertEquals("image/x-icon", response.header("Content-Type"));
         assertEquals(200, response.code());
+        response.close();
     }
 
     @Test
@@ -413,6 +419,7 @@ public class TestCormorant extends TestBase {
         Response response = client.newCall(new Request.Builder().url(getUrl() + contextPath + "/v2.0").get().build()).execute();
         assertEquals(200, response.code());
         assertEquals("application/json", response.header("Content-Type"));
+        response.close();
     }
 
     @Test

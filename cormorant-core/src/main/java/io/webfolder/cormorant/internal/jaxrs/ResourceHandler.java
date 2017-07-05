@@ -432,7 +432,7 @@ class ResourceHandler<T> implements Util {
     protected boolean isModified(
                         final long modifiedHeader,
                         final long lastModified) {
-        return (modifiedHeader + ONE_SECOND_IN_MILLIS <= lastModified);
+        return modifiedHeader + ONE_SECOND_IN_MILLIS <= lastModified;
     }
 
     protected long toLong(

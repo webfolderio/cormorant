@@ -20,16 +20,27 @@ package io.webfolder.cormorant.api;
 import static java.lang.Long.toHexString;
 import static java.lang.String.format;
 import static java.lang.String.valueOf;
+import static java.time.ZoneId.of;
+import static java.time.format.DateTimeFormatter.ofPattern;
+import static java.util.Locale.ENGLISH;
 import static java.util.concurrent.ThreadLocalRandom.current;
 import static java.util.regex.Pattern.compile;
 
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.regex.Pattern;
 
 public interface Util {
 
-    public static final char    FORWARD_SLASH = '/';
+    public static final char    FORWARD_SLASH            = '/';
 
-    public static final Pattern LEADING_SLASH = compile("^/+");
+    public static final Pattern LEADING_SLASH            = compile("^/+");
+
+    public static final ZoneId  GMT                      = of("GMT");
+
+    public static final DateTimeFormatter DATE_FORMATTER = ofPattern("EEE, dd MMM yyyy HH:mm:ss 'GMT'")
+                                                           .withLocale(ENGLISH)
+                                                           .withZone(GMT);
 
     public default String removeLeadingSlash(String path) {
         if (path == null) {

@@ -21,12 +21,9 @@ import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
 import static java.lang.String.valueOf;
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static java.time.ZoneId.of;
 import static java.time.ZonedDateTime.now;
-import static java.time.format.DateTimeFormatter.ofPattern;
 import static java.util.Collections.unmodifiableMap;
 import static java.util.Collections.unmodifiableSet;
-import static java.util.Locale.ENGLISH;
 import static javax.ws.rs.core.HttpHeaders.CONTENT_TYPE;
 import static javax.ws.rs.core.HttpHeaders.USER_AGENT;
 import static javax.ws.rs.core.HttpHeaders.VARY;
@@ -37,8 +34,6 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 import java.sql.SQLException;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -89,12 +84,6 @@ public class ResponseWriter implements MessageBodyWriter, Util {
     private final Map<Class<?>, Set<Field>> headerMappings   = getHeaderMappings();
 
     private static final String  TRANSFER_ENCODING           = "Transfer-Encoding";
-
-    private static final ZoneId  GMT                         = of("GMT");
-
-    private static final DateTimeFormatter FORMATTER         = ofPattern("EEE, dd MMM yyyy HH:mm:ss 'GMT'")
-                                                                    .withLocale(ENGLISH)
-                                                                    .withZone(GMT);
 
     @Context
     private UriInfo uriInfo;
@@ -285,7 +274,7 @@ public class ResponseWriter implements MessageBodyWriter, Util {
         }
 
         final CormorantResponse cormorantResponse = (CormorantResponse) response;
-        cormorantResponse.setDate(FORMATTER.format(now()));
+        cormorantResponse.setDate(DATE_FORMATTER.format(now()));
         cormorantResponse.setTransId(generateTxId());
 
         for (Field field : headerMappings.get(response.getClass())) {
