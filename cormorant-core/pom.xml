@@ -10,7 +10,7 @@
     <licenses>
         <license>
             <name>GNU Affero General Public License</name>
-            <url>https://cormorant.webfolder.io/license</url>
+            <url>http://www.gnu.org/licenses</url>
         </license>
     </licenses>
     <description>Object Storage Server</description>
@@ -129,7 +129,7 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>2.20</version>
                 <configuration>
-                    <forkMode>always</forkMode>
+                    <reuseForks>false</reuseForks>
                     <excludes>
                         <exclude>**/TestServer*</exclude>
                     </excludes>
@@ -147,6 +147,22 @@
             <groupId>org.sharegov</groupId>
             <artifactId>mjson</artifactId>
             <version>1.4.1</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>junit</groupId>
+                    <artifactId>junit</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>1.7.25</version>
+        </dependency>
+        <dependency>
+            <groupId>net.jodah</groupId>
+            <artifactId>expiringmap</artifactId>
+            <version>0.5.8</version>
         </dependency>
         <dependency>
             <groupId>javax.ws.rs</groupId>
@@ -159,11 +175,6 @@
             <artifactId>sqlite-jdbc</artifactId>
             <version>3.19.3</version>
             <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>net.jodah</groupId>
-            <artifactId>expiringmap</artifactId>
-            <version>0.5.8</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
@@ -216,16 +227,16 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>1.7.25</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
             <groupId>org.tinylog</groupId>
             <artifactId>slf4j-binding</artifactId>
             <version>1.2</version>
             <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-api</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.apache.jclouds.api</groupId>
@@ -238,12 +249,24 @@
             <artifactId>jclouds-slf4j</artifactId>
             <version>2.0.1</version>
             <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-api</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.javaswift</groupId>
             <artifactId>joss</artifactId>
             <version>0.9.15</version>
             <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-api</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.squareup.okhttp3</groupId>

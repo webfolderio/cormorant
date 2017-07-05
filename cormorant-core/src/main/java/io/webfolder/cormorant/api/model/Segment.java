@@ -21,9 +21,9 @@ public class Segment<T> {
 
     private final String contentType;
 
-    private final long size;
+    private final long   size;
 
-    private final T object;
+    private final T      object;
 
     public Segment(final String contentType,
                    final long   size,

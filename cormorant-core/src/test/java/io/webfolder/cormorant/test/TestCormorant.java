@@ -489,18 +489,17 @@ public class TestCormorant extends TestBase {
         final char[] buffer = new char[1024];
         final StringBuilder out = new StringBuilder();
         try (Reader in = new InputStreamReader(is, UTF_8)) {
-            for (;;) {
+            for ( ; ; ) {
                 int rsz = in.read(buffer, 0, buffer.length);
-                if (rsz < 0)
+                if (rsz < 0) {
                     break;
+                }
                 out.append(buffer, 0, rsz);
             }
         }
         catch (UnsupportedEncodingException ex) {
-            /* ... */
         }
         catch (IOException ex) {
-            /* ... */
         }
         return out.toString();
     }

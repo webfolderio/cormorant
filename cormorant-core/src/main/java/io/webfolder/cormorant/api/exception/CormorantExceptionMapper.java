@@ -49,10 +49,9 @@ public class CormorantExceptionMapper implements ExceptionMapper<CormorantExcept
             log.error(t.getMessage(), t);
         }
         final String error = t.getMessage();
-        Response response = status(t.getStatusCode())
-                                .header(CONTENT_LENGTH, error.length())
-                                .entity(error)
-                            .build();
-        return response;
+        return status(t.getStatusCode())
+                    .header(CONTENT_LENGTH, error.length())
+                    .entity(error)
+                .build();
     }
 }
