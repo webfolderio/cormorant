@@ -128,4 +128,8 @@ public class CacheMetadataService implements MetadataService {
             cache.removeAll(namespace);
         }
     }
+
+    @Override
+    public void init() {
+    }
 }

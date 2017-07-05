@@ -22,6 +22,8 @@ import java.util.Map;
 
 public interface MetadataService {
 
+    void init() throws SQLException;
+
     String get(String namespace, String key) throws SQLException;
 
     boolean contains(String namespace, String key) throws SQLException;

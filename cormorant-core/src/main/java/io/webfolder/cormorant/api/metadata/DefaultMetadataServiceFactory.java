@@ -31,6 +31,7 @@ import static java.util.ServiceLoader.load;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.sql.SQLException;
 import java.util.Iterator;
 import java.util.ServiceLoader;
 
@@ -88,6 +89,11 @@ public class DefaultMetadataServiceFactory implements MetadataServiceFactory {
                 }
                 metadataService = new JdbcMetadaService(dsFactory.get(), schema, table);
             }
+        }
+        try {
+            metadataService.init();
+        } catch (SQLException e) {
+            throw new CormorantException(e);
         }
         if (cacheable) {
             return new CacheMetadataService(metadataService);

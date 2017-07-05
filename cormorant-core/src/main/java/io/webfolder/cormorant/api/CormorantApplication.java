@@ -51,9 +51,9 @@ import io.webfolder.cormorant.internal.jaxrs.ObjectController;
 
 public class CormorantApplication extends Application {
 
-    private final AccountService accountService;
+    private final AccountService         accountService;
 
-    private final KeystoneService keystoneService;
+    private final KeystoneService        keystoneService;
 
     private final CormorantConfiguration configuration;
 
@@ -77,9 +77,9 @@ public class CormorantApplication extends Application {
         final MetadataService objectMetadataService    = metadataServiceFactory.create(OBJECT    , configuration.isCacheMetadata());
         final MetadataService systemMetadataService    = metadataServiceFactory.create(OBJECT_SYS, configuration.isCacheMetadata());
 
-        final ContainerService<Path> containerService = new PathContainerService(configuration.getObjectStore(),
+        final ContainerService<Path> containerService  = new PathContainerService(configuration.getObjectStore(),
                                                                 configuration.getPathMaxCount(), containerMetadataService, systemMetadataService);
-        final ObjectService<Path>    objectService    = new PathObjectService(containerService, systemMetadataService);
+        final ObjectService<Path>    objectService     = new PathObjectService(containerService, systemMetadataService);
 
         containerService.setObjectService(objectService);
 

@@ -37,7 +37,6 @@ import javax.sql.DataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.webfolder.cormorant.api.exception.CormorantException;
 import io.webfolder.cormorant.api.service.MetadataService;
 
 public class JdbcMetadaService implements MetadataService {
@@ -59,7 +58,6 @@ public class JdbcMetadaService implements MetadataService {
         this.ds         = ds;
         this.schema     = schema;
         this.table      = table;
-        init();
     }
 
     @Override
@@ -181,7 +179,8 @@ public class JdbcMetadaService implements MetadataService {
         return schema.isEmpty() ? "" : schema + ".";
     }
 
-    protected void init() {
+    @Override
+    public void init() throws SQLException {
         final String tableDDL = "create table "        +
                                     getSchemaKeyword() +
                                     table              +
@@ -199,8 +198,6 @@ public class JdbcMetadaService implements MetadataService {
                     LOG.info("Table index [{}] created.", new Object[] { "IDX_" + table });
                 }
             }
-        } catch (SQLException e) {
-            throw new CormorantException(e);
         }
     }
 }

@@ -225,4 +225,8 @@ public class FileMetadataService implements MetadataService {
         }
         return json;
     }
+
+    @Override
+    public void init() {
+    }
 }
