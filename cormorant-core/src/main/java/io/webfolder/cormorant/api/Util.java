@@ -32,15 +32,15 @@ import java.util.regex.Pattern;
 
 public interface Util {
 
-    public static final char    FORWARD_SLASH            = '/';
+    public static final char              FORWARD_SLASH  = '/';
 
-    public static final Pattern LEADING_SLASH            = compile("^/+");
+    public static final Pattern           LEADING_SLASH  = compile("^/+");
 
-    public static final ZoneId  GMT                      = of("GMT");
+    public static final ZoneId            GMT            = of("GMT");
 
     public static final DateTimeFormatter DATE_FORMATTER = ofPattern("EEE, dd MMM yyyy HH:mm:ss 'GMT'")
-                                                           .withLocale(ENGLISH)
-                                                           .withZone(GMT);
+                                                             .withLocale(ENGLISH)
+                                                             .withZone(GMT);
 
     public default String removeLeadingSlash(String path) {
         if (path == null) {

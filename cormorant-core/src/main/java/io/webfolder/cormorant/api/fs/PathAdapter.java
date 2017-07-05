@@ -56,11 +56,11 @@ public class PathAdapter implements ResourceAdapter<Path>, Util {
     private final MetadataService systemMetadataService;
 
     public PathAdapter(
-                    final Path                  container,
-                    final ObjectService<Path>   objectService,
-                    final MetadataService       systemMetadataService) {
-        this.container        = container.toAbsolutePath().normalize();
-        this.objectService   = objectService;
+                    final Path                container,
+                    final ObjectService<Path> objectService,
+                    final MetadataService     systemMetadataService) {
+        this.container             = container.toAbsolutePath().normalize();
+        this.objectService         = objectService;
         this.systemMetadataService = systemMetadataService;
     }
 
