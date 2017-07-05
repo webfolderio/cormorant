@@ -34,7 +34,6 @@ import java.util.Set;
 
 import javax.ws.rs.core.Application;
 
-import io.webfolder.cormorant.api.fs.FileChecksumService;
 import io.webfolder.cormorant.api.fs.PathContainerService;
 import io.webfolder.cormorant.api.fs.PathObjectService;
 import io.webfolder.cormorant.api.metadata.DefaultMetadataServiceFactory;
@@ -97,8 +96,7 @@ public class CormorantApplication extends Application {
         final MetadataService objectMetadataService    = metadataServiceFactory.create(OBJECT    , isCacheMetadata());
         final MetadataService systemMetadataService    = metadataServiceFactory.create(OBJECT_SYS, isCacheMetadata());
 
-        final FileChecksumService    checksumService  = new FileChecksumService();
-        final ContainerService<Path> containerService = new PathContainerService(objectStore, pathMaxCount, checksumService, containerMetadataService, systemMetadataService);
+        final ContainerService<Path> containerService = new PathContainerService(objectStore, pathMaxCount, containerMetadataService, systemMetadataService);
         final ObjectService<Path>    objectService    = new PathObjectService(containerService, systemMetadataService);
 
         containerService.setObjectService(objectService);
@@ -125,7 +123,6 @@ public class CormorantApplication extends Application {
         singletons.add(new ObjectController<Path>(accountService,
                                                     containerService,
                                                     objectService,
-                                                    checksumService,
                                                     objectMetadataService,
                                                     systemMetadataService));
 

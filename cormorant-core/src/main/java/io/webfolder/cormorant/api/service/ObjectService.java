@@ -82,4 +82,6 @@ public interface ObjectService<T> {
     boolean exist(T container, T object) throws IOException;
 
     String getMimeType(T container, T object, boolean autoDetect) throws IOException, SQLException;
+
+    String calculateChecksum(List<T> objects) throws IOException;
 }

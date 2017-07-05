@@ -19,6 +19,8 @@ package io.webfolder.cormorant.api.fs;
 
 import static io.webfolder.cormorant.api.Json.read;
 import static io.webfolder.cormorant.api.metadata.MetadataServiceFactory.MANIFEST_EXTENSION;
+import static java.lang.String.format;
+import static java.nio.channels.Channels.newInputStream;
 import static java.nio.channels.Channels.newReader;
 import static java.nio.channels.FileChannel.open;
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -28,6 +30,7 @@ import static java.nio.file.Files.exists;
 import static java.nio.file.Files.getLastModifiedTime;
 import static java.nio.file.Files.isReadable;
 import static java.nio.file.Files.move;
+import static java.nio.file.Files.readAttributes;
 import static java.nio.file.Files.size;
 import static java.nio.file.LinkOption.NOFOLLOW_LINKS;
 import static java.nio.file.StandardCopyOption.ATOMIC_MOVE;
@@ -35,16 +38,21 @@ import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static java.nio.file.StandardOpenOption.CREATE;
 import static java.nio.file.StandardOpenOption.READ;
 import static java.nio.file.StandardOpenOption.WRITE;
+import static java.security.MessageDigest.getInstance;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.unmodifiableMap;
 import static java.util.Locale.ENGLISH;
+import static java.util.concurrent.TimeUnit.DAYS;
 import static javax.ws.rs.core.HttpHeaders.CONTENT_TYPE;
+import static net.jodah.expiringmap.ExpirationPolicy.CREATED;
+import static net.jodah.expiringmap.ExpiringMap.builder;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.SequenceInputStream;
+import java.math.BigInteger;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
 import java.nio.file.Files;
@@ -52,6 +60,8 @@ import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributeView;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -80,7 +90,13 @@ public class PathObjectService implements ObjectService<Path>, Util {
 
     private static final String DIRECTORY          = "application/directory";
 
+    private static final String MD5_CHECKSUM       = "MD5";
+
+    private static final int    BUFFER_SIZE        = 1024 * 256;
+
     private final Map<String, String> mimeTypes    = loadMimeTypes();
+
+    private final Map<Object, String> cache;
 
     private final ContainerService<Path> containerService;
 
@@ -91,6 +107,11 @@ public class PathObjectService implements ObjectService<Path>, Util {
                 final MetadataService        systemMetadataService) {
         this.containerService      = containerService;
         this.systemMetadataService = systemMetadataService;
+        cache = builder()
+                .expirationPolicy(CREATED)
+                .expiration(1, DAYS)
+                .maxSize(100_000)
+            .build();
     }
 
     @Override
@@ -397,6 +418,60 @@ public class PathObjectService implements ObjectService<Path>, Util {
     @Override
     public boolean exist(Path container, Path object) {
         return Files.exists(object);
+    }
+
+    @Override
+    public String calculateChecksum(List<Path> objects) throws IOException {
+        StringBuilder fileId = new StringBuilder();
+        for (final Path next : objects) {
+            BasicFileAttributes attributes = readAttributes(next, BasicFileAttributes.class, NOFOLLOW_LINKS);
+            String pathId = next.toString();
+            Object fileKey = attributes.fileKey();
+            if ( fileKey != null ) {
+                fileId.append(fileKey.toString());
+            } else {
+                fileId.append(next.toString());
+            }
+            fileId.append(pathId);
+            fileId.append(attributes.size());
+            fileId.append(attributes.lastModifiedTime().toMillis());
+        }
+        String cachedHash = cache.get(fileId.toString());
+        if ( cachedHash != null ) {
+            return cachedHash;
+        }
+        MessageDigest md;
+        try {
+            md = getInstance(MD5_CHECKSUM);
+        } catch (NoSuchAlgorithmException e) {
+            throw new CormorantException(e);
+        }
+        fileId = new StringBuilder();
+        for (final Path next : objects) {
+            BasicFileAttributes attributes = readAttributes(next, BasicFileAttributes.class, NOFOLLOW_LINKS);
+            String pathId = next.toString();
+            Object fileKey = attributes.fileKey();
+            if ( fileKey != null ) {
+                fileId.append(fileKey.toString());
+            } else {
+                fileId.append(next.toString());
+            }
+            fileId.append(pathId);
+            fileId.append(attributes.size());
+            fileId.append(attributes.lastModifiedTime().toMillis());
+
+            try (InputStream is = newInputStream(open(next, NOFOLLOW_LINKS, READ))) {
+                final byte[] buffer = new byte[BUFFER_SIZE];
+                int read;
+                while((read = is.read(buffer)) > 0) {
+                    md.update(buffer, 0, read);
+                }
+            }
+        }
+        final byte[] hash = md.digest();
+        final String hashHexValue = format("%032x", new BigInteger(1, hash));
+        cache.put(fileId.toString(), hashHexValue);
+        return hashHexValue;
     }
 
     protected Map<String, String> loadMimeTypes() {

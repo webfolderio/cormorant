@@ -25,6 +25,7 @@ import static java.lang.Boolean.TRUE;
 import static java.nio.file.Files.getLastModifiedTime;
 import static java.nio.file.Files.isDirectory;
 import static java.nio.file.LinkOption.NOFOLLOW_LINKS;
+import static java.util.Arrays.asList;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -33,7 +34,6 @@ import java.sql.SQLException;
 import io.webfolder.cormorant.api.exception.CormorantException;
 import io.webfolder.cormorant.api.resource.ContentFormat;
 import io.webfolder.cormorant.api.resource.ResourceAdapter;
-import io.webfolder.cormorant.api.service.ChecksumService;
 import io.webfolder.cormorant.api.service.MetadataService;
 import io.webfolder.cormorant.api.service.ObjectService;
 
@@ -55,19 +55,15 @@ public class PathAdapter implements ResourceAdapter<Path> {
 
     private final Path container;
 
-    private final ChecksumService<Path> checksumService;
-
     private final ObjectService<Path> objectService;
 
     private final MetadataService systemMetadataService;
 
     public PathAdapter(
                     final Path                  container,
-                    final ChecksumService<Path> checksumService,
                     final ObjectService<Path>   objectService,
                     final MetadataService       systemMetadataService) {
         this.container        = container.toAbsolutePath().normalize();
-        this.checksumService = checksumService;
         this.objectService   = objectService;
         this.systemMetadataService = systemMetadataService;
     }
@@ -98,7 +94,7 @@ public class PathAdapter implements ResourceAdapter<Path> {
         } catch (IOException e) {
             throw new CormorantException(e);
         }
-        final String hash = isdir ? MD5_OF_EMPTY_STRING : checksumService.calculateChecksum(path);
+        final String hash = isdir ? MD5_OF_EMPTY_STRING : objectService.calculateChecksum(asList(path));
         if (json.equals(contentFormat)) {
             builder.append("{")
                    .append("\"name\":\"").append(isdir && TRUE.equals(appendForwardSlash) ? normalizedName + FORWARD_SLASH : normalizedName).append("\"").append(",")

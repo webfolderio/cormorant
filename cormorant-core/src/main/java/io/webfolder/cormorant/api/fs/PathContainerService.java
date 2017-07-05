@@ -35,7 +35,6 @@ import java.sql.SQLException;
 import io.webfolder.cormorant.api.exception.CormorantException;
 import io.webfolder.cormorant.api.model.ListContainerOptions;
 import io.webfolder.cormorant.api.resource.ResourceStream;
-import io.webfolder.cormorant.api.service.ChecksumService;
 import io.webfolder.cormorant.api.service.ContainerService;
 import io.webfolder.cormorant.api.service.MetadataService;
 import io.webfolder.cormorant.api.service.ObjectService;
@@ -48,8 +47,6 @@ public class PathContainerService implements ContainerService<Path> {
 
     private final int                   pathMaxCount   ;
 
-    private final ChecksumService<Path> checksumService;
-
     private final MetadataService       metadataService;
 
     private final MetadataService       systemMetadataService;
@@ -59,12 +56,10 @@ public class PathContainerService implements ContainerService<Path> {
     public PathContainerService(
                     final Path                  root,
                     final int                   pathMaxCount,
-                    final ChecksumService<Path> checksumService,
                     final MetadataService       metadaService,
                     final MetadataService       systemMetadataService) {
         this.root                  = root.toAbsolutePath().normalize();
         this.pathMaxCount          = pathMaxCount                     ;
-        this.checksumService       = checksumService                  ;
         this.metadataService       = metadaService                    ;
         this.systemMetadataService = systemMetadataService            ;
     }
@@ -115,7 +110,7 @@ public class PathContainerService implements ContainerService<Path> {
             walkFileTree(visitorPath,
                                 emptySet(), recursive ? MAX_VALUE : 1, visitor);
             stream = new PathStream(visitor,
-                                new PathAdapter(container, checksumService, objectService, systemMetadataService));
+                                new PathAdapter(container, objectService, systemMetadataService));
         }
 
         return stream;

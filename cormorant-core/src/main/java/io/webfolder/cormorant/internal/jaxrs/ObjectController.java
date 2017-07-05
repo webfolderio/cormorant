@@ -30,6 +30,7 @@ import static java.time.Instant.ofEpochMilli;
 import static java.time.ZoneId.of;
 import static java.time.ZonedDateTime.ofInstant;
 import static java.time.format.DateTimeFormatter.ofPattern;
+import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.Locale.ENGLISH;
@@ -94,7 +95,6 @@ import io.webfolder.cormorant.api.exception.CormorantException;
 import io.webfolder.cormorant.api.model.Container;
 import io.webfolder.cormorant.api.model.Segment;
 import io.webfolder.cormorant.api.service.AccountService;
-import io.webfolder.cormorant.api.service.ChecksumService;
 import io.webfolder.cormorant.api.service.ContainerService;
 import io.webfolder.cormorant.api.service.MetadataService;
 import io.webfolder.cormorant.api.service.ObjectService;
@@ -159,8 +159,6 @@ public class ObjectController<T> implements Util {
 
     private final ObjectService<T>    objectService;
 
-    private final ChecksumService<T>  checksumService;
-
     private final MetadataService     systemMetadataService;
 
     private final MetadataService     metadataService;
@@ -181,13 +179,11 @@ public class ObjectController<T> implements Util {
                     final AccountService      accountService  ,
                     final ContainerService<T> containerService,
                     final ObjectService<T>    objectService   ,
-                    final ChecksumService<T>  checksumService ,
                     final MetadataService     metadataService ,
                     final MetadataService     systemMetadata  ) {
         this.accountService        = accountService  ;
         this.containerService      = containerService;
         this.objectService         = objectService   ;
-        this.checksumService       = checksumService ;
         this.metadataService       = metadataService ;
         this.systemMetadataService = systemMetadata  ;
     }
@@ -228,7 +224,7 @@ public class ObjectController<T> implements Util {
                 }
                 dynamicLargeObject     = true;
                 dynamicLargeObjects    = objectService.listDynamicLargeObject(container, object);
-                dynamicLargeObjectEtag = checksumService.calculateChecksum(dynamicLargeObjects);
+                dynamicLargeObjectEtag = objectService.calculateChecksum(dynamicLargeObjects);
             }
         }
 
@@ -251,7 +247,7 @@ public class ObjectController<T> implements Util {
                                 container = dynamicLargeObjectContainer;
                                 dynamicLargeObject = true;
                                 dynamicLargeObjects    = objectService.listDynamicLargeObject(container, object);
-                                dynamicLargeObjectEtag = checksumService.calculateChecksum(dynamicLargeObjects);
+                                dynamicLargeObjectEtag = objectService.calculateChecksum(dynamicLargeObjects);
                             }
                         }
                     }
@@ -279,7 +275,7 @@ public class ObjectController<T> implements Util {
         final String  namespace          = objectService.getNamespace(container, object);
         final long    lastModified       = objectService.getLastModified(object);
         final long    creationTime       = objectService.getCreationTime(object);
-        final String  etag               = dynamicLargeObjectEtag != null ? dynamicLargeObjectEtag : checksumService.calculateChecksum(object);
+        final String  etag               = dynamicLargeObjectEtag != null ? dynamicLargeObjectEtag : objectService.calculateChecksum(asList(object));
         final String  contentDisposition = systemMetadataService.get(namespace, CONTENT_DISPOSITION);
 
         final Map<String, String> headers = new HashMap<>();
@@ -463,7 +459,7 @@ public class ObjectController<T> implements Util {
                 sysMetadata.put(CONTENT_LENGTH, 0);
                 sysMetadata.put(ETAG, MD5_OF_EMPTY_STRING);
             } else {
-                sysMetadata.put(ETAG, checksumService.calculateChecksum(object));
+                sysMetadata.put(ETAG, objectService.calculateChecksum(asList(object)));
                 sysMetadata.put(CONTENT_LENGTH, objectService.getSize(object));
             }
         }
@@ -485,13 +481,13 @@ public class ObjectController<T> implements Util {
                 }
                 final List<T> objects = objectService.listDynamicLargeObject(container, object);
                 if ( ! objects.isEmpty() ) {
-                    etag = checksumService.calculateChecksum(objects);
+                    etag = objectService.calculateChecksum(objects);
                 }
                 final long size = objectService.getDyanmicObjectSize(container, object);
                 sysMetadata.put(CONTENT_LENGTH, size);
             }
             if (etag == null) {
-                etag = checksumService.calculateChecksum(object);
+                etag = objectService.calculateChecksum(asList(object));
             }
         }
 
@@ -839,7 +835,7 @@ public class ObjectController<T> implements Util {
 
         updateMetadata(targetNamespace);
 
-        final String checksum           = checksumService.calculateChecksum(targetObject);
+        final String checksum           = objectService.calculateChecksum(asList(targetObject));
         final String sourceLastModified = FORMATTER.format(ofInstant(ofEpochMilli(objectService.getLastModified(sourceObject)), GMT));
         final String targetLastModified = FORMATTER.format(ofInstant(ofEpochMilli(objectService.getLastModified(targetObject)), GMT));
 
@@ -1014,7 +1010,7 @@ public class ObjectController<T> implements Util {
 
         final Container           containerInfo  = accountService.getContainer(request.getAccount(), request.getContainer());
         final Map<String, Object> systemMetadata = new HashMap<>();
-        final String              etag           = checksumService.calculateChecksum(sourceObject);
+        final String              etag           = objectService.calculateChecksum(asList(sourceObject));
         final String              requestETag    = httpHeaders.getHeaderString(ETAG);
         // ----------------------------------------------------------------------------------
         // Ensure object integrity
@@ -1129,7 +1125,7 @@ public class ObjectController<T> implements Util {
             response.setETag(etag);
         } else {
             final List<T> objects                = objectService.listDynamicLargeObject(targetContainer, targetObject);
-            final String  dynamicLargeObjectEtag = checksumService.calculateChecksum(objects);
+            final String  dynamicLargeObjectEtag = objectService.calculateChecksum(objects);
             response.setETag(dynamicLargeObjectEtag);
         }
     }
@@ -1190,7 +1186,7 @@ public class ObjectController<T> implements Util {
             }
             if (map.containsKey("etag")) {
                 final String expectedChecksum = (String) map.get("etag");
-                final String actualChecksum   = checksumService.calculateChecksum(segmentObject);
+                final String actualChecksum   = objectService.calculateChecksum(asList(segmentObject));
                 if ( ! expectedChecksum.equals(actualChecksum) ) {
                     throw new CormorantException("Segment etag [" +
                                     expectedChecksum + "] does not match with actual etag [" +
@@ -1221,7 +1217,7 @@ public class ObjectController<T> implements Util {
                                                             tempObject,
                                                             container,
                                                             request.getObject() + MANIFEST_EXTENSION);
-            final String eTag = checksumService.calculateChecksum(object);
+            final String eTag = objectService.calculateChecksum(asList(object));
             response.setETag("\"" + eTag + "\"");
             response.setContentType(APPLICATION_JSON);
             response.setLastModified(valueOf(objectService.getLastModified(object)));
