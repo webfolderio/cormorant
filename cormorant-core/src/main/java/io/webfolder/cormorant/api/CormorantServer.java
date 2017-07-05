@@ -20,6 +20,7 @@ package io.webfolder.cormorant.api;
 import static io.undertow.Handlers.gracefulShutdown;
 import static io.undertow.security.api.AuthenticationMode.CONSTRAINT_DRIVEN;
 import static io.undertow.servlet.Servlets.filter;
+import static io.undertow.servlet.api.ServletContainer.Factory.newInstance;
 import static io.undertow.servlet.api.ServletStackTraces.NONE;
 import static io.undertow.util.Methods.COPY;
 import static io.undertow.util.Methods.DELETE;
@@ -70,7 +71,7 @@ public class CormorantServer {
 
     private final PathHandler root = new PathHandler();
 
-    private final ServletContainer container = ServletContainer.Factory.newInstance();
+    private final ServletContainer container = newInstance();
 
     private volatile DeploymentManager manager;
 

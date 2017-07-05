@@ -41,7 +41,7 @@ class CormorantSecurityContext implements SecurityContext {
         this.securityContext = securityContext;
         this.principal       = principal;
         this.keystoneService = keystoneService;
-        this.method = method;
+        this.method          = method;
     }
 
     @Override

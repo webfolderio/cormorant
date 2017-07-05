@@ -282,9 +282,9 @@ public class AuthenticationController {
         final Domain domain = keystoneService.getDomain();
 
         String response = userTemplateV3;
-        response = response.replace("__NAME__", user.getUsername());
-        response = response.replace("__ID__", id);
-        response = response.replace("__ENABLE__", valueOf(user.isEnable()));
+        response = response.replace("__NAME__"     , user.getUsername());
+        response = response.replace("__ID__"       , id);
+        response = response.replace("__ENABLE__"   , valueOf(user.isEnable()));
         response = response.replace("__DOMAIN_ID__", domain.getId());
 
         return status(CREATED).entity(response).build();
@@ -393,8 +393,7 @@ public class AuthenticationController {
     @Path("/v3/roles")
     @Produces(APPLICATION_JSON)
     public Response listRoles() {
-        String roles = rolesTemplateV3;
-        return ok().entity(roles).build();
+        return ok().entity(rolesTemplateV3).build();
     }
 
     @PUT
@@ -423,7 +422,7 @@ public class AuthenticationController {
         if ( ! keystoneService.containsProject(projectId) ) {
             return status(NOT_FOUND).entity("Project [" + projectId + "] not found").build();   
         }
-        boolean deleted = keystoneService.deleteProject(projectId);
+        final boolean deleted = keystoneService.deleteProject(projectId);
         return status(deleted ? NO_CONTENT : BAD_REQUEST).build();
     }
 

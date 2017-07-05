@@ -21,11 +21,11 @@ import io.webfolder.cormorant.api.service.MetadataService;
 
 public interface MetadataServiceFactory {
 
-    String MANIFEST_EXTENSION  = ".manifest"      ;
+    String MANIFEST_EXTENSION  = ".manifest";
 
-    String METADATA_EXTENSION  = ".metadata"      ;
+    String METADATA_EXTENSION  = ".metadata";
 
     MetadataService create(
-                        final String  cacheName,
-                        final boolean cacheable);
+                        String  cacheName,
+                        boolean cacheable);
 }

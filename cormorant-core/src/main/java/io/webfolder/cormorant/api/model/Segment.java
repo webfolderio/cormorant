@@ -25,10 +25,12 @@ public class Segment<T> {
 
     private final T object;
 
-    public Segment(String contentType, long size, T object) {
+    public Segment(final String contentType,
+                   final long   size,
+                   final T      object) {
         this.contentType = contentType;
-        this.size = size;
-        this.object = object;
+        this.size        = size;
+        this.object      = object;
     }
 
     public String getContentType() {

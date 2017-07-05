@@ -31,7 +31,7 @@ import io.webfolder.cormorant.api.service.MetadataService;
 
 public class CacheMetadataService implements MetadataService {
 
-    private MultiKeyMap<String, String> cache = new MultiKeyMap<>();
+    private final MultiKeyMap<String, String> cache = new MultiKeyMap<>();
 
     private final MetadataService delegate;
 
