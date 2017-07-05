@@ -38,7 +38,9 @@ import org.pmw.tinylog.writers.ConsoleWriter;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
 import io.webfolder.cormorant.api.CormorantApplication;
+import io.webfolder.cormorant.api.CormorantConfiguration;
 import io.webfolder.cormorant.api.CormorantServer;
+import io.webfolder.cormorant.api.metadata.MetadataStorage;
 import io.webfolder.cormorant.api.model.Role;
 import io.webfolder.cormorant.api.model.User;
 import io.webfolder.cormorant.api.service.AccountService;
@@ -99,13 +101,18 @@ public class TestServer {
         AccountService accountService   = new TestAccountService(objectStore);
         KeystoneService keystoneService = new DefaultKeystoneService(users);
 
-        CormorantApplication application = new CormorantApplication(objectStore,
-                                                metadataStore,
-                                                accountService,
-                                                keystoneService,
-                                                "myaccount");
+        CormorantConfiguration configuration = new CormorantConfiguration.Builder()
+                                                        .accountName("myaccount")
+                                                        .cacheMetadata(true)
+                                                        .storage(MetadataStorage.File)
+                                                        .pathMaxCount(10_000)
+                                                        .objectStore(objectStore)
+                                                        .metadataStore(metadataStore)
+                                                        .build();
 
-        application.setCacheMetadata(true);
+        CormorantApplication application = new CormorantApplication(configuration,
+                                                    accountService,
+                                                    keystoneService);
 
         server.deploy(application);
 

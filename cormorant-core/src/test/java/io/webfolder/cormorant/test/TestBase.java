@@ -52,6 +52,7 @@ import com.google.inject.Module;
 
 import io.undertow.Handlers;
 import io.webfolder.cormorant.api.CormorantApplication;
+import io.webfolder.cormorant.api.CormorantConfiguration;
 import io.webfolder.cormorant.api.CormorantServer;
 import io.webfolder.cormorant.api.exception.CormorantException;
 import io.webfolder.cormorant.api.metadata.MetadataStorage;
@@ -124,15 +125,19 @@ public class TestBase {
         AccountService accountService   = new TestAccountService(objectStore);
         KeystoneService keystoneService = new DefaultKeystoneService(users);
 
-        CormorantApplication application = new CormorantApplication(objectStore,
-                                                    metadataStore,
+        CormorantConfiguration configuration = new CormorantConfiguration.Builder()
+                                                .accountName("myaccount")
+                                                .cacheMetadata(true)
+                                                .storage(MetadataStorage.File)
+                                                .pathMaxCount(10_000)
+                                                .objectStore(objectStore)
+                                                .metadataStore(metadataStore)
+                                                .build();
+
+        CormorantApplication application = new CormorantApplication(configuration,
                                                     accountService,
-                                                    keystoneService,
-                                                    "myaccount");
+                                                    keystoneService);
 
-        application.setCacheMetadata(true);
-
-        application.setMetadataStorage(MetadataStorage.File);
         server.deploy(application);
 
         server.start((root) -> { return Handlers.requestDump(root); });

@@ -66,9 +66,4 @@ public class TestAccountService extends PathAccountService {
     protected Path getContainerPath(String accountName, String containerName) {
         return this.root.resolve(containerName);
     }
-
-    @Override
-    public boolean containsContainer(String account, String container) {
-        return getContainers(account).contains(container);
-    }
 }

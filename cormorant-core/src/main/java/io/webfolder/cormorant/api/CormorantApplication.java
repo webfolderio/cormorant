@@ -21,7 +21,6 @@ import static io.webfolder.cormorant.api.metadata.CacheNames.ACCOUNT;
 import static io.webfolder.cormorant.api.metadata.CacheNames.CONTAINER;
 import static io.webfolder.cormorant.api.metadata.CacheNames.OBJECT;
 import static io.webfolder.cormorant.api.metadata.CacheNames.OBJECT_SYS;
-import static io.webfolder.cormorant.api.metadata.MetadataStorage.SQLite;
 import static java.util.concurrent.TimeUnit.DAYS;
 import static net.jodah.expiringmap.ExpirationPolicy.CREATED;
 import static net.jodah.expiringmap.ExpiringMap.builder;
@@ -38,10 +37,9 @@ import io.webfolder.cormorant.api.fs.PathContainerService;
 import io.webfolder.cormorant.api.fs.PathObjectService;
 import io.webfolder.cormorant.api.metadata.DefaultMetadataServiceFactory;
 import io.webfolder.cormorant.api.metadata.MetadataServiceFactory;
-import io.webfolder.cormorant.api.metadata.MetadataStorage;
 import io.webfolder.cormorant.api.service.AccountService;
-import io.webfolder.cormorant.api.service.KeystoneService;
 import io.webfolder.cormorant.api.service.ContainerService;
+import io.webfolder.cormorant.api.service.KeystoneService;
 import io.webfolder.cormorant.api.service.MetadataService;
 import io.webfolder.cormorant.api.service.ObjectService;
 import io.webfolder.cormorant.internal.jaxrs.AccountController;
@@ -53,50 +51,34 @@ import io.webfolder.cormorant.internal.jaxrs.ObjectController;
 
 public class CormorantApplication extends Application {
 
-    private final Path           objectStore;
-
-    private final Path           metadataStore;
-
     private final AccountService accountService;
 
     private final KeystoneService keystoneService;
 
-    private final String          accountName;
-
-    private MetadataStorage       metadataStorage;
-
-    private boolean               cacheMetadata;
-
-    private int                   pathMaxCount;
+    private final CormorantConfiguration configuration;
 
     public CormorantApplication(
-                final Path            objectStore,
-                final Path            metadataStore,
-                final AccountService  accountService,
-                final KeystoneService keystoneService,
-                final String          accountName) {
-        this.objectStore     = objectStore;
-        this.metadataStore   = metadataStore;
+                final CormorantConfiguration configuration,
+                final AccountService         accountService,
+                final KeystoneService        keystoneService) {
+        this.configuration   = configuration;
         this.accountService  = accountService;
         this.keystoneService = keystoneService;
-        this.accountName     = accountName;
-        setPathMaxCount(10_000);
-        setMetadataStorage(SQLite);
-        setCacheMetadata(false);
     }
 
     @Override
     public Set<Object> getSingletons() {
         final Set<Object> singletons = new HashSet<>();
 
-        final MetadataServiceFactory metadataServiceFactory = new DefaultMetadataServiceFactory(metadataStore, getMetadataStorage());
+        final MetadataServiceFactory metadataServiceFactory = new DefaultMetadataServiceFactory(configuration.getMetadataStore(), configuration.getStorage());
 
-        final MetadataService accountMetadataService   = metadataServiceFactory.create(ACCOUNT   , isCacheMetadata());
-        final MetadataService containerMetadataService = metadataServiceFactory.create(CONTAINER , isCacheMetadata());
-        final MetadataService objectMetadataService    = metadataServiceFactory.create(OBJECT    , isCacheMetadata());
-        final MetadataService systemMetadataService    = metadataServiceFactory.create(OBJECT_SYS, isCacheMetadata());
+        final MetadataService accountMetadataService   = metadataServiceFactory.create(ACCOUNT   , configuration.isCacheMetadata());
+        final MetadataService containerMetadataService = metadataServiceFactory.create(CONTAINER , configuration.isCacheMetadata());
+        final MetadataService objectMetadataService    = metadataServiceFactory.create(OBJECT    , configuration.isCacheMetadata());
+        final MetadataService systemMetadataService    = metadataServiceFactory.create(OBJECT_SYS, configuration.isCacheMetadata());
 
-        final ContainerService<Path> containerService = new PathContainerService(objectStore, pathMaxCount, containerMetadataService, systemMetadataService);
+        final ContainerService<Path> containerService = new PathContainerService(configuration.getObjectStore(),
+                                                                configuration.getPathMaxCount(), containerMetadataService, systemMetadataService);
         final ObjectService<Path>    objectService    = new PathObjectService(containerService, systemMetadataService);
 
         containerService.setObjectService(objectService);
@@ -111,7 +93,7 @@ public class CormorantApplication extends Application {
 
         singletons.add(new CormorantFeature<>(tokens, keystoneService, accountMetadataService, containerService));
 
-        singletons.add(new AuthenticationController(tokens, keystoneService, accountName));
+        singletons.add(new AuthenticationController(tokens, keystoneService, configuration.getAccountName()));
 
         singletons.add(new AccountController(accountService,
                                                     accountMetadataService));
@@ -129,29 +111,5 @@ public class CormorantApplication extends Application {
         singletons.add(new FaviconController());
 
         return singletons;
-    }
-
-    public int getPathMaxCount() {
-        return pathMaxCount;
-    }
-
-    public void setPathMaxCount(int pathMaxCount) {
-        this.pathMaxCount = pathMaxCount;
-    }
-
-    public MetadataStorage getMetadataStorage() {
-        return metadataStorage;
-    }
-
-    public void setMetadataStorage(MetadataStorage metadataStorage) {
-        this.metadataStorage = metadataStorage;
-    }
-
-    public boolean isCacheMetadata() {
-        return cacheMetadata;
-    }
-
-    public void setCacheMetadata(boolean cacheMetadata) {
-        this.cacheMetadata = cacheMetadata;
     }
 }

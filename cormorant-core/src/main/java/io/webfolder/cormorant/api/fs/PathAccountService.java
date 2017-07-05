@@ -98,6 +98,11 @@ public abstract class PathAccountService implements AccountService {
         return account;
     }
 
+    @Override
+    public boolean containsContainer(String account, String container) {
+        return getContainers(account).contains(container);
+    }
+
     protected Long getContainerTimestamp(
                         final String accountName,
                         final String containerName) throws IOException {

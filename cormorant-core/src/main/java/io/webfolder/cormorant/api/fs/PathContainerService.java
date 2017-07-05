@@ -43,21 +43,21 @@ public class PathContainerService implements ContainerService<Path> {
 
     private static final String FORWARD_SLASH = "/";
 
-    private final Path                  root           ;
+    private final Path            root           ;
 
-    private final int                   pathMaxCount   ;
+    private final int             pathMaxCount   ;
 
-    private final MetadataService       metadataService;
+    private final MetadataService metadataService;
 
-    private final MetadataService       systemMetadataService;
+    private final MetadataService systemMetadataService;
 
     private ObjectService<Path>   objectService;
 
     public PathContainerService(
-                    final Path                  root,
-                    final int                   pathMaxCount,
-                    final MetadataService       metadaService,
-                    final MetadataService       systemMetadataService) {
+                    final Path            root,
+                    final int             pathMaxCount,
+                    final MetadataService metadaService,
+                    final MetadataService systemMetadataService) {
         this.root                  = root.toAbsolutePath().normalize();
         this.pathMaxCount          = pathMaxCount                     ;
         this.metadataService       = metadaService                    ;
@@ -119,7 +119,7 @@ public class PathContainerService implements ContainerService<Path> {
     @Override
     public boolean contains(final String accountName, final String containerName) {
         final Path path = getContainer(accountName, containerName);
-        return    path != null && exists(path, NOFOLLOW_LINKS) ? true : false;
+        return path != null && exists(path, NOFOLLOW_LINKS) ? true : false;
     }
 
     @Override
