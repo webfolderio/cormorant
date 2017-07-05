@@ -29,7 +29,7 @@ import io.webfolder.cormorant.api.model.Project;
 import io.webfolder.cormorant.api.model.Role;
 import io.webfolder.cormorant.api.model.User;
 
-public class DefaultAuthenticationService implements AuthenticationService {
+public class DefaultKeystoneService implements KeystoneService {
 
     private final Map<String, User>    users    = new ConcurrentHashMap<>();
 
@@ -37,11 +37,11 @@ public class DefaultAuthenticationService implements AuthenticationService {
 
     private final Domain domain;
 
-    public DefaultAuthenticationService(Map<String, User> users) {
+    public DefaultKeystoneService(Map<String, User> users) {
         this(users, new Domain("default", "default"));
     }
 
-    public DefaultAuthenticationService(Map<String, User> users, Domain domain) {
+    public DefaultKeystoneService(Map<String, User> users, Domain domain) {
         this.domain = domain;
         this.users.putAll(users);
     }

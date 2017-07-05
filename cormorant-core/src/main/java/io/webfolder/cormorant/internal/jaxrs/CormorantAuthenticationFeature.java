@@ -27,7 +27,7 @@ import javax.ws.rs.container.DynamicFeature;
 import javax.ws.rs.container.ResourceInfo;
 import javax.ws.rs.core.FeatureContext;
 
-import io.webfolder.cormorant.api.service.AuthenticationService;
+import io.webfolder.cormorant.api.service.KeystoneService;
 import io.webfolder.cormorant.api.service.ContainerService;
 import io.webfolder.cormorant.api.service.MetadataService;
 
@@ -35,7 +35,7 @@ public class CormorantAuthenticationFeature<T> implements DynamicFeature {
 
     private final Map<String, Principal> tokens;
 
-    private final AuthenticationService  authenticationService;
+    private final KeystoneService        keystoneService;
 
     private final MetadataService        accountMetadataService;
 
@@ -43,11 +43,11 @@ public class CormorantAuthenticationFeature<T> implements DynamicFeature {
 
     public CormorantAuthenticationFeature(
                         final Map<String, Principal> tokens,
-                        final AuthenticationService  authenticationService,
+                        final KeystoneService        keystoneService,
                         final MetadataService        accountMetadataService,
                         final ContainerService<T>    containerService) {
         this.tokens                 = tokens;
-        this.authenticationService  = authenticationService;
+        this.keystoneService        = keystoneService;
         this.accountMetadataService = accountMetadataService;
         this.containerService       = containerService;
     }
@@ -73,7 +73,7 @@ public class CormorantAuthenticationFeature<T> implements DynamicFeature {
             context.register(new SecurityFilter<>(
                                         tokens,
                                         role,
-                                        authenticationService,
+                                        keystoneService,
                                         accountMetadataService,
                                         containerService));
         }

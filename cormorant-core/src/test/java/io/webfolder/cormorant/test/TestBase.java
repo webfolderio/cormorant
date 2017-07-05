@@ -58,8 +58,8 @@ import io.webfolder.cormorant.api.metadata.MetadataStorage;
 import io.webfolder.cormorant.api.model.Role;
 import io.webfolder.cormorant.api.model.User;
 import io.webfolder.cormorant.api.service.AccountService;
-import io.webfolder.cormorant.api.service.AuthenticationService;
-import io.webfolder.cormorant.api.service.DefaultAuthenticationService;
+import io.webfolder.cormorant.api.service.KeystoneService;
+import io.webfolder.cormorant.api.service.DefaultKeystoneService;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -121,13 +121,13 @@ public class TestBase {
                              true);
         users.put("myaccount", user);
 
-        AccountService accountService = new TestAccountService(objectStore);
-        AuthenticationService authenticationService = new DefaultAuthenticationService(users);
+        AccountService accountService   = new TestAccountService(objectStore);
+        KeystoneService keystoneService = new DefaultKeystoneService(users);
 
         CormorantApplication application = new CormorantApplication(objectStore,
                                                     metadataStore,
                                                     accountService,
-                                                    authenticationService,
+                                                    keystoneService,
                                                     "myaccount");
 
         application.setCacheMetadata(true);

@@ -64,7 +64,7 @@ import io.webfolder.cormorant.api.model.Domain;
 import io.webfolder.cormorant.api.model.Project;
 import io.webfolder.cormorant.api.model.Role;
 import io.webfolder.cormorant.api.model.User;
-import io.webfolder.cormorant.api.service.AuthenticationService;
+import io.webfolder.cormorant.api.service.KeystoneService;
 
 @Path("/")
 @RolesAllowed({ "cormorant-admin" })
@@ -95,7 +95,7 @@ public class AuthenticationController {
 
     private final Map<String, Principal> tokens;
 
-    private final AuthenticationService authenticationService;
+    private final KeystoneService keystoneService;
 
     private final String accountName;
 
@@ -104,18 +104,18 @@ public class AuthenticationController {
 
     public AuthenticationController(
                 final Map<String, Principal> tokens,
-                final AuthenticationService  authenticationService,
+                final KeystoneService        keysonteService,
                 final String                 accountName) {
-        this.tokens                = tokens;
-        this.authenticationService = authenticationService;
-        this.authTemplateV2        = loadResource("/io/webfolder/cormorant/auth-v2.json");
-        this.authTemplateV3        = loadResource("/io/webfolder/cormorant/auth-v3.json");
-        this.domainsTemplateV3     = loadResource("/io/webfolder/cormorant/domains-v3.json");
-        this.projectsTemplateV3    = loadResource("/io/webfolder/cormorant/projects-v3.json");
-        this.userTemplateV3        = loadResource("/io/webfolder/cormorant/user-v3.json");
-        this.rolesTemplateV3       = loadResource("/io/webfolder/cormorant/roles-v3.json");
-        this.infoV2                = loadResource("/io/webfolder/cormorant/info-v2.json");
-        this.accountName           = accountName;
+        this.tokens             = tokens;
+        this.keystoneService    = keysonteService;
+        this.authTemplateV2     = loadResource("/io/webfolder/cormorant/auth-v2.json");
+        this.authTemplateV3     = loadResource("/io/webfolder/cormorant/auth-v3.json");
+        this.domainsTemplateV3  = loadResource("/io/webfolder/cormorant/domains-v3.json");
+        this.projectsTemplateV3 = loadResource("/io/webfolder/cormorant/projects-v3.json");
+        this.userTemplateV3     = loadResource("/io/webfolder/cormorant/user-v3.json");
+        this.rolesTemplateV3    = loadResource("/io/webfolder/cormorant/roles-v3.json");
+        this.infoV2             = loadResource("/io/webfolder/cormorant/info-v2.json");
+        this.accountName        = accountName;
     }
 
     @GET
@@ -125,7 +125,7 @@ public class AuthenticationController {
                 final @HeaderParam("X-Auth-User") String username,
                 final @HeaderParam("X-Auth-Key")  String password) {
 
-        if ( ! authenticationService.authenticate(username, password) ) {
+        if ( ! keystoneService.authenticate(username, password) ) {
             return status(BAD_REQUEST)
                             .entity("Incorrect username or password.")
                             .build();
@@ -172,7 +172,7 @@ public class AuthenticationController {
         final String username    = credentials.at("username").asString();
         final String password    = credentials.at("password").asString();
 
-        if ( ! authenticationService.authenticate(username, password) ) {
+        if ( ! keystoneService.authenticate(username, password) ) {
             return status(BAD_REQUEST)
                             .entity("Incorrect username or password.")
                             .build();
@@ -195,8 +195,8 @@ public class AuthenticationController {
         response = response.replace("__TENANT_NAME__", "default");
         response = response.replace("__USER_NAME__"  , username);
         response = response.replace("__USER_ID__"    , username);
-        response = response.replace("__ROLE_ID__"    , authenticationService.getRole(username).toString());
-        response = response.replace("__ROLE_NAME__"  , authenticationService.getRole(username).toString());
+        response = response.replace("__ROLE_ID__"    , keystoneService.getRole(username).toString());
+        response = response.replace("__ROLE_NAME__"  , keystoneService.getRole(username).toString());
         response = response.replace("__EXPIRES__"    , expires.toString());
         response = response.replace("__PUBLIC_URL__" , publicUrl);
 
@@ -226,7 +226,7 @@ public class AuthenticationController {
     public Response listDomains() {
         String response = domainsTemplateV3;
 
-        final Domain domain = authenticationService.getDomain();
+        final Domain domain = keystoneService.getDomain();
 
         response = response.replace("__ID__", domain.getId());
         response = response.replace("__NAME__", domain.getName());
@@ -251,7 +251,7 @@ public class AuthenticationController {
 
         Project project = new Project(name, description, domainId);
 
-        String projectId = authenticationService.createProject(project);
+        String projectId = keystoneService.createProject(project);
 
         String response = projectsTemplateV3;
         response = response.replace("__NAME__", project.getName());
@@ -278,8 +278,8 @@ public class AuthenticationController {
         final String              email     = (String) map.get("email");
 
         final User   user   = new User(username, password, email, projectId, Role.None, true);
-        final String id     = authenticationService.createUser(user);
-        final Domain domain = authenticationService.getDomain();
+        final String id     = keystoneService.createUser(user);
+        final Domain domain = keystoneService.getDomain();
 
         String response = userTemplateV3;
         response = response.replace("__NAME__", user.getUsername());
@@ -341,7 +341,7 @@ public class AuthenticationController {
             throw new CormorantException("Failed to authenticate the request. Missing user name or user id.");
         }
 
-        if ( ! authenticationService.authenticate(authUsername, authPassword) ) {
+        if ( ! keystoneService.authenticate(authUsername, authPassword) ) {
             return status(BAD_REQUEST)
                         .entity("Incorrect username or password.")
                         .build();
@@ -364,8 +364,8 @@ public class AuthenticationController {
         response = response.replace("__EXPIRES_AT__"       , expires.toString());
         response = response.replace("__USER_ID__"          , authUsername);
         response = response.replace("__USER__"             , authUsername);
-        response = response.replace("__ROLE__"             , authenticationService.getRole(authUsername).toString());
-        response = response.replace("__ROLE_ID__"          , authenticationService.getRole(authUsername).toString());
+        response = response.replace("__ROLE__"             , keystoneService.getRole(authUsername).toString());
+        response = response.replace("__ROLE_ID__"          , keystoneService.getRole(authUsername).toString());
         response = response.replace("__AUDIT_ID__"         , auditId);
         response = response.replace("__ISSUED_AT__"        , now().toString());
 
@@ -403,27 +403,27 @@ public class AuthenticationController {
                                     @PathParam("projectId") final String projectId,
                                     @PathParam("userId")    final String userId,
                                     @PathParam("roleId")    final String roleId) {
-        authenticationService.assignRole(userId, roleId);
+        keystoneService.assignRole(userId, roleId);
         return status(NO_CONTENT).build();
     }
 
     @DELETE
     @Path("/v3/users/{userId}")
     public Response deleteUser(@PathParam("userId")  final String userId) {
-        if ( ! authenticationService.containsUser(userId) ) {
+        if ( ! keystoneService.containsUser(userId) ) {
             return status(NOT_FOUND).entity("User [" + userId + "] not found").build();
         }
-        boolean deleted = authenticationService.deleteUser(userId);
+        boolean deleted = keystoneService.deleteUser(userId);
         return status(deleted ? NO_CONTENT : BAD_REQUEST).build();
     }
 
     @DELETE
     @Path("/v3/projects/{projectId}")
     public Response deleteProject(@PathParam("projectId") final String projectId) {
-        if ( ! authenticationService.containsProject(projectId) ) {
+        if ( ! keystoneService.containsProject(projectId) ) {
             return status(NOT_FOUND).entity("Project [" + projectId + "] not found").build();   
         }
-        boolean deleted = authenticationService.deleteProject(projectId);
+        boolean deleted = keystoneService.deleteProject(projectId);
         return status(deleted ? NO_CONTENT : BAD_REQUEST).build();
     }
 

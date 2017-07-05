@@ -41,7 +41,7 @@ import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriInfo;
 
 import io.webfolder.cormorant.api.exception.CormorantException;
-import io.webfolder.cormorant.api.service.AuthenticationService;
+import io.webfolder.cormorant.api.service.KeystoneService;
 import io.webfolder.cormorant.api.service.ContainerService;
 import io.webfolder.cormorant.api.service.MetadataService;
 
@@ -49,7 +49,7 @@ class SecurityFilter<T> implements ContainerRequestFilter {
 
     private final Map<String, Principal> tokens;
 
-    private final AuthenticationService  authenticationService;
+    private final KeystoneService        keystoneService;
 
     private final String                 permission;
 
@@ -70,12 +70,12 @@ class SecurityFilter<T> implements ContainerRequestFilter {
     public SecurityFilter(
                 final Map<String, Principal> tokens,
                 final String                 permission,
-                final AuthenticationService  authenticationService,
+                final KeystoneService        keystoneService,
                 final MetadataService        accountMetadataService,
                 final ContainerService<T>    containerService) {
         this.tokens                 = tokens;
         this.permission             = permission;
-        this.authenticationService  = authenticationService;
+        this.keystoneService        = keystoneService;
         this.accountMetadataService = accountMetadataService;
         this.containerService       = containerService;
     }
@@ -140,7 +140,7 @@ class SecurityFilter<T> implements ContainerRequestFilter {
                                 "DELETE".equalsIgnoreCase(requestContext.getMethod()) &&
                                 principal.getName().equals(uriInfo.getPathParameters().getFirst("userId"));
 
-        final boolean authorized = authenticationService.hasPermission(principal.getName(), permission, requestContext.getMethod());
+        final boolean authorized = keystoneService.hasPermission(principal.getName(), permission, requestContext.getMethod());
         if ( ! deleteSelf && ! authorized ) {
             final String error = "Insufficient permission.";
             requestContext
@@ -168,7 +168,7 @@ class SecurityFilter<T> implements ContainerRequestFilter {
         SecurityContext securityContext = requestContext.getSecurityContext();
         requestContext.setSecurityContext(new CormorantSecurityContext(securityContext,
                                                     principal,
-                                                    authenticationService,
+                                                    keystoneService,
                                                     requestContext.getMethod()));
     }
 

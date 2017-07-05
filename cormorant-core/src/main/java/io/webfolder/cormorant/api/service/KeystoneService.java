@@ -22,7 +22,7 @@ import io.webfolder.cormorant.api.model.Project;
 import io.webfolder.cormorant.api.model.Role;
 import io.webfolder.cormorant.api.model.User;
 
-public interface AuthenticationService {
+public interface KeystoneService {
 
     boolean authenticate(String username, String password);
 

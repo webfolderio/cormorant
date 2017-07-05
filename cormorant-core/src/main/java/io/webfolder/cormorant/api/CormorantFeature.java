@@ -27,7 +27,7 @@ import javax.ws.rs.core.MediaType;
 import org.jboss.resteasy.spi.ResteasyProviderFactory;
 
 import io.webfolder.cormorant.api.exception.CormorantExceptionMapper;
-import io.webfolder.cormorant.api.service.AuthenticationService;
+import io.webfolder.cormorant.api.service.KeystoneService;
 import io.webfolder.cormorant.api.service.ContainerService;
 import io.webfolder.cormorant.api.service.MetadataService;
 import io.webfolder.cormorant.internal.jaxrs.CormorantAuthenticationFeature;
@@ -38,21 +38,21 @@ public class CormorantFeature<T> implements Feature {
 
     private final Map<String, Principal> tokens;
 
-    private final AuthenticationService authenticationService;
+    private final KeystoneService        keystoneService;
 
-    private final MetadataService accountMetadataService;
+    private final MetadataService        accountMetadataService;
 
-    private final ContainerService<T> containerService;
+    private final ContainerService<T>    containerService;
 
     public CormorantFeature(
                 final Map<String, Principal> tokens,
-                final AuthenticationService authenticationService,
-                final MetadataService accountMetadataService,
-                final ContainerService<T> containerService) {
-        this.tokens = tokens;
-        this.authenticationService = authenticationService;
+                final KeystoneService        keystoneService,
+                final MetadataService        accountMetadataService,
+                final ContainerService<T>    containerService) {
+        this.tokens                 = tokens;
+        this.keystoneService        = keystoneService;
         this.accountMetadataService = accountMetadataService;
-        this.containerService = containerService;
+        this.containerService       = containerService;
     }
 
     @Override
@@ -62,7 +62,7 @@ public class CormorantFeature<T> implements Feature {
         context.register(new ResponseWriter());
         context.register(new CormorantExceptionMapper());
         context.register(new CormorantAuthenticationFeature<>(tokens,
-                                                              authenticationService,
+                                                              keystoneService,
                                                               accountMetadataService,
                                                               containerService));
         return true;

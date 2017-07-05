@@ -40,7 +40,7 @@ import io.webfolder.cormorant.api.metadata.DefaultMetadataServiceFactory;
 import io.webfolder.cormorant.api.metadata.MetadataServiceFactory;
 import io.webfolder.cormorant.api.metadata.MetadataStorage;
 import io.webfolder.cormorant.api.service.AccountService;
-import io.webfolder.cormorant.api.service.AuthenticationService;
+import io.webfolder.cormorant.api.service.KeystoneService;
 import io.webfolder.cormorant.api.service.ContainerService;
 import io.webfolder.cormorant.api.service.MetadataService;
 import io.webfolder.cormorant.api.service.ObjectService;
@@ -59,7 +59,7 @@ public class CormorantApplication extends Application {
 
     private final AccountService         accountService;
 
-    private final AuthenticationService  authenticationService;
+    private final KeystoneService        keystoneService;
 
     private final String                 accountName;
 
@@ -70,16 +70,16 @@ public class CormorantApplication extends Application {
     private int                          pathMaxCount;
 
     public CormorantApplication(
-                final Path                  objectStore,
-                final Path                  metadataStore,
-                final AccountService        accountService,
-                final AuthenticationService authenticationService,
-                final String                accountName) {
-        this.objectStore            = objectStore;
-        this.metadataStore          = metadataStore;
-        this.accountService         = accountService;
-        this.authenticationService  = authenticationService;
-        this.accountName            = accountName;
+                final Path            objectStore,
+                final Path            metadataStore,
+                final AccountService  accountService,
+                final KeystoneService keystoneService,
+                final String          accountName) {
+        this.objectStore     = objectStore;
+        this.metadataStore   = metadataStore;
+        this.accountService  = accountService;
+        this.keystoneService = keystoneService;
+        this.accountName     = accountName;
         setPathMaxCount(10_000);
         setMetadataStorage(SQLite);
         setCacheMetadata(false);
@@ -109,9 +109,9 @@ public class CormorantApplication extends Application {
 
         singletons.add(new HealthCheckController());
 
-        singletons.add(new CormorantFeature<>(tokens, authenticationService, accountMetadataService, containerService));
+        singletons.add(new CormorantFeature<>(tokens, keystoneService, accountMetadataService, containerService));
 
-        singletons.add(new AuthenticationController(tokens, authenticationService, accountName));
+        singletons.add(new AuthenticationController(tokens, keystoneService, accountName));
 
         singletons.add(new AccountController(accountService,
                                                     accountMetadataService));

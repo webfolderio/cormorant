@@ -21,7 +21,7 @@ import java.security.Principal;
 
 import javax.ws.rs.core.SecurityContext;
 
-import io.webfolder.cormorant.api.service.AuthenticationService;
+import io.webfolder.cormorant.api.service.KeystoneService;
 
 class CormorantSecurityContext implements SecurityContext {
 
@@ -29,18 +29,18 @@ class CormorantSecurityContext implements SecurityContext {
 
     private final Principal principal;
 
-    private final AuthenticationService authenticationService;
+    private final KeystoneService keystoneService;
 
     private final String method;
     
     public CormorantSecurityContext(
-                final SecurityContext       securityContext,
-                final Principal             principal,
-                final AuthenticationService authenticationService,
-                final String                method) {
+                final SecurityContext securityContext,
+                final Principal       principal,
+                final KeystoneService keystoneService,
+                final String          method) {
         this.securityContext = securityContext;
-        this.principal = principal;
-        this.authenticationService = authenticationService;
+        this.principal       = principal;
+        this.keystoneService = keystoneService;
         this.method = method;
     }
 
@@ -51,7 +51,7 @@ class CormorantSecurityContext implements SecurityContext {
 
     @Override
     public boolean isUserInRole(String role) {
-        return authenticationService.hasPermission(principal.getName(), role, method);
+        return keystoneService.hasPermission(principal.getName(), role, method);
     }
 
     @Override
