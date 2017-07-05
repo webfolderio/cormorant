@@ -387,7 +387,8 @@ public class ObjectController<T> implements Util {
 
         final String path       = uriInfo.getRequestUri().getPath();
         boolean createDirectory = DIRECTORY.equalsIgnoreCase(request.getContentType()) ||
-                                            path.charAt(path.length() - 1) == FORWARD_SLASH;
+                                            (path.charAt(path.length() - 1) == 
+                                                FORWARD_SLASH && new Long(0).equals(request.getContentLength()));
 
         if (createDirectory) {
             createDirectory(request, response, is);
