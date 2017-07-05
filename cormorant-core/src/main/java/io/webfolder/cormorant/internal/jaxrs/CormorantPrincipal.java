@@ -22,17 +22,17 @@ import java.time.Instant;
 
 class CormorantPrincipal implements Principal {
 
-    private final String name;
+    private final String  name;
 
-    private final String token;
+    private final String  token;
 
     private final Instant expires;
 
-    private final String auditId;
+    private final String  auditId;
     
     public CormorantPrincipal(
-                final String name,
-                final String token,
+                final String  name,
+                final String  token,
                 final Instant expires) {
         this(name, token, expires, null);
     }

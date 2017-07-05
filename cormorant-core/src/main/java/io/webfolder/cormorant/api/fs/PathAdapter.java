@@ -31,26 +31,23 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.sql.SQLException;
 
+import io.webfolder.cormorant.api.Util;
 import io.webfolder.cormorant.api.resource.ContentFormat;
 import io.webfolder.cormorant.api.resource.ResourceAdapter;
 import io.webfolder.cormorant.api.service.MetadataService;
 import io.webfolder.cormorant.api.service.ObjectService;
 
-public class PathAdapter implements ResourceAdapter<Path> {
+public class PathAdapter implements ResourceAdapter<Path>, Util {
 
-    private static final String BACKSLASH = "\\";
+    private static final char    CHAR_BACKSLASH = '\\';
 
-    private static final char   CHAR_BACKSLASH = BACKSLASH.charAt(0);
+    private static final char    CHAR_FORWARD_SLASH = '/';
 
-    private static final String FORWARD_SLASH = "/";
+    private static final int     DIR_SIZE = 0;
 
-    private static final char   CHAR_FORWARD_SLASH = FORWARD_SLASH.charAt(0);
+    private static final String  MD5_OF_EMPTY_STRING = "d41d8cd98f00b204e9800998ecf8427e";
 
-    private static final String NEW_LINE = "\r\n";
-
-    private static final int    DIR_SIZE = 0;
-
-    private static final String MD5_OF_EMPTY_STRING  = "d41d8cd98f00b204e9800998ecf8427e";
+    private static final String  NEW_LINE = "\r\n";
 
     private final Path container;
 

@@ -19,7 +19,6 @@ package io.webfolder.cormorant.internal.jaxrs;
 
 import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
-import static java.lang.Long.toHexString;
 import static java.lang.String.valueOf;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.time.ZoneId.of;
@@ -28,7 +27,6 @@ import static java.time.format.DateTimeFormatter.ofPattern;
 import static java.util.Collections.unmodifiableMap;
 import static java.util.Collections.unmodifiableSet;
 import static java.util.Locale.ENGLISH;
-import static java.util.concurrent.ThreadLocalRandom.current;
 import static javax.ws.rs.core.HttpHeaders.CONTENT_TYPE;
 import static javax.ws.rs.core.HttpHeaders.USER_AGENT;
 import static javax.ws.rs.core.HttpHeaders.VARY;
@@ -57,6 +55,7 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.ext.MessageBodyWriter;
 
+import io.webfolder.cormorant.api.Util;
 import io.webfolder.cormorant.api.exception.CormorantException;
 import io.webfolder.cormorant.api.resource.ContentFormat;
 import io.webfolder.cormorant.api.resource.ResourceStream;
@@ -79,7 +78,7 @@ import io.webfolder.cormorant.internal.response.ObjectPostResponse;
 import io.webfolder.cormorant.internal.response.ObjectPutResponse;
 
 @SuppressWarnings("rawtypes")
-public class ResponseWriter implements MessageBodyWriter {
+public class ResponseWriter implements MessageBodyWriter, Util {
 
     private final String                    applicationJson  = "application/json; charset=utf-8";
 
@@ -287,9 +286,7 @@ public class ResponseWriter implements MessageBodyWriter {
 
         final CormorantResponse cormorantResponse = (CormorantResponse) response;
         cormorantResponse.setDate(FORMATTER.format(now()));
-        final String part1 = leadingZeros(valueOf(toHexString(current().nextLong())), 21);
-        final String part2 = leadingZeros(valueOf(toHexString(current().nextLong())), 10);
-        cormorantResponse.setTransId("tx" + part1 + "-" + (part2.length() > 10 ? part2.substring(0, 10) : part2));
+        cormorantResponse.setTransId(generateTxId());
 
         for (Field field : headerMappings.get(response.getClass())) {
             final Object value;
@@ -311,15 +308,6 @@ public class ResponseWriter implements MessageBodyWriter {
                 os.write(content.getBytes(UTF_8));
                 os.flush();
             }
-        }
-    }
-
-    protected String leadingZeros(final String str, final int length) {
-        if (str.length() >= length) {
-            return str;
-        }
-        else {
-            return String.format("%0" + (length-str.length()) + "d%s", 0, str);
         }
     }
 

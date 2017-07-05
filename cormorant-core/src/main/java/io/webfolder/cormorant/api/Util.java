@@ -17,6 +17,10 @@
  */
 package io.webfolder.cormorant.api;
 
+import static java.lang.Long.toHexString;
+import static java.lang.String.format;
+import static java.lang.String.valueOf;
+import static java.util.concurrent.ThreadLocalRandom.current;
 import static java.util.regex.Pattern.compile;
 
 import java.util.regex.Pattern;
@@ -39,5 +43,19 @@ public interface Util {
             normalizedPath = LEADING_SLASH.matcher(normalizedPath).replaceAll("");
         }
         return normalizedPath;
+    }
+
+    public default String generateTxId() {
+        final String part1 = leadingZeros(valueOf(toHexString(current().nextLong())), 21);
+        final String part2 = leadingZeros(valueOf(toHexString(current().nextLong())), 10);
+        return "tx" + part1 + "-" + (part2.length() > 10 ? part2.substring(0, 10) : part2);
+    }
+
+    public default String leadingZeros(final String str, final int length) {
+        if (str.length() >= length) {
+            return str;
+        } else {
+            return format("%0" + (length - str.length()) + "d%s", 0, str);
+        }
     }
 }

@@ -13,19 +13,21 @@ public class CormorantConfiguration {
 
     private String accountName;
 
-    private boolean cacheMetadata = true;
+    private boolean cacheMetadata;
 
-    private MetadataStorage storage = DEFAULT_STORAGE;
+    private MetadataStorage storage;
 
-    private int pathMaxCount = PATH_MAX_COUNT;
-
-    public static final MetadataStorage DEFAULT_STORAGE = SQLite;
-
-    public static final int PATH_MAX_COUNT = 10_000;
+    private int pathMaxCount;
 
     public static class Builder {
 
         private CormorantConfiguration configuration = new CormorantConfiguration();
+
+        public Builder() {
+            storage(SQLite).
+            pathMaxCount(10_000).
+            cacheMetadata(true);
+        }
 
         public Builder objectStore(Path objectStore) {
             configuration.objectStore = objectStore;

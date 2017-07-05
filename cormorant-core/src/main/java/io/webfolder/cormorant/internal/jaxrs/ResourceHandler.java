@@ -230,9 +230,7 @@ class ResourceHandler<T> implements Util {
             response.setContentType("multipart/byteranges; boundary=" + ranges.get(0).getBoundary());
         }
 
-        final String part1 = leadingZeros(valueOf(toHexString(current().nextLong())), 21);
-        final String part2 = leadingZeros(valueOf(toHexString(current().nextLong())), 10);
-        response.setHeader("X-Trans-Id", "tx" + part1 + "-" + (part2.length() > 10 ? part2.substring(0, 10) : part2));
+        response.setHeader("X-Trans-Id", generateTxId());
         response.setHeader("X-Timestamp", valueOf(resource.getCreationTime()));
 
         for (Entry<String, String> entry : resource.getHeaders().entrySet()) {
@@ -240,14 +238,6 @@ class ResourceHandler<T> implements Util {
         }
 
         return resource.getContentType();
-    }
-
-    protected String leadingZeros(final String str, final int length) {
-        if (str.length() >= length) {
-            return str;
-        } else {
-            return String.format("%0" + (length-str.length()) + "d%s", 0, str);
-        }
     }
 
     protected void write(

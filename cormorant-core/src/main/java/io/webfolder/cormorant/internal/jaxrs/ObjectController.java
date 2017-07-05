@@ -121,8 +121,6 @@ public class ObjectController<T> implements Util {
                                                                 .withLocale(ENGLISH)
                                                                 .withZone(GMT);
 
-    private static final char    FORWARD_SLASH          = '/';
-
     private static final String  META_PREFIX            = "x-object-meta-";
 
     private static final String  X_DELETE_AT            = "X-Delete-At";
@@ -134,6 +132,8 @@ public class ObjectController<T> implements Util {
     private static final String  TRANSFER_ENCODING      = "Transfer-Encoding";
 
     private static final String  X_STATIC_LARGE_OBJECT  = "X-Static-Large-Object";
+
+    private static final String  MD5_OF_EMPTY_STRING    = "d41d8cd98f00b204e9800998ecf8427e";
 
     private static final int     UNPROCESSABLE_ENTITY   = 422;
 
@@ -148,8 +148,6 @@ public class ObjectController<T> implements Util {
     private static final String  ACCEPT_RANGES          = "Accept-Ranges";
 
     private static final String  BYTES_RESPONSE         = "bytes";
-
-    private static final String  MD5_OF_EMPTY_STRING    = "d41d8cd98f00b204e9800998ecf8427e";
 
     private static final String  DIRECTORY              = "application/directory";
 
