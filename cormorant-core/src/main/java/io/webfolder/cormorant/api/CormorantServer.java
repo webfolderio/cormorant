@@ -137,6 +137,7 @@ public class CormorantServer {
                         .setDisplayName("cormorant")
                         .setAuthenticationMode(CONSTRAINT_DRIVEN)
                         .setServletStackTraces(NONE)
+                        .setSecurityDisabled(true)
                         .addInitialHandlerChainWrapper(new Builder().build(singletonMap("format", "combined")))
                         .setClassLoader(deployment.getApplication().getClass().getClassLoader());
     }
