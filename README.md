@@ -37,6 +37,7 @@ The cormorant API is a RESTful, HTTP-based API that is compatible with swift. Us
 
 * [CloudBerry Explorer for OpenStack](https://www.cloudberrylab.com/explorer/openstack.aspx)
 * [rclone](https://rclone.org/)
+* [restic](https://restic.github.io/)
 
 ### Supported Client Libraries (SDKs)
 __Java__
