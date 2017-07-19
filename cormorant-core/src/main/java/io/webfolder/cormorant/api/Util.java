@@ -42,13 +42,13 @@ public interface Util {
                                                              .withLocale(ENGLISH)
                                                              .withZone(GMT);
 
-    public default String removeLeadingSlash(String path) {
-        if (path == null) {
+    public default String removeLeadingSlash(String uri) {
+        if (uri == null) {
             return null;
         }
-        String normalizedPath = path;
+        String normalizedPath = uri;
         if (normalizedPath.charAt(0) == FORWARD_SLASH) {
-            normalizedPath = path.substring(1, path.length());
+            normalizedPath = uri.substring(1, uri.length());
         }
         if (normalizedPath.charAt(0) == FORWARD_SLASH) {
             normalizedPath = LEADING_SLASH.matcher(normalizedPath).replaceAll("");
