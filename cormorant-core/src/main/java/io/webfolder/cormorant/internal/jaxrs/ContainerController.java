@@ -48,7 +48,7 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import io.webfolder.cormorant.api.exception.CormorantException;
 import io.webfolder.cormorant.api.model.Container;
 import io.webfolder.cormorant.api.model.ListContainerOptions;
-import io.webfolder.cormorant.api.resource.ResourceStream;
+import io.webfolder.cormorant.api.resource.Resource;
 import io.webfolder.cormorant.api.service.AccountService;
 import io.webfolder.cormorant.api.service.ContainerService;
 import io.webfolder.cormorant.api.service.MetadataService;
@@ -117,7 +117,7 @@ public class ContainerController<T> {
                                                     request.getMarker(),
                                                     request.getEndMarker(),
                                                     request.getReverse());
-        ResourceStream<?> resources = null;
+        Resource<?> resources = null;
         if ( request.getContainer() != null &&
                     ! request.getContainer().trim().isEmpty() ) {
             resources = containerService.listObjects(request.getAccount(),

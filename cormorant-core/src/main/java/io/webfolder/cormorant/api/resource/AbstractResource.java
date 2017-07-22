@@ -21,13 +21,13 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Iterator;
 
-public abstract class AbstractResourceStream<T> implements ResourceStream<T> {
+public abstract class AbstractResource<T> implements Resource<T> {
 
     private final Iterable<T> stream;
 
     private final ResourceAdapter<T> resourceAdapter;
 
-    public AbstractResourceStream(
+    public AbstractResource(
                             final Iterable<T> stream,
                             final ResourceAdapter<T> resourceAdapter) {
         this.stream = stream;

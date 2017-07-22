@@ -53,7 +53,7 @@ import javax.ws.rs.ext.MessageBodyWriter;
 import io.webfolder.cormorant.api.Util;
 import io.webfolder.cormorant.api.exception.CormorantException;
 import io.webfolder.cormorant.api.resource.ContentFormat;
-import io.webfolder.cormorant.api.resource.ResourceStream;
+import io.webfolder.cormorant.api.resource.Resource;
 import io.webfolder.cormorant.internal.response.AccountGetResponse;
 import io.webfolder.cormorant.internal.response.AccountGetResponseBody;
 import io.webfolder.cormorant.internal.response.AccountGetResponseContext;
@@ -236,7 +236,7 @@ public class ResponseWriter implements MessageBodyWriter, Util {
             // @see https://github.com/ncw/swift/blob/master/swift_test.go#L1355
             final Boolean appendForwardSlash = "goswift/1.0".equals(userAgent) ? FALSE : TRUE;
 
-            ResourceStream stream = cgr.getBody();
+            Resource stream = cgr.getBody();
             for (Object next : stream) {
                 String json;
                 try {

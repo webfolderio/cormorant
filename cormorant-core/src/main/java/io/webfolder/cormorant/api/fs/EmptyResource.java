@@ -21,9 +21,9 @@ import java.nio.file.Path;
 import java.util.Iterator;
 
 import io.webfolder.cormorant.api.resource.ContentFormat;
-import io.webfolder.cormorant.api.resource.ResourceStream;
+import io.webfolder.cormorant.api.resource.Resource;
 
-public final class PathNullStream implements ResourceStream<Path> {
+public final class EmptyResource implements Resource<Path> {
 
     private static final class EmptyIterator implements Iterator<Path> {
 
@@ -40,7 +40,7 @@ public final class PathNullStream implements ResourceStream<Path> {
 
     private static final EmptyIterator EMPTY_ITERATOR = new EmptyIterator();
 
-    public static final ResourceStream<Path> EMPTY_STREAM = new PathNullStream();
+    public static final Resource<Path> EMPTY_RESOURCE = new EmptyResource();
 
     @Override
     public Iterator<Path> iterator() {

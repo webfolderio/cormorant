@@ -65,7 +65,7 @@ import static org.junit.Assert.assertTrue;
 import io.webfolder.cormorant.api.Json;
 import io.webfolder.cormorant.api.Util;
 import io.webfolder.cormorant.api.exception.CormorantException;
-import io.webfolder.cormorant.api.fs.PathNullStream;
+import io.webfolder.cormorant.api.fs.EmptyResource;
 import okhttp3.MediaType;
 import okhttp3.Request;
 import okhttp3.RequestBody;
@@ -424,7 +424,7 @@ public class TestCormorant extends TestBase {
 
     @Test
     public void t27TestPathNullStream() {        
-        PathNullStream stream = new PathNullStream();
+        EmptyResource stream = new EmptyResource();
         assertNull(stream.iterator().next());
         assertNull(stream.convert(null, null, null));
     }

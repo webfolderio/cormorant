@@ -21,11 +21,11 @@ import java.io.IOException;
 import java.sql.SQLException;
 
 import io.webfolder.cormorant.api.model.ListContainerOptions;
-import io.webfolder.cormorant.api.resource.ResourceStream;
+import io.webfolder.cormorant.api.resource.Resource;
 
 public interface ContainerService<T> {
 
-    ResourceStream<T> listObjects(String accountName,
+    Resource<T> listObjects(String accountName,
                                     String containerName,
                                     ListContainerOptions options) throws IOException;
 

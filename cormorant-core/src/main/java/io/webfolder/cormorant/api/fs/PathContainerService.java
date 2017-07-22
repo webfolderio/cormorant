@@ -17,7 +17,7 @@
  */
 package io.webfolder.cormorant.api.fs;
 
-import static io.webfolder.cormorant.api.fs.PathNullStream.EMPTY_STREAM;
+import static io.webfolder.cormorant.api.fs.EmptyResource.EMPTY_RESOURCE;
 import static java.lang.Integer.MAX_VALUE;
 import static java.lang.Long.parseLong;
 import static java.nio.file.Files.createDirectory;
@@ -34,7 +34,7 @@ import java.sql.SQLException;
 
 import io.webfolder.cormorant.api.exception.CormorantException;
 import io.webfolder.cormorant.api.model.ListContainerOptions;
-import io.webfolder.cormorant.api.resource.ResourceStream;
+import io.webfolder.cormorant.api.resource.Resource;
 import io.webfolder.cormorant.api.service.ContainerService;
 import io.webfolder.cormorant.api.service.MetadataService;
 import io.webfolder.cormorant.api.service.ObjectService;
@@ -65,11 +65,11 @@ public class PathContainerService implements ContainerService<Path> {
     }
 
     @Override
-    public ResourceStream<Path> listObjects(
+    public Resource<Path> listObjects(
                                         final String               accountName  ,
                                         final String               containerName,
                                         final ListContainerOptions options      ) throws IOException {
-        ResourceStream<Path> stream = EMPTY_STREAM;
+        Resource<Path> stream = EMPTY_RESOURCE;
 
         final Path container = getContainer(accountName, containerName);
 
@@ -104,12 +104,12 @@ public class PathContainerService implements ContainerService<Path> {
         }
 
         if ( ! recursive && ! exists(visitorPath) ) {
-            stream = EMPTY_STREAM;
+            stream = EMPTY_RESOURCE;
         } else {
             PathVisitor visitor = new PathVisitor(options, visitorPath, pathMaxCount);
             walkFileTree(visitorPath,
                                 emptySet(), recursive ? MAX_VALUE : 1, visitor);
-            stream = new PathStream(visitor,
+            stream = new PathResource(visitor,
                                 new PathAdapter(container, objectService, systemMetadataService));
         }
 

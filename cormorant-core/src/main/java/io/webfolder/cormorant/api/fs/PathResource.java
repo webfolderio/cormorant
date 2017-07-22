@@ -19,12 +19,12 @@ package io.webfolder.cormorant.api.fs;
 
 import java.nio.file.Path;
 
-import io.webfolder.cormorant.api.resource.AbstractResourceStream;
+import io.webfolder.cormorant.api.resource.AbstractResource;
 import io.webfolder.cormorant.api.resource.ResourceAdapter;
 
-class PathStream extends AbstractResourceStream<Path> {
+class PathResource extends AbstractResource<Path> {
 
-    public PathStream(Iterable<Path> stream,
+    public PathResource(Iterable<Path> stream,
                                 ResourceAdapter<Path> resourceAdapter) {
         super(stream, resourceAdapter);
     }

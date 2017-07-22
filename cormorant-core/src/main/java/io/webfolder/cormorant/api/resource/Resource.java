@@ -17,7 +17,7 @@
  */
 package io.webfolder.cormorant.api.resource;
 
-public interface ResourceStream<T> extends
-                                        Iterable<T>       ,
-                                        ResourceAdapter<T> {
+public interface Resource<T> extends
+                                Iterable<T>       ,
+                                ResourceAdapter<T> {
 }

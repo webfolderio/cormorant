@@ -17,15 +17,15 @@
  */
 package io.webfolder.cormorant.internal.response;
 
-import io.webfolder.cormorant.api.resource.ResourceStream;
+import io.webfolder.cormorant.api.resource.Resource;
 
 public class ContainerGetResponseContext<T> {
 
     private ContainerGetResponse response = new ContainerGetResponse();
 
-    private ResourceStream<T> body;
+    private Resource<T> body;
 
-    public ContainerGetResponseContext(final ResourceStream<T> body) {
+    public ContainerGetResponseContext(final Resource<T> body) {
         this.body = body;
     }
 
@@ -33,7 +33,7 @@ public class ContainerGetResponseContext<T> {
         return response;
     }
 
-    public ResourceStream<T> getBody() {
+    public Resource<T> getBody() {
         return body;
     }
 }
