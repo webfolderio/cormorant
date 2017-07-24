@@ -18,12 +18,17 @@
 package io.webfolder.cormorant.api.fs;
 
 import static java.nio.file.Files.exists;
+import static java.nio.file.Files.isDirectory;
+import static java.nio.file.Files.list;
 import static java.nio.file.Files.readAttributes;
 import static java.nio.file.Files.walkFileTree;
 import static java.nio.file.LinkOption.NOFOLLOW_LINKS;
+import static java.util.stream.Collectors.toList;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.attribute.BasicFileAttributeView;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.List;
 import java.util.Map;
@@ -31,20 +36,54 @@ import java.util.NavigableSet;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Stream;
 
+import io.webfolder.cormorant.api.exception.CormorantException;
 import io.webfolder.cormorant.api.model.Account;
 import io.webfolder.cormorant.api.model.Container;
 import io.webfolder.cormorant.api.service.AccountService;
 
-public abstract class PathAccountService implements AccountService {
-
-    protected abstract Long getAccountTimestamp(String accountName);
-
-    protected abstract List<String> getContainers(String accountName);
-
-    protected abstract Path getContainerPath(String accountName, String containerName);
+public class PathAccountService implements AccountService {
 
     private Map<String, Container> containers = new ConcurrentHashMap<>();
+
+    private Path root;
+
+    public PathAccountService(Path root) {
+        this.root = root;
+    }
+    
+    protected List<String> getContainers(String accountName) {
+        Stream<Path> list = null;
+        try {
+            list = list(root);
+            return list
+                    .filter(p -> isDirectory(p))
+                    .map(p -> p.getFileName().toString())
+                    .collect(toList());
+        } catch (IOException e) {
+            throw new CormorantException(e);
+        } finally {
+            if ( list != null ) {
+                list.close();
+            }
+        }
+    }
+
+    protected Path getContainerPath(String accountName, String containerName) {
+        return root.resolve(containerName);
+    }
+
+    protected Long getAccountTimestamp(String accountName) {
+        BasicFileAttributeView view = Files.getFileAttributeView(root, BasicFileAttributeView.class);
+        BasicFileAttributes attributes;
+        try {
+            attributes = view.readAttributes();
+        } catch (IOException e) {
+            throw new CormorantException(e);
+        }
+        return new Long(attributes.creationTime().toMillis());
+    }
 
     @Override
     public NavigableSet<Container> listContainers(final String accountName) throws IOException {

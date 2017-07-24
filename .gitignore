@@ -19,3 +19,7 @@
 /cormorant-core/test
 /cormorant-core/cormorant.db
 /cormorant-core/TODO.md
+/cormorant-server/.settings
+/cormorant-server/.project
+/cormorant-server/.classpath
+/cormorant-server/cormorant.db

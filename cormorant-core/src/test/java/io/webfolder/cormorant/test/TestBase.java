@@ -55,12 +55,13 @@ import io.webfolder.cormorant.api.CormorantApplication;
 import io.webfolder.cormorant.api.CormorantConfiguration;
 import io.webfolder.cormorant.api.CormorantServer;
 import io.webfolder.cormorant.api.exception.CormorantException;
+import io.webfolder.cormorant.api.fs.PathAccountService;
 import io.webfolder.cormorant.api.metadata.MetadataStorage;
 import io.webfolder.cormorant.api.model.Role;
 import io.webfolder.cormorant.api.model.User;
 import io.webfolder.cormorant.api.service.AccountService;
-import io.webfolder.cormorant.api.service.KeystoneService;
 import io.webfolder.cormorant.api.service.DefaultKeystoneService;
+import io.webfolder.cormorant.api.service.KeystoneService;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -122,7 +123,7 @@ public class TestBase {
                              true);
         users.put("myaccount", user);
 
-        AccountService accountService   = new TestAccountService(objectStore);
+        AccountService accountService   = new PathAccountService(objectStore);
         KeystoneService keystoneService = new DefaultKeystoneService(users);
 
         CormorantConfiguration configuration = new CormorantConfiguration.Builder()

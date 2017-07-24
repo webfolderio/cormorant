@@ -23,6 +23,7 @@
     </developers>
     <modules>
         <module>cormorant-core</module>
+        <module>cormorant-server</module>
     </modules>
     <licenses>
         <license>

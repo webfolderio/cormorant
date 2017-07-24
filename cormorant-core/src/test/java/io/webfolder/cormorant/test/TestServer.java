@@ -40,6 +40,7 @@ import io.undertow.server.HttpServerExchange;
 import io.webfolder.cormorant.api.CormorantApplication;
 import io.webfolder.cormorant.api.CormorantConfiguration;
 import io.webfolder.cormorant.api.CormorantServer;
+import io.webfolder.cormorant.api.fs.PathAccountService;
 import io.webfolder.cormorant.api.metadata.MetadataStorage;
 import io.webfolder.cormorant.api.model.Role;
 import io.webfolder.cormorant.api.model.User;
@@ -98,7 +99,7 @@ public class TestServer {
                             true);
         users.put("myaccount", user);
 
-        AccountService accountService   = new TestAccountService(objectStore);
+        AccountService accountService   = new PathAccountService(objectStore);
         KeystoneService keystoneService = new DefaultKeystoneService(users);
 
         CormorantConfiguration configuration = new CormorantConfiguration.Builder()
