@@ -51,9 +51,9 @@ import io.webfolder.cormorant.api.service.KeystoneService;
 
 public class EmbeddedServer {
 
-    private static final int CAN_NOT_CREATE_DATA_DIR     = -1;
+    private static final int CAN_NOT_CREATE_DATA_FOLDER     = -1;
 
-    private static final int CAN_NOT_CREATE_METADATA_DIR = -2;
+    private static final int CAN_NOT_CREATE_METADATA_FOLDER = -2;
 
     private static final Logger LOG = LoggerFactory.getLogger(EmbeddedServer.class);
 
@@ -64,8 +64,9 @@ public class EmbeddedServer {
                 .writer(new ConsoleWriter())
                 .level(ERROR)
                 .level(EmbeddedServer.class, INFO)
+                .level(CormorantServer.class, INFO)
                 .formatPattern("{{level}|min-size=8} {date} {message}")
-                .activate();
+            .activate();
 
         final Path objectStore = get("data");
 
@@ -74,7 +75,7 @@ public class EmbeddedServer {
                 createDirectory(objectStore);
             } catch (IOException e) {
                 LOG.error(e.getMessage());
-                exit(CAN_NOT_CREATE_DATA_DIR);
+                exit(CAN_NOT_CREATE_DATA_FOLDER);
             }
         }
 
@@ -85,10 +86,9 @@ public class EmbeddedServer {
                 createDirectory(metadataStore);
             } catch (IOException e) {
                 LOG.error(e.getMessage());
-                exit(CAN_NOT_CREATE_METADATA_DIR);
+                exit(CAN_NOT_CREATE_METADATA_FOLDER);
             }
         }
-
 
         User admin = new User("admin",
                               toHexString(new SecureRandom().nextLong()),
@@ -101,13 +101,13 @@ public class EmbeddedServer {
         KeystoneService keystoneService = new DefaultKeystoneService(singletonMap(admin.getUsername(), admin));
 
         CormorantConfiguration configuration = new Builder()
-                                                    .accountName("myaccount")
+                                                    .accountName("default")
                                                     .cacheMetadata(true)
                                                     .storage(SQLite)
                                                     .pathMaxCount(10_000)
                                                     .objectStore(objectStore)
                                                     .metadataStore(metadataStore)
-                                                    .build();
+                                                .build();
 
         CormorantApplication application = new CormorantApplication(configuration,
                                                     accountService,
@@ -123,11 +123,17 @@ public class EmbeddedServer {
 
         getRuntime().addShutdownHook(thread);
 
-        LOG.info("Cormorant started.");
+        String version = EmbeddedServer.class.getPackage().getImplementationVersion();
 
-        LOG.info("Host     : {}", server.getHost());
-        LOG.info("Port     : {}", server.getPort());
+        LOG.info("==========================================================");
+        LOG.info("Cormorant {} is ready to use.", new Object[] { version });
+        LOG.info("==========================================================");
         LOG.info("Username : {}", admin.getUsername());
         LOG.info("Password : {}", admin.getPassword());
+        LOG.info("----------------------------------------------------------");
+        LOG.info("Auth V1  : http://{}:{}/auth/v1.0", new Object[] { server.getHost(), server.getPort() });
+        LOG.info("Auth V2  : http://{}:{}/v2.0", new Object[] { server.getHost(), server.getPort()  });
+        LOG.info("Auth V3  : http://{}:{}/v3", new Object[] { server.getHost(), server.getPort()  });
+        LOG.info("----------------------------------------------------------");
     }
 }

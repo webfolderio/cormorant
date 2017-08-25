@@ -23,3 +23,6 @@
 /cormorant-server/.project
 /cormorant-server/.classpath
 /cormorant-server/cormorant.db
+/cormorant-core/dependency-reduced-pom.xml
+/cormorant-server/dependency-reduced-pom.xml
+/cormorant-server/metadata/cormorant.db

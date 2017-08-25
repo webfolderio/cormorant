@@ -42,18 +42,18 @@ import io.webfolder.cormorant.api.service.MetadataService;
 
 public class DefaultMetadataServiceFactory implements MetadataServiceFactory {
 
-    private final Path              root     ;
+    private final Path              metadataStore;
 
-    private final DataSourceFactory dsFactory;
+    private final DataSourceFactory dsFactory    ;
 
-    private final MetadataStorage   storage  ;
+    private final MetadataStorage   storage      ;
 
-    public DefaultMetadataServiceFactory(final Path root, final MetadataStorage storage) {
-        this.root = root;
+    public DefaultMetadataServiceFactory(final Path metadataStore, final MetadataStorage storage) {
+        this.metadataStore = metadataStore;
         this.storage = storage;
         final ServiceLoader<DataSourceFactory> dsServFactory = load(DataSourceFactory.class, getClass().getClassLoader());
         final Iterator<DataSourceFactory> dsServIterator = dsServFactory.iterator();
-        this.dsFactory = dsServIterator.hasNext() ? dsServIterator.next() : SQLite.equals(storage) ? new SQLiteDataSourceFactory() : null;
+        this.dsFactory = dsServIterator.hasNext() ? dsServIterator.next() : SQLite.equals(storage) ? new SQLiteDataSourceFactory(metadataStore) : null;
     }
 
     @Override
@@ -62,15 +62,17 @@ public class DefaultMetadataServiceFactory implements MetadataServiceFactory {
                                 final boolean cacheable) {
         final ServiceLoader<MetadataService> loader       = load(MetadataService.class, getClass().getClassLoader());
         final Iterator<MetadataService>      iterator     = loader.iterator();
-        final Path                           absolutePath = root.toAbsolutePath().normalize().resolve(cacheName);
-        if ( ! exists(absolutePath, NOFOLLOW_LINKS) ) {
-            try {
-                createDirectories(absolutePath);
-            } catch (IOException e) {
-                throw new CormorantException("Unable to create property directory [" + absolutePath + "], namespace [" + cacheName + "].", e);
+        final Path                           absolutePath = metadataStore.toAbsolutePath().normalize().resolve(cacheName);
+        if (File.equals(storage)) {
+            if ( ! exists(absolutePath, NOFOLLOW_LINKS) ) {
+                try {
+                    createDirectories(absolutePath);
+                } catch (IOException e) {
+                    throw new CormorantException("Unable to create property directory [" + absolutePath + "], namespace [" + cacheName + "].", e);
+                }
+            } else if ( ! isDirectory(absolutePath, NOFOLLOW_LINKS) ) {
+                throw new CormorantException("Invalid property directory [" + absolutePath + "], namespace [" + cacheName + "].");
             }
-        } else if ( ! isDirectory(absolutePath, NOFOLLOW_LINKS) ) {
-            throw new CormorantException("Invalid property directory [" + absolutePath + "], namespace [" + cacheName + "].");
         }
         MetadataService metadataService;
         if (iterator.hasNext()) {

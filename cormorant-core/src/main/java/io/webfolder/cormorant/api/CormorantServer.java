@@ -173,6 +173,7 @@ public class CormorantServer {
         if (lock != null) {
             if (lock.tryLock()) {
                 try {
+                    LOG.info("Shutting down.");
                     if ( gracefulHandler != null ) {
                         try {
                             gracefulHandler.shutdown();

@@ -17,7 +17,11 @@
  */
 package io.webfolder.cormorant.api;
 
+import static java.io.File.separator;
+import static java.lang.String.format;
 import static org.sqlite.SQLiteConfig.Encoding.UTF8;
+
+import java.nio.file.Path;
 
 import javax.sql.DataSource;
 
@@ -28,12 +32,12 @@ public class SQLiteDataSourceFactory implements DataSourceFactory {
 
     private final SQLiteDataSource ds;
 
-    public SQLiteDataSourceFactory() {
+    public SQLiteDataSourceFactory(final Path metadataStore) {
         SQLiteConfig config = new SQLiteConfig();
         config.setEncoding(UTF8);
         config.setSharedCache(true);
         ds = new SQLiteDataSource(config);
-        ds.setUrl("jdbc:sqlite:cormorant.db");
+        ds.setUrl(format("jdbc:sqlite:%s%scormorant.db", metadataStore.toAbsolutePath(), separator));
     }
 
     @Override
