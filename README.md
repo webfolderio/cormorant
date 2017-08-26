@@ -3,7 +3,7 @@
 __cormorant__ is an object storage server released under AGPL.
 
 [![License](https://img.shields.io/badge/license-AGPL-blue.svg)](https://opensource.org/licenses/AGPL-3.0)
-[![circleci](https://img.shields.io/circleci/project/github/webfolderio/cdp4j.svg?label=linux)](https://circleci.com/gh/webfolderio/cormorant)
+[![circleci](https://img.shields.io/circleci/project/github/webfolderio/cormorant.svg?label=linux)](https://circleci.com/gh/webfolderio/cormorant)
 [![AppVeyor](https://img.shields.io/appveyor/ci/WebFolder/cormorant.svg?label=windows)](https://ci.appveyor.com/project/WebFolder/cormorant)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/d6af9f5df82d4568ba29ea6fceb9d605)](https://www.codacy.com/app/WebFolder/cormorant?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=webfolderio/cormorant&amp;utm_campaign=Badge_Grade)
 [![Coverage Status](https://coveralls.io/repos/github/webfolderio/cormorant/badge.svg?branch=master)](https://coveralls.io/github/webfolderio/cormorant?branch=master)

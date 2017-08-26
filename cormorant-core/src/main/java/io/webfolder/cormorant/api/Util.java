@@ -46,6 +46,9 @@ public interface Util {
         if (uri == null) {
             return null;
         }
+        if (uri.isEmpty()) {
+            return uri;
+        }
         String normalizedPath = uri;
         if (normalizedPath.charAt(0) == FORWARD_SLASH) {
             normalizedPath = uri.substring(1, uri.length());
