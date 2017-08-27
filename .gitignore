@@ -27,3 +27,5 @@
 /cormorant-server/dependency-reduced-pom.xml
 /cormorant-server/metadata/cormorant.db
 /cormorant-server/storage/metadata/cormorant.db
+/cormorant-server/storage
+/cormorant-server/log/access.log

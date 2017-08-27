@@ -28,11 +28,14 @@ import static io.undertow.util.Methods.GET;
 import static io.undertow.util.Methods.HEAD;
 import static io.undertow.util.Methods.POST;
 import static io.undertow.util.Methods.PUT;
-import static java.util.Collections.singletonMap;
+import static java.util.concurrent.Executors.newSingleThreadExecutor;
 import static java.util.concurrent.TimeUnit.MINUTES;
 import static javax.servlet.DispatcherType.REQUEST;
 import static org.slf4j.LoggerFactory.getLogger;
 
+import java.io.File;
+import java.nio.file.Path;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Function;
 
@@ -44,13 +47,16 @@ import org.jboss.resteasy.spi.ResteasyDeployment;
 import org.slf4j.Logger;
 
 import io.undertow.Undertow;
+import io.undertow.server.HandlerWrapper;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.handlers.AllowedMethodsHandler;
 import io.undertow.server.handlers.GracefulShutdownHandler;
 import io.undertow.server.handlers.HttpContinueAcceptingHandler;
 import io.undertow.server.handlers.HttpContinueReadHandler;
 import io.undertow.server.handlers.PathHandler;
-import io.undertow.server.handlers.accesslog.AccessLogHandler.Builder;
+import io.undertow.server.handlers.accesslog.AccessLogHandler;
+import io.undertow.server.handlers.accesslog.AccessLogReceiver;
+import io.undertow.server.handlers.accesslog.DefaultAccessLogReceiver;
 import io.undertow.servlet.api.DeploymentInfo;
 import io.undertow.servlet.api.DeploymentManager;
 import io.undertow.servlet.api.FilterInfo;
@@ -82,6 +88,10 @@ public class CormorantServer {
     private volatile GracefulShutdownHandler gracefulHandler;
 
     private volatile ReentrantLock lock = new ReentrantLock(true);
+
+    private ExecutorService accessLogExecutor = newSingleThreadExecutor();
+
+    private Path accessLogPath;
 
     private String host;
 
@@ -128,7 +138,7 @@ public class CormorantServer {
 
     protected DeploymentInfo initDeployment(final Application application) {
         final FilterInfo filterInfo = filter("RestEasyFilter", Filter30Dispatcher.class).setAsyncSupported(true);
-        return new DeploymentInfo()
+        DeploymentInfo di = new DeploymentInfo()
                         .addServletContextAttribute(ResteasyDeployment.class.getName(), deployment)
                         .addFilter(filterInfo)
                         .addFilterUrlMapping("RestEasyFilter", "/*", REQUEST)
@@ -138,8 +148,30 @@ public class CormorantServer {
                         .setAuthenticationMode(CONSTRAINT_DRIVEN)
                         .setServletStackTraces(NONE)
                         .setSecurityDisabled(true)
-                        .addInitialHandlerChainWrapper(new Builder().build(singletonMap("format", "combined")))
                         .setClassLoader(deployment.getApplication().getClass().getClassLoader());
+        if ( accessLogPath != null ) {
+            File outputDirectory = accessLogPath.getParent().toFile();
+            String logBaseName = accessLogPath.getFileName().toString();
+            String logNameSuffix = ".log";
+            String fileName = accessLogPath.getFileName().toString();
+            int start = fileName.lastIndexOf(".");
+            if (start > 0) {
+                logNameSuffix = fileName.substring(start, fileName.length());
+                logBaseName = fileName.substring(0, start);
+            }
+            boolean rotate = true;
+            AccessLogReceiver accessLogReceiver = new DefaultAccessLogReceiver(accessLogExecutor,
+                                                                               outputDirectory,
+                                                                               logBaseName,
+                                                                               logNameSuffix,
+                                                                               rotate);
+            HandlerWrapper accessLogHandlerWrapper = next -> new AccessLogHandler(next,
+                                                                                  accessLogReceiver,
+                                                                                  "combined",
+                                                                                  CormorantServer.class.getClassLoader());
+            di = di.addInitialHandlerChainWrapper(accessLogHandlerWrapper);
+        }
+        return di;
     }
 
     public CormorantServer start() {
@@ -196,6 +228,7 @@ public class CormorantServer {
                         server.stop();
                         server = null;
                     }
+                    accessLogExecutor.shutdown();
                 } finally {
                     lock.unlock();
                     lock = null;
@@ -226,5 +259,9 @@ public class CormorantServer {
 
     public void setContextPath(String contextPath) {
         this.contextPath = contextPath;
+    }
+
+    public void setAccessLogPath(Path accessLogPath) {
+        this.accessLogPath = accessLogPath;
     }
 }

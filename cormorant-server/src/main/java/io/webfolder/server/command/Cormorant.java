@@ -11,8 +11,6 @@ import picocli.CommandLine.Option;
     description = "cormorant is an object storage server released under AGPL.",
     subcommands = {
                     Start.class,
-                    Stop.class,
-                    Restart.class,
                     Password.class,
                     Help.class
                 },

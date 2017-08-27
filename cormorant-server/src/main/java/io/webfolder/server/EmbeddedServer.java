@@ -28,15 +28,14 @@ import java.nio.file.Path;
 import java.util.List;
 
 import io.webfolder.server.command.Cormorant;
+import io.webfolder.server.command.ExitCodes;
 import io.webfolder.server.command.Help;
 import io.webfolder.server.command.Password;
 import io.webfolder.server.command.Start;
 import picocli.CommandLine;
 import picocli.CommandLine.ParameterException;
 
-public class EmbeddedServer {
-
-    private static final int INVALID_ARG = -1;
+public class EmbeddedServer implements ExitCodes {
 
     public static void main(String[] args) {
         Cormorant cormorant = new Cormorant();

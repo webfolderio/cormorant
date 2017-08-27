@@ -31,6 +31,7 @@ import java.util.concurrent.CountDownLatch;
 
 import org.junit.Test;
 import org.junit.runner.JUnitCore;
+import org.mindrot.jbcrypt.BCrypt;
 import org.pmw.tinylog.Configurator;
 import org.pmw.tinylog.Level;
 import org.pmw.tinylog.writers.ConsoleWriter;
@@ -92,7 +93,7 @@ public class TestServer {
         Map<String, User> users = new HashMap<>();
 
         User user = new User("myaccount",
-                            "mypassword",
+                            BCrypt.hashpw("mypassword", BCrypt.gensalt(12)),
                             "test@example.com",
                             "default",
                             Role.Admin,

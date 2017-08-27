@@ -72,8 +72,11 @@ public class Start implements ExitCodes {
     @Option(names = { "-f", "--log-file" }, arity ="1", paramLabel = "<file>", description = "Writes generated log records to file.")
     private Path logFile = get("log").resolve("cormorant.log");
 
-    @Option(names = { "-a", "--access-log" }, arity ="1", paramLabel = "<file>", description = "Writes http access log records to file.")
+    @Option(names = { "-a", "--access-log-file" }, arity ="1", paramLabel = "<file>", description = "Writes http access log records to file.")
     private Path accessLog = get("log").resolve("access.log");
+
+    @Option(names = { "-q", "--disable-access-log-file" }, description = "Turn off access logs.")
+    private boolean disableAccessLog;
 
     @Option(names = { "-d", "--data-path" }, arity ="1", paramLabel = "<path>", description = "Sets data path.")
     private Path data = get("storage").resolve("data");
@@ -93,7 +96,7 @@ public class Start implements ExitCodes {
             try {
                 createDirectories(data);
             } catch (IOException e) {
-                log.error(e.getMessage());
+                log.error("Unable to data create directory [" + data.toString() + "].", e);
                 exit(CAN_NOT_CREATE_DATA_FOLDER);
             }
         }
@@ -102,8 +105,17 @@ public class Start implements ExitCodes {
             try {
                 createDirectories(metadata);
             } catch (IOException e) {
-                log.error(e.getMessage());
+                log.error("Unable to metadata create directory [" + metadata.toString() + "].", e);
                 exit(CAN_NOT_CREATE_METADATA_FOLDER);
+            }
+        }
+
+        if ( ! disableAccessLog && ! exists(accessLog.getParent()) ) {
+            try {
+                createDirectories(accessLog.getParent());
+            } catch (IOException e) {
+                log.error("Unable to create access log directory [" + accessLog.toString() + "].", e);
+                exit(CAN_NOT_CREATE_ACCESS_LOG_FOLDER);
             }
         }
 
@@ -139,6 +151,9 @@ public class Start implements ExitCodes {
         CormorantServer server = new CormorantServer();
         server.setPort(port);
         server.setHost(host);
+        if ( ! disableAccessLog ) {
+            server.setAccessLogPath(accessLog);
+        }
         server.deploy(application);
 
         server.start();
@@ -182,6 +197,7 @@ public class Start implements ExitCodes {
             .writer(writer)
             .level(logLevel)
             .level(Start.class, INFO)
+            .level(CormorantServer.class, INFO)
             .formatPattern("{{level}|min-size=8} {date} {message}")
         .activate();
     }

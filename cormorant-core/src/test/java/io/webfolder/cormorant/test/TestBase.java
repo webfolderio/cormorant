@@ -43,6 +43,7 @@ import org.jclouds.openstack.swift.v1.features.AccountApi;
 import org.jclouds.openstack.swift.v1.features.ContainerApi;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.mindrot.jbcrypt.BCrypt;
 import org.pmw.tinylog.Configurator;
 import org.pmw.tinylog.Level;
 import org.pmw.tinylog.writers.ConsoleWriter;
@@ -116,7 +117,7 @@ public class TestBase {
         Map<String, User> users = new HashMap<>();
 
         User user = new User("myaccount",
-                             "mypassword",
+                             BCrypt.hashpw("mypassword", BCrypt.gensalt(12)),
                              "test@example.com",
                              "default",
                              Role.Admin,

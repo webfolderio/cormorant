@@ -48,6 +48,7 @@ import io.webfolder.cormorant.internal.jaxrs.ContainerController;
 import io.webfolder.cormorant.internal.jaxrs.FaviconController;
 import io.webfolder.cormorant.internal.jaxrs.HealthCheckController;
 import io.webfolder.cormorant.internal.jaxrs.ObjectController;
+import io.webfolder.cormorant.internal.undertow.CormorantRemoteUser;
 
 public class CormorantApplication extends Application {
 
@@ -88,6 +89,8 @@ public class CormorantApplication extends Application {
                                                 .expiration(1, DAYS)
                                                 .maxSize(100_000)
                                             .build();
+
+        CormorantRemoteUser.principals = tokens;
 
         singletons.add(new HealthCheckController());
 
