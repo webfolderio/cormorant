@@ -213,6 +213,11 @@
    <version>1.7.25</version>
   </dependency>
   <dependency>
+   <groupId>info.picocli</groupId>
+   <artifactId>picocli</artifactId>
+   <version>1.0.0</version>
+  </dependency>
+  <dependency>
    <groupId>net.jodah</groupId>
    <artifactId>expiringmap</artifactId>
    <version>0.5.8</version>

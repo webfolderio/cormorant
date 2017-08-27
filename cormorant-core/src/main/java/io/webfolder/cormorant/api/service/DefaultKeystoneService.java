@@ -20,6 +20,7 @@ package io.webfolder.cormorant.api.service;
 import static io.webfolder.cormorant.api.model.Role.Admin;
 import static io.webfolder.cormorant.api.model.Role.None;
 import static io.webfolder.cormorant.api.model.Role.valueOf;
+import static org.mindrot.jbcrypt.BCrypt.checkpw;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -48,9 +49,9 @@ public class DefaultKeystoneService implements KeystoneService {
 
     @Override
     public boolean authenticate(String username, String password) {
-        return users.containsKey(username)                             &&
-                    password != null                                   &&
-                    password.equals(users.get(username).getPassword()) &&
+        return users.containsKey(username)                               &&
+                    password != null                                     &&
+                    checkpw(password, users.get(username).getPassword()) &&
                     users.get(username).isEnable();
     }
 

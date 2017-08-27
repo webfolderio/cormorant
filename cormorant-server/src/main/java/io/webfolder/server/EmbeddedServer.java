@@ -17,123 +17,57 @@
  */
 package io.webfolder.server;
 
-import static io.webfolder.cormorant.api.metadata.MetadataStorage.SQLite;
-import static io.webfolder.cormorant.api.model.Role.Admin;
-import static java.lang.Long.toHexString;
-import static java.lang.Runtime.getRuntime;
+import static java.lang.System.err;
 import static java.lang.System.exit;
-import static java.lang.System.setProperty;
-import static java.nio.file.Files.createDirectory;
-import static java.nio.file.Files.exists;
+import static java.lang.System.out;
 import static java.nio.file.Paths.get;
-import static java.util.Collections.singletonMap;
-import static org.pmw.tinylog.Configurator.defaultConfig;
-import static org.pmw.tinylog.Level.ERROR;
-import static org.pmw.tinylog.Level.INFO;
+import static java.util.Collections.emptyList;
+import static picocli.CommandLine.Help.Ansi.AUTO;
 
-import java.io.IOException;
 import java.nio.file.Path;
-import java.security.SecureRandom;
+import java.util.List;
 
-import org.pmw.tinylog.writers.ConsoleWriter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import io.webfolder.cormorant.api.CormorantApplication;
-import io.webfolder.cormorant.api.CormorantConfiguration;
-import io.webfolder.cormorant.api.CormorantConfiguration.Builder;
-import io.webfolder.cormorant.api.CormorantServer;
-import io.webfolder.cormorant.api.fs.PathAccountService;
-import io.webfolder.cormorant.api.model.User;
-import io.webfolder.cormorant.api.service.AccountService;
-import io.webfolder.cormorant.api.service.DefaultKeystoneService;
-import io.webfolder.cormorant.api.service.KeystoneService;
+import io.webfolder.server.command.Cormorant;
+import io.webfolder.server.command.Help;
+import io.webfolder.server.command.Password;
+import io.webfolder.server.command.Start;
+import picocli.CommandLine;
+import picocli.CommandLine.ParameterException;
 
 public class EmbeddedServer {
 
-    private static final int CAN_NOT_CREATE_DATA_FOLDER     = -1;
-
-    private static final int CAN_NOT_CREATE_METADATA_FOLDER = -2;
-
-    private static final Logger LOG = LoggerFactory.getLogger(EmbeddedServer.class);
+    private static final int INVALID_ARG = -1;
 
     public static void main(String[] args) {
-        setProperty("org.jboss.logging.provider", "slf4j");
-
-        defaultConfig()
-                .writer(new ConsoleWriter())
-                .level(ERROR)
-                .level(EmbeddedServer.class, INFO)
-                .level(CormorantServer.class, INFO)
-                .formatPattern("{{level}|min-size=8} {date} {message}")
-            .activate();
-
-        final Path objectStore = get("data");
-
-        if ( ! exists(objectStore) ) {
-            try {
-                createDirectory(objectStore);
-            } catch (IOException e) {
-                LOG.error(e.getMessage());
-                exit(CAN_NOT_CREATE_DATA_FOLDER);
+        Cormorant cormorant = new Cormorant();
+        CommandLine commandLine = new CommandLine(cormorant);
+        commandLine.registerConverter(Path.class, value -> get(value));
+        List<CommandLine> parsed = emptyList();
+        try {
+            parsed = commandLine.parse(args);
+        } catch (ParameterException e) {
+            err.println(e.getMessage());
+            if (args.length >= 1) {
+                err.println();
+                new Help().help(err, args[0]);
             }
+            exit(INVALID_ARG);
+            return;
         }
-
-        final Path metadataStore = get("metadata");
-
-        if ( ! exists(metadataStore) ) {
-            try {
-                createDirectory(metadataStore);
-            } catch (IOException e) {
-                LOG.error(e.getMessage());
-                exit(CAN_NOT_CREATE_METADATA_FOLDER);
+        if (commandLine.isVersionHelpRequested()) {
+            commandLine.printVersionHelp(out, AUTO);
+        } else if (parsed.size() >= 2) {
+            Object command = parsed.get(1).getCommand();
+            if (Start.class.equals(command.getClass())) {
+                ((Start) command).start();
+            } else if (Password.class.equals(command.getClass())) {
+                ((Password) command).generate();
+            } else if (Help.class.equals(command.getClass())) {
+                ((Help) command).help();
             }
+        } else {
+            commandLine.usage(err, AUTO);
+            exit(INVALID_ARG);
         }
-
-        User admin = new User("admin",
-                              toHexString(new SecureRandom().nextLong()),
-                              "admin@example.com",
-                              "default",
-                              Admin,
-                              true);
-
-        AccountService accountService   = new PathAccountService(objectStore);
-        KeystoneService keystoneService = new DefaultKeystoneService(singletonMap(admin.getUsername(), admin));
-
-        CormorantConfiguration configuration = new Builder()
-                                                    .accountName("default")
-                                                    .cacheMetadata(true)
-                                                    .storage(SQLite)
-                                                    .pathMaxCount(10_000)
-                                                    .objectStore(objectStore)
-                                                    .metadataStore(metadataStore)
-                                                .build();
-
-        CormorantApplication application = new CormorantApplication(configuration,
-                                                    accountService,
-                                                    keystoneService);
-
-        CormorantServer server = new CormorantServer();
-        server.deploy(application);
-
-        server.start();
-
-        Thread thread = new Thread(server::stop);
-        thread.setDaemon(true);
-
-        getRuntime().addShutdownHook(thread);
-
-        String version = EmbeddedServer.class.getPackage().getImplementationVersion();
-
-        LOG.info("==========================================================");
-        LOG.info("Cormorant {} is ready to use.", new Object[] { version });
-        LOG.info("==========================================================");
-        LOG.info("Username : {}", admin.getUsername());
-        LOG.info("Password : {}", admin.getPassword());
-        LOG.info("----------------------------------------------------------");
-        LOG.info("Auth V1  : http://{}:{}/auth/v1.0", new Object[] { server.getHost(), server.getPort() });
-        LOG.info("Auth V2  : http://{}:{}/v2.0", new Object[] { server.getHost(), server.getPort()  });
-        LOG.info("Auth V3  : http://{}:{}/v3", new Object[] { server.getHost(), server.getPort()  });
-        LOG.info("----------------------------------------------------------");
     }
 }
