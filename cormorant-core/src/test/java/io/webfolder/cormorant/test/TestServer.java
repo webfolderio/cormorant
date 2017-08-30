@@ -93,7 +93,7 @@ public class TestServer {
         Map<String, User> users = new HashMap<>();
 
         User user = new User("myaccount",
-                            BCrypt.hashpw("mypassword", BCrypt.gensalt(12)),
+                            BCrypt.hashpw("mypassword", BCrypt.gensalt()),
                             "test@example.com",
                             "default",
                             Role.Admin,
