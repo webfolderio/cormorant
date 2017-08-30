@@ -121,7 +121,14 @@ public class PathObjectService implements ObjectService<Path>, Util {
     @Override
     public TempObject<Path> createTempObject(String accontName, Path container) throws IOException, SQLException {
         if (useSecureTempFile) {
-            return new SecureTempObject(new SecureTempFile());
+            SecureTempFile secureTempFile = new SecureTempFile();
+            boolean create = secureTempFile.create();
+            if (create) {
+                SecureTempObject secureTempObject = new SecureTempObject(secureTempFile);
+                return secureTempObject;
+            } else {
+                return new DefaultTempObject<Path>(createTempFile("cormorant", ".new"), this);
+            }
         } else {
             return new DefaultTempObject<Path>(createTempFile("cormorant", ".new"), this);
         }
