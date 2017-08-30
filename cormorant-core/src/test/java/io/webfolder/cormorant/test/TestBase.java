@@ -63,6 +63,7 @@ import io.webfolder.cormorant.api.model.User;
 import io.webfolder.cormorant.api.service.AccountService;
 import io.webfolder.cormorant.api.service.DefaultKeystoneService;
 import io.webfolder.cormorant.api.service.KeystoneService;
+import io.webfolder.otmpfile.SecureTempFile;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -97,6 +98,8 @@ public class TestBase {
 
     @BeforeClass
     public static void start() {
+        System.out.println("Supports O_TMPFILE:" + SecureTempFile.SUPPORT_O_TMPFILE);
+
         Locale.setDefault(ENGLISH);
 
         System.setProperty("org.jboss.logging.provider", "slf4j");

@@ -281,6 +281,11 @@
    <scope>test</scope>
   </dependency>
   <dependency>
+   <groupId>io.webfolder</groupId>
+   <artifactId>otmpfile</artifactId>
+   <version>1.0.1</version>
+  </dependency>
+  <dependency>
    <groupId>org.apache.jclouds.driver</groupId>
    <artifactId>jclouds-slf4j</artifactId>
    <version>2.0.2</version>

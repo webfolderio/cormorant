@@ -19,6 +19,7 @@ package io.webfolder.cormorant.api.fs;
 
 import static io.webfolder.cormorant.api.Json.read;
 import static io.webfolder.cormorant.api.metadata.MetadataServiceFactory.MANIFEST_EXTENSION;
+import static io.webfolder.otmpfile.SecureTempFile.SUPPORT_O_TMPFILE;
 import static java.lang.String.format;
 import static java.nio.channels.Channels.newInputStream;
 import static java.nio.channels.Channels.newReader;
@@ -77,6 +78,7 @@ import io.webfolder.cormorant.api.model.Segment;
 import io.webfolder.cormorant.api.service.ContainerService;
 import io.webfolder.cormorant.api.service.MetadataService;
 import io.webfolder.cormorant.api.service.ObjectService;
+import io.webfolder.otmpfile.SecureTempFile;
 
 public class PathObjectService implements ObjectService<Path>, Util {
 
@@ -102,6 +104,8 @@ public class PathObjectService implements ObjectService<Path>, Util {
 
     private final MetadataService systemMetadataService;
 
+    private final boolean useSecureTempFile = SUPPORT_O_TMPFILE;
+
     public PathObjectService(
                 final ContainerService<Path> containerService,
                 final MetadataService        systemMetadataService) {
@@ -115,8 +119,12 @@ public class PathObjectService implements ObjectService<Path>, Util {
     }
 
     @Override
-    public Path createTempObject(String accontName, Path container) throws IOException, SQLException {
-        return createTempFile("cormorant", ".new");
+    public TempObject<Path> createTempObject(String accontName, Path container) throws IOException, SQLException {
+        if (useSecureTempFile) {
+            return new SecureTempObject(new SecureTempFile());
+        } else {
+            return new PathTempObject(createTempFile("cormorant", ".new"));
+        }
     }
 
     @Override

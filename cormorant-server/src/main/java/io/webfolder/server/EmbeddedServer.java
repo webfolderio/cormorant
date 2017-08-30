@@ -30,7 +30,6 @@ import java.util.List;
 import io.webfolder.server.command.Cormorant;
 import io.webfolder.server.command.ExitCodes;
 import io.webfolder.server.command.Help;
-import io.webfolder.server.command.Password;
 import io.webfolder.server.command.Start;
 import picocli.CommandLine;
 import picocli.CommandLine.ParameterException;
@@ -59,8 +58,6 @@ public class EmbeddedServer implements ExitCodes {
             Object command = parsed.get(1).getCommand();
             if (Start.class.equals(command.getClass())) {
                 ((Start) command).start();
-            } else if (Password.class.equals(command.getClass())) {
-                ((Password) command).generate();
             } else if (Help.class.equals(command.getClass())) {
                 ((Help) command).help();
             }

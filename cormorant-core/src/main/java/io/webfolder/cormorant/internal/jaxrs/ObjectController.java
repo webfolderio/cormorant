@@ -88,6 +88,7 @@ import javax.ws.rs.core.UriInfo;
 import io.webfolder.cormorant.api.Json;
 import io.webfolder.cormorant.api.Util;
 import io.webfolder.cormorant.api.exception.CormorantException;
+import io.webfolder.cormorant.api.fs.TempObject;
 import io.webfolder.cormorant.api.model.Container;
 import io.webfolder.cormorant.api.model.Segment;
 import io.webfolder.cormorant.api.service.AccountService;
@@ -969,36 +970,46 @@ public class ObjectController<T> implements Util {
                                                 copyFromObjectPath + "].");
             }
             sourceContainer = containerService.getContainer(request.getAccount(), copyFromContainer);
+
+            if (sourceContainer == null) {
+                throw new CormorantException("Container [" + request.getContainer() + "] not found.");
+            }
+
+            final boolean validPath = objectService.isValidPath(sourceContainer, request.getObject());
+
+            if ( ! validPath ) {
+                throw new CormorantException("Invalid object path [" + request.getObject() + "].");
+            }
+
             sourceObject = objectService.getObject(request.getAccount(), copyFromContainer, copyFromObjectPath);
             if (sourceObject == null) {
                 throw new CormorantException("Failed to copy object from [" + copyFrom + "]. Object not found.");
             }
         } else {
             sourceContainer = containerService.getContainer(request.getAccount(), request.getContainer());
-            final Long    maxTransferSize = chunked ? MAX_UPLOAD_SIZE : request.getContentLength();
-            final T       tempObject      = objectService.createTempObject(request.getAccount(), sourceContainer);
+
+            if (sourceContainer == null) {
+                throw new CormorantException("Container [" + request.getContainer() + "] not found.");
+            }
+
+            final boolean validPath = objectService.isValidPath(sourceContainer, request.getObject());
+
+            if ( ! validPath ) {
+                throw new CormorantException("Invalid object path [" + request.getObject() + "].");
+            }
+
+            final Long          maxTransferSize = chunked ? MAX_UPLOAD_SIZE : request.getContentLength();
+            final TempObject<T> tempObject      = objectService.createTempObject(request.getAccount(), sourceContainer);
 
             try (final ReadableByteChannel readableChannel = newChannel(is);
-                                        final WritableByteChannel writableChannel = objectService.getWritableChannel(tempObject)) {
+                                        final WritableByteChannel writableChannel = tempObject.getWritableByteChannel()) {
                 write(readableChannel, writableChannel, 0L, maxTransferSize);
             }
 
-            sourceObject    = tempObject;
+            sourceObject    = tempObject.toObject();
             targetContainer = sourceContainer;
         }
 
-        if (sourceContainer == null) {
-            throw new CormorantException("Container [" + request.getContainer() + "] not found.");
-        }
-
-        final boolean validPath = objectService.isValidPath(sourceContainer, request.getObject());
-
-        if ( ! validPath ) {
-            throw new CormorantException("Invalid object path [" + request.getObject() + "].");
-        }
-
-        final Container           containerInfo  = accountService.getContainer(request.getAccount(), request.getContainer());
-        final Map<String, Object> systemMetadata = new HashMap<>();
         final String              etag           = objectService.calculateChecksum(asList(sourceObject));
         final String              requestETag    = httpHeaders.getHeaderString(ETAG);
         // ----------------------------------------------------------------------------------
@@ -1018,6 +1029,9 @@ public class ObjectController<T> implements Util {
             throw new CormorantException("ETag request header [" + requestETag + "] does not match with [" + etag + "].",
                             UNPROCESSABLE_ENTITY);
         }
+
+        final Container           containerInfo  = accountService.getContainer(request.getAccount(), request.getContainer());
+        final Map<String, Object> systemMetadata = new HashMap<>();
 
         final long    tempObjectSize = objectService.getSize(sourceObject);
         final T       directory      = objectService.getDirectory(targetContainer, request.getObject());
@@ -1197,13 +1211,13 @@ public class ObjectController<T> implements Util {
             }
             files.add(segmentObject);
         }
-        final T container  = containerService.getContainer(request.getAccount(), request.getContainer());
-        final T tempObject = objectService.createTempObject(request.getAccount(), container);
+        final T container              = containerService.getContainer(request.getAccount(), request.getContainer());
+        final TempObject<T> tempObject = objectService.createTempObject(request.getAccount(), container);
         try (ReadableByteChannel readableChannel = newChannel(new ByteArrayInputStream(data));
-                    WritableByteChannel writableChannel = objectService.getWritableChannel(tempObject)) {
+                    WritableByteChannel writableChannel = tempObject.getWritableByteChannel()) {
             write(readableChannel, writableChannel, 0L, contentLength);
             final T object = objectService.moveTempObject(request.getAccount(),
-                                                            tempObject,
+                                                            tempObject.toObject(),
                                                             container,
                                                             request.getObject() + MANIFEST_EXTENSION);
             final String eTag = objectService.calculateChecksum(asList(object));

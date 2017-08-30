@@ -24,8 +24,6 @@ public class Help {
     public void help(PrintStream ps, String command) {
         if ("start".equals(command)) {
             usage(new Start(), ps);
-        } else if ("password".equals(command))  {
-            usage(new Password(), ps);
         } else {
             usage(this, ps);
         }

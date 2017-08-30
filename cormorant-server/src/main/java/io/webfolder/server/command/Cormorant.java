@@ -5,13 +5,12 @@ import picocli.CommandLine.Option;
 
 @Command(
     version     = "1.0.0",
-    footer      = "\n2017 Copyright(c) WebFolder OÜ - https://webfolder.io",
+    footer      = "\nCopyright 2017 WebFolder OÜ",
     name        = "cormorant",
     sortOptions = false,
     description = "cormorant is an object storage server released under AGPL.",
     subcommands = {
                     Start.class,
-                    Password.class,
                     Help.class
                 },
     showDefaultValues = true

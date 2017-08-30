@@ -23,6 +23,7 @@ import java.nio.channels.WritableByteChannel;
 import java.sql.SQLException;
 import java.util.List;
 
+import io.webfolder.cormorant.api.fs.TempObject;
 import io.webfolder.cormorant.api.model.Segment;
 
 public interface ObjectService<T> {
@@ -33,7 +34,7 @@ public interface ObjectService<T> {
 
     T getObject(String accountName, String containerName, String objectPath) throws IOException, SQLException;
 
-    T createTempObject(String accontName, T container) throws IOException, SQLException;
+    TempObject<T> createTempObject(String accontName, T container) throws IOException, SQLException;
 
     void deleteTempObject(String accountName, T container, T tempObject) throws IOException, SQLException;
 
