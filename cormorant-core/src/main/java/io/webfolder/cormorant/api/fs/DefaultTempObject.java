@@ -21,9 +21,26 @@ import java.io.IOException;
 import java.nio.channels.WritableByteChannel;
 import java.sql.SQLException;
 
-public interface TempObject<T> {
+import io.webfolder.cormorant.api.service.ObjectService;
 
-    public WritableByteChannel getWritableByteChannel() throws IOException, SQLException;
+public class DefaultTempObject<T> implements TempObject<T> {
 
-    public T toObject();
+    private final T path;
+
+    private ObjectService<T> objectService;
+
+    public DefaultTempObject(T path, ObjectService<T> objectService) {
+        this.path = path;
+        this.objectService = objectService;
+    }
+
+    @Override
+    public WritableByteChannel getWritableByteChannel() throws IOException, SQLException {
+        return objectService.getWritableChannel(path);
+    }
+
+    @Override
+    public T toObject() {
+        return path;
+    }
 }

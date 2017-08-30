@@ -123,7 +123,7 @@ public class PathObjectService implements ObjectService<Path>, Util {
         if (useSecureTempFile) {
             return new SecureTempObject(new SecureTempFile());
         } else {
-            return new PathTempObject(createTempFile("cormorant", ".new"));
+            return new DefaultTempObject<Path>(createTempFile("cormorant", ".new"), this);
         }
     }
 
