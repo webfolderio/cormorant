@@ -49,10 +49,20 @@ public class DefaultKeystoneService implements KeystoneService {
 
     @Override
     public boolean authenticate(String username, String password) {
-        return users.containsKey(username)                               &&
-                    password != null                                     &&
-                    checkpw(password, users.get(username).getPassword()) &&
-                    users.get(username).isEnable();
+        if ( ! users.containsKey(username) ) {
+            return false;
+        }
+        if (password == null || password.trim().isEmpty()) {
+            return false;
+        }
+        if ( ! users.get(username).isEnable() ) {
+            return false;
+        }
+        try {
+            return checkpw(password, users.get(username).getPassword());
+        } catch (Throwable t) {
+            return false;
+        }
     }
 
     @Override
