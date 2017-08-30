@@ -98,7 +98,7 @@ public class TestBase {
 
     @BeforeClass
     public static void start() {
-        System.out.println("Supports O_TMPFILE:" + SecureTempFile.SUPPORT_O_TMPFILE);
+        System.out.println("Supports O_TMPFILE: " + SecureTempFile.SUPPORT_O_TMPFILE);
 
         Locale.setDefault(ENGLISH);
 

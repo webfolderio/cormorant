@@ -1004,9 +1004,9 @@ public class ObjectController<T> implements Util {
             try (final ReadableByteChannel readableChannel = newChannel(is);
                                         final WritableByteChannel writableChannel = tempObject.getWritableByteChannel()) {
                 write(readableChannel, writableChannel, 0L, maxTransferSize);
+                sourceObject = tempObject.toObject();
             }
 
-            sourceObject    = tempObject.toObject();
             targetContainer = sourceContainer;
         }
 
@@ -1216,8 +1216,9 @@ public class ObjectController<T> implements Util {
         try (ReadableByteChannel readableChannel = newChannel(new ByteArrayInputStream(data));
                     WritableByteChannel writableChannel = tempObject.getWritableByteChannel()) {
             write(readableChannel, writableChannel, 0L, contentLength);
+            T temp = tempObject.toObject();
             final T object = objectService.moveTempObject(request.getAccount(),
-                                                            tempObject.toObject(),
+                                                            temp,
                                                             container,
                                                             request.getObject() + MANIFEST_EXTENSION);
             final String eTag = objectService.calculateChecksum(asList(object));
