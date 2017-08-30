@@ -30,6 +30,8 @@ import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
 import static javax.ws.rs.core.Response.Status.CREATED;
 import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 import static javax.ws.rs.core.Response.Status.NO_CONTENT;
+import static org.mindrot.jbcrypt.BCrypt.gensalt;
+import static org.mindrot.jbcrypt.BCrypt.hashpw;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -277,7 +279,8 @@ public class AuthenticationController {
         final String              username  = (String) map.get("name");
         final String              email     = (String) map.get("email");
 
-        final User   user   = new User(username, password, email, projectId, Role.None, true);
+        String hash = hashpw(password, gensalt(12));
+        final User   user   = new User(username, hash, email, projectId, Role.None, true);
         final String id     = keystoneService.createUser(user);
         final Domain domain = keystoneService.getDomain();
 
