@@ -116,6 +116,32 @@
         <exclude>META-INF/DEPENDENCIES</exclude>
         <exclude>META-INF/maven</exclude>
         <exclude>META-INF/maven/**</exclude>
+        <exclude>org/jboss/resteasy/api/validation/**</exclude>
+        <exclude>org/jboss/resteasy/plugins/providers/validation/**</exclude>
+        <exclude>org/jboss/resteasy/plugins/providers/DataSourceProvider**</exclude>
+        <exclude>org/jboss/resteasy/plugins/providers/IIOImageProvider**</exclude>
+        <exclude>org/jboss/resteasy/plugins/providers/DocumentProvider**</exclude>
+        <exclude>org/jboss/resteasy/plugins/providers/FileProvider**</exclude>
+        <exclude>org/jboss/resteasy/plugins/providers/SourceProvider**</exclude>
+        <exclude>org/jboss/resteasy/spi/touri/**</exclude>
+        <exclude>io/undertow/server/handlers/proxy/mod_cluster/**</exclude>
+        <exclude>io/undertow/server/handlers/sse/**</exclude>
+        <exclude>io/undertow/server/protocol/ajp/**</exclude>
+        <exclude>io/undertow/server/protocol/http2/**</exclude>
+        <exclude>io/undertow/servlet/websockets/**</exclude>
+        <exclude>io/undertow/websockets/**</exclude>
+        <exclude>io/undertow/client/http2/**</exclude>
+        <exclude>io/undertow/protocols/alpn/**</exclude>
+        <exclude>io/undertow/security/impl/**</exclude>
+        <exclude>io/undertow/server/handlers/JDBCLogHandler**</exclude>
+        <exclude>org/pmw/tinylog/writers/JdbcWriter**</exclude>
+        <exclude>org/sqlite/native/FreeBSD/**</exclude>
+        <exclude>org/sqlite/native/Linux/aarch64/**</exclude>
+        <exclude>org/sqlite/native/Linux/android-arm/**</exclude>
+        <exclude>org/sqlite/native/Linux/arm/**</exclude>
+        <exclude>org/sqlite/native/Linux/armv6/**</exclude>
+        <exclude>org/sqlite/native/Linux/armv7/**</exclude>
+        <exclude>org/sqlite/native/Linux/ppc64/**</exclude>
        </excludes>
       </filter>
      </filters>
