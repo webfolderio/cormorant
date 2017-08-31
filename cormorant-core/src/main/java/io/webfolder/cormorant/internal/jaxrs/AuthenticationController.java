@@ -362,15 +362,15 @@ public class AuthenticationController {
         final ResponseBuilder builder = status(CREATED);
         String response = authTemplateV3;
 
-        response = response.replace("__KEYSTONE_URL__"     , uriInfo.getBaseUri().toString());
-        response = response.replace("__OBJECT_STORE_URL__" , uriInfo.getBaseUri().toString() + "v1/" + accountName);
-        response = response.replace("__EXPIRES_AT__"       , expires.toString());
-        response = response.replace("__USER_ID__"          , authUsername);
-        response = response.replace("__USER__"             , authUsername);
-        response = response.replace("__ROLE__"             , keystoneService.getRole(authUsername).toString());
-        response = response.replace("__ROLE_ID__"          , keystoneService.getRole(authUsername).toString());
-        response = response.replace("__AUDIT_ID__"         , auditId);
-        response = response.replace("__ISSUED_AT__"        , now().toString());
+        response = response.replace("__KEYSTONE_URL__"    , uriInfo.getBaseUri().toString());
+        response = response.replace("__OBJECT_STORE_URL__", uriInfo.getBaseUri().toString() + "v1/" + accountName);
+        response = response.replace("__EXPIRES_AT__"      , expires.toString());
+        response = response.replace("__USER_ID__"         , authUsername);
+        response = response.replace("__USER__"            , authUsername);
+        response = response.replace("__ROLE__"            , keystoneService.getRole(authUsername).toString());
+        response = response.replace("__ROLE_ID__"         , keystoneService.getRole(authUsername).toString());
+        response = response.replace("__AUDIT_ID__"        , auditId);
+        response = response.replace("__ISSUED_AT__"       , now().toString());
 
         return builder
                     .type(APPLICATION_JSON)

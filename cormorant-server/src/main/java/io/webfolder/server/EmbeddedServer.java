@@ -20,9 +20,9 @@ package io.webfolder.server;
 import static java.lang.System.err;
 import static java.lang.System.exit;
 import static java.lang.System.out;
-import static java.nio.file.Paths.get;
 import static java.util.Collections.emptyList;
-import static picocli.CommandLine.Help.Ansi.AUTO;
+import static io.webfolder.server.picocli.CommandLine.Help.Ansi.AUTO;
+import static java.nio.file.Paths.get;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -31,8 +31,8 @@ import io.webfolder.server.command.Cormorant;
 import io.webfolder.server.command.ExitCodes;
 import io.webfolder.server.command.Help;
 import io.webfolder.server.command.Start;
-import picocli.CommandLine;
-import picocli.CommandLine.ParameterException;
+import io.webfolder.server.picocli.CommandLine;
+import io.webfolder.server.picocli.CommandLine.ParameterException;
 
 public class EmbeddedServer implements ExitCodes {
 

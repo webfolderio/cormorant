@@ -18,12 +18,12 @@
 package io.webfolder.server.command;
 
 import static java.lang.System.out;
-import static picocli.CommandLine.usage;
+import static io.webfolder.server.picocli.CommandLine.usage;
 
 import java.io.PrintStream;
 
-import picocli.CommandLine.Command;
-import picocli.CommandLine.Option;
+import io.webfolder.server.picocli.CommandLine.Command;
+import io.webfolder.server.picocli.CommandLine.Option;
 
 @Command(
     name = "help",

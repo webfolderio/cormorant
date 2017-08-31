@@ -19,6 +19,5 @@ package io.webfolder.cormorant.api.model;
 
 public enum Role {
     Admin,
-    Member,
     None
 }
