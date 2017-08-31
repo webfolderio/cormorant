@@ -13,11 +13,11 @@
    See the License for the specific language governing permissions and
    limitations under the License.
  */
-package io.webfolder.server.picocli;
+package io.webfolder.server;
 
-import static io.webfolder.server.picocli.CommandLine.Help.Column.Overflow.SPAN;
-import static io.webfolder.server.picocli.CommandLine.Help.Column.Overflow.TRUNCATE;
-import static io.webfolder.server.picocli.CommandLine.Help.Column.Overflow.WRAP;
+import static io.webfolder.server.CommandLine.Help.Column.Overflow.SPAN;
+import static io.webfolder.server.CommandLine.Help.Column.Overflow.TRUNCATE;
+import static io.webfolder.server.CommandLine.Help.Column.Overflow.WRAP;
 import static java.util.Locale.ENGLISH;
 
 import java.io.File;
@@ -61,9 +61,9 @@ import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.regex.Pattern;
 
-import io.webfolder.server.picocli.CommandLine.Help.Ansi.IStyle;
-import io.webfolder.server.picocli.CommandLine.Help.Ansi.Style;
-import io.webfolder.server.picocli.CommandLine.Help.Ansi.Text;
+import io.webfolder.server.CommandLine.Help.Ansi.IStyle;
+import io.webfolder.server.CommandLine.Help.Ansi.Style;
+import io.webfolder.server.CommandLine.Help.Ansi.Text;
 
 /**
  * <p>
@@ -4105,6 +4105,18 @@ public class CommandLine {
         private static final long serialVersionUID = -6050931703233083760L;
         public MissingTypeConverterException(String msg) {
             super(msg);
+        }
+    }
+
+    public static class Point {
+
+        public int y;
+
+        public int x;
+
+        public Point(int x, int y) {
+            this.x = x;
+            this.y = y;
         }
     }
 }

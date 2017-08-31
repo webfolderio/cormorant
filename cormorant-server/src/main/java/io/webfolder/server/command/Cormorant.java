@@ -17,8 +17,8 @@
  */
 package io.webfolder.server.command;
 
-import io.webfolder.server.picocli.CommandLine.Command;
-import io.webfolder.server.picocli.CommandLine.Option;
+import io.webfolder.server.CommandLine.Command;
+import io.webfolder.server.CommandLine.Option;
 
 @Command(
     version     = "1.0.0",

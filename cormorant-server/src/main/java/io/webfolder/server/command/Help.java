@@ -17,13 +17,13 @@
  */
 package io.webfolder.server.command;
 
+import static io.webfolder.server.CommandLine.usage;
 import static java.lang.System.out;
-import static io.webfolder.server.picocli.CommandLine.usage;
 
 import java.io.PrintStream;
 
-import io.webfolder.server.picocli.CommandLine.Command;
-import io.webfolder.server.picocli.CommandLine.Option;
+import io.webfolder.server.CommandLine.Command;
+import io.webfolder.server.CommandLine.Option;
 
 @Command(
     name = "help",
