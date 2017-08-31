@@ -21,6 +21,7 @@ import static io.webfolder.cormorant.api.metadata.CacheNames.ACCOUNT;
 import static io.webfolder.cormorant.api.metadata.CacheNames.CONTAINER;
 import static io.webfolder.cormorant.api.metadata.CacheNames.OBJECT;
 import static io.webfolder.cormorant.api.metadata.CacheNames.OBJECT_SYS;
+import static java.util.Collections.unmodifiableSet;
 import static java.util.concurrent.TimeUnit.DAYS;
 import static net.jodah.expiringmap.ExpirationPolicy.CREATED;
 import static net.jodah.expiringmap.ExpiringMap.builder;
@@ -58,6 +59,10 @@ public class CormorantApplication extends Application {
 
     private final CormorantConfiguration configuration;
 
+    private Set<Object> singletons;
+
+    private Set<Class<?>> classes;
+
     public CormorantApplication(
                 final CormorantConfiguration configuration,
                 final AccountService         accountService,
@@ -65,11 +70,11 @@ public class CormorantApplication extends Application {
         this.configuration   = configuration;
         this.accountService  = accountService;
         this.keystoneService = keystoneService;
+        init();
     }
 
-    @Override
-    public Set<Object> getSingletons() {
-        final Set<Object> singletons = new HashSet<>();
+    protected void init() {
+        singletons = new HashSet<>();
 
         final MetadataServiceFactory metadataServiceFactory = new DefaultMetadataServiceFactory(configuration.getMetadataStore(), configuration.getStorage());
 
@@ -111,8 +116,20 @@ public class CormorantApplication extends Application {
                                                     objectMetadataService,
                                                     systemMetadataService));
 
-        singletons.add(new FaviconController());
+        singletons = unmodifiableSet(singletons);
 
+        classes = new HashSet<>();
+        classes.add(FaviconController.class);
+
+        classes = unmodifiableSet(classes);
+    }
+
+    @Override
+    public Set<Object> getSingletons() {
         return singletons;
+    }
+
+    public Set<Class<?>> getClasses() {
+        return classes;
     }
 }

@@ -42,6 +42,8 @@ public interface Util {
                                                              .withLocale(ENGLISH)
                                                              .withZone(GMT);
 
+    public static final String  MD5_OF_EMPTY_STRING      = "d41d8cd98f00b204e9800998ecf8427e";
+
     public default String removeLeadingSlash(String uri) {
         if (uri == null) {
             return null;

@@ -55,6 +55,7 @@ import io.webfolder.cormorant.api.CormorantConfiguration;
 import io.webfolder.cormorant.api.CormorantConfiguration.Builder;
 import io.webfolder.cormorant.api.CormorantServer;
 import io.webfolder.cormorant.api.fs.PathAccountService;
+import io.webfolder.cormorant.api.fs.PathObjectService;
 import io.webfolder.cormorant.api.model.User;
 import io.webfolder.cormorant.api.service.AccountService;
 import io.webfolder.cormorant.api.service.DefaultKeystoneService;
@@ -215,6 +216,7 @@ public class Start implements ExitCodes {
             .level(logLevel)
             .level(Start.class, INFO)
             .level(CormorantServer.class, INFO)
+            .level(PathObjectService.class, INFO)
             .formatPattern("{{level}|min-size=8} {date} {message}")
         .activate();
     }

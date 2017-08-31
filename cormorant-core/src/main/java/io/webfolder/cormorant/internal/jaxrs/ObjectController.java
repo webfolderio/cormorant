@@ -124,8 +124,6 @@ public class ObjectController<T> implements Util {
 
     private static final String  X_STATIC_LARGE_OBJECT = "X-Static-Large-Object";
 
-    private static final String  MD5_OF_EMPTY_STRING   = "d41d8cd98f00b204e9800998ecf8427e";
-
     private static final int     UNPROCESSABLE_ENTITY  = 422;
 
     private static final int     MAX_MANIFEST_SIZE     = 256 * 1024                ; // 256 KB

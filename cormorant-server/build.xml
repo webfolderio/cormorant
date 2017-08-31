@@ -6,6 +6,7 @@
 		<delete includeemptydirs="true">
 			<fileset dir="target/dist" includes="**/*" />
 		</delete>
+		<mkdir dir="target/dist" />
 	</target>
 
 	<target name="unjar">

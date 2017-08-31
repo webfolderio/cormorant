@@ -71,6 +71,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.webfolder.cormorant.api.Json;
 import io.webfolder.cormorant.api.Util;
 import io.webfolder.cormorant.api.exception.CormorantException;
@@ -78,6 +81,7 @@ import io.webfolder.cormorant.api.model.Segment;
 import io.webfolder.cormorant.api.service.ContainerService;
 import io.webfolder.cormorant.api.service.MetadataService;
 import io.webfolder.cormorant.api.service.ObjectService;
+import io.webfolder.fast.md5.Md5;
 import io.webfolder.otmpfile.SecureTempFile;
 
 public class PathObjectService implements ObjectService<Path>, Util {
@@ -96,15 +100,19 @@ public class PathObjectService implements ObjectService<Path>, Util {
 
     private static final int     BUFFER_SIZE       = 1024 * 256;
 
-    private final Map<String, String> mimeTypes    = loadMimeTypes();
-
     private final Map<Object, String> cache;
 
     private final ContainerService<Path> containerService;
 
     private final MetadataService systemMetadataService;
 
-    private final boolean useSecureTempFile = SUPPORT_O_TMPFILE;
+    private final Logger log                    = LoggerFactory.getLogger(PathObjectService.class);
+
+    private final Map<String, String> mimeTypes = loadMimeTypes();
+
+    private final boolean useSecureTempFile     = SUPPORT_O_TMPFILE;
+
+    private final boolean useFastMd5            = useFastMd5();
 
     public PathObjectService(
                 final ContainerService<Path> containerService,
@@ -116,6 +124,9 @@ public class PathObjectService implements ObjectService<Path>, Util {
                 .expiration(1, DAYS)
                 .maxSize(100_000)
             .build();
+        log.info("==========================================================");
+        log.info("Use secure temp file (O_TMPFILE): {}", useSecureTempFile ? "true" : "false");
+        log.info("Use fast MD5                    : {}", useFastMd5        ? "true" : "false");
     }
 
     @Override
@@ -453,12 +464,19 @@ public class PathObjectService implements ObjectService<Path>, Util {
         if ( cachedHash != null ) {
             return cachedHash;
         }
-        MessageDigest md;
-        try {
-            md = getInstance(MD5_CHECKSUM);
-        } catch (NoSuchAlgorithmException e) {
-            throw new CormorantException(e);
+
+        MessageDigest javaMd5 = null;
+        Md5 fastMd5 = null;
+        if ( ! useFastMd5 ) {
+            try {
+                javaMd5 = getInstance(MD5_CHECKSUM);
+            } catch (NoSuchAlgorithmException e) {
+                throw new CormorantException(e);
+            }
+        } else {
+            fastMd5 = new Md5();
         }
+
         fileId = new StringBuilder();
         for (final Path next : objects) {
             BasicFileAttributes attributes = readAttributes(next, BasicFileAttributes.class, NOFOLLOW_LINKS);
@@ -473,20 +491,41 @@ public class PathObjectService implements ObjectService<Path>, Util {
             fileId.append(attributes.size());
             fileId.append(attributes.lastModifiedTime().toMillis());
 
-            try (InputStream is = newInputStream(open(next, NOFOLLOW_LINKS, READ))) {
-                final byte[] buffer = new byte[BUFFER_SIZE];
-                int read;
-                while((read = is.read(buffer)) > 0) {
-                    md.update(buffer, 0, read);
+            if ( ! useFastMd5 ) {
+                try (InputStream is = newInputStream(open(next, NOFOLLOW_LINKS, READ))) {
+                    final byte[] buffer = new byte[BUFFER_SIZE];
+                    int read;
+                    while((read = is.read(buffer)) > 0) {
+                        javaMd5.update(buffer, 0, read);
+                    }
                 }
+            } else {
+                try (InputStream is = newInputStream(open(next, NOFOLLOW_LINKS, READ))) {
+                    final byte[] buffer = new byte[BUFFER_SIZE];
+                    int read;
+                    while((read = is.read(buffer)) > 0) {
+                        fastMd5.update(buffer, 0, read);
+                    }
+                }                
             }
         }
-        final byte[] hash = md.digest();
+        final byte[] hash =  useFastMd5 ? fastMd5.getHash() : javaMd5.digest();
         final String hashHexValue = format("%032x", new BigInteger(1, hash));
         cache.put(fileId.toString(), hashHexValue);
         return hashHexValue;
     }
 
+    protected boolean useFastMd5() {
+        try {
+            Md5 md5 = new Md5();
+            md5.update(new byte[] { });
+            final String hash = format("%032x", new BigInteger(1, md5.getHash()));
+            return MD5_OF_EMPTY_STRING.equals(hash);
+        } catch(Throwable t) {
+        }
+        return false;
+    }
+    
     protected Map<String, String> loadMimeTypes() {
         final Map<String, String> map = new HashMap<>();
         try (BufferedReader reader = new BufferedReader(
