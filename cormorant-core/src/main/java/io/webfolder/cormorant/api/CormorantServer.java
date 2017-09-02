@@ -73,7 +73,7 @@ public class CormorantServer {
 
     private static final long   SHUTDOWN_TIMEOUT     = MINUTES.toSeconds(1);
 
-    private static final Logger LOG                  = getLogger(CormorantServer.class);
+    private final Logger log = getLogger(CormorantServer.class);
 
     private final PathHandler root = new PathHandler();
 
@@ -129,7 +129,7 @@ public class CormorantServer {
             final HttpHandler handler = manager.start();
             root.addPrefixPath(deploymentInfo.getContextPath(), handler);
         } catch (ServletException e) {
-            LOG.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
             throw new CormorantException(e);
         }
 
@@ -205,13 +205,13 @@ public class CormorantServer {
         if (lock != null) {
             if (lock.tryLock()) {
                 try {
-                    LOG.info("Shutting down.");
+                    log.info("cormorant server is shutting down.");
                     if ( gracefulHandler != null ) {
                         try {
                             gracefulHandler.shutdown();
                             gracefulHandler.awaitShutdown(SHUTDOWN_TIMEOUT);
                         } catch (InterruptedException e) {
-                            LOG.error(e.getMessage(), e);
+                            log.error(e.getMessage(), e);
                         } finally {
                             gracefulHandler = null;
                         }
@@ -229,6 +229,7 @@ public class CormorantServer {
                         server = null;
                     }
                     accessLogExecutor.shutdown();
+                    log.info("Server terminated successfully.");
                 } finally {
                     lock.unlock();
                     lock = null;

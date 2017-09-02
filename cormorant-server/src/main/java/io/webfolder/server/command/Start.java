@@ -22,24 +22,45 @@ import static io.webfolder.cormorant.api.model.Role.Admin;
 import static io.webfolder.server.command.LogAppender.Console;
 import static io.webfolder.server.command.LogAppender.File;
 import static java.lang.Integer.MAX_VALUE;
+import static java.lang.Integer.parseInt;
 import static java.lang.Long.toHexString;
 import static java.lang.Runtime.getRuntime;
+import static java.lang.String.valueOf;
 import static java.lang.System.exit;
 import static java.lang.System.setProperty;
+import static java.lang.management.ManagementFactory.getRuntimeMXBean;
 import static java.nio.file.Files.createDirectories;
+import static java.nio.file.Files.createFile;
+import static java.nio.file.Files.delete;
 import static java.nio.file.Files.exists;
+import static java.nio.file.Files.isDirectory;
+import static java.nio.file.Files.isReadable;
+import static java.nio.file.Files.isWritable;
+import static java.nio.file.Files.write;
 import static java.nio.file.Paths.get;
+import static java.nio.file.StandardOpenOption.SYNC;
+import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
+import static java.nio.file.StandardOpenOption.WRITE;
 import static java.util.Collections.singletonMap;
+import static java.util.regex.Pattern.compile;
 import static org.mindrot.jbcrypt.BCrypt.gensalt;
 import static org.mindrot.jbcrypt.BCrypt.hashpw;
 import static org.pmw.tinylog.Configurator.defaultConfig;
 import static org.pmw.tinylog.Level.ERROR;
 import static org.pmw.tinylog.Level.INFO;
+import static org.pmw.tinylog.Level.WARNING;
 import static org.slf4j.LoggerFactory.getLogger;
+import static org.xnio.OptionMap.EMPTY;
+import static org.xnio.Xnio.getInstance;
 
 import java.io.IOException;
+import java.lang.management.RuntimeMXBean;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.file.Path;
 import java.security.SecureRandom;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.pmw.tinylog.Level;
 import org.pmw.tinylog.labelers.TimestampLabeler;
@@ -49,6 +70,8 @@ import org.pmw.tinylog.writers.ConsoleWriter;
 import org.pmw.tinylog.writers.RollingFileWriter;
 import org.pmw.tinylog.writers.Writer;
 import org.slf4j.Logger;
+import org.xnio.FileSystemWatcher;
+import org.xnio.Xnio;
 
 import io.webfolder.cormorant.api.CormorantApplication;
 import io.webfolder.cormorant.api.CormorantConfiguration;
@@ -60,9 +83,9 @@ import io.webfolder.cormorant.api.model.User;
 import io.webfolder.cormorant.api.service.AccountService;
 import io.webfolder.cormorant.api.service.DefaultKeystoneService;
 import io.webfolder.cormorant.api.service.KeystoneService;
-import io.webfolder.server.EmbeddedServer;
 import io.webfolder.server.CommandLine.Command;
 import io.webfolder.server.CommandLine.Option;
+import io.webfolder.server.EmbeddedServer;
 
 @Command(
     name = "start",
@@ -72,16 +95,18 @@ import io.webfolder.server.CommandLine.Option;
 )
 public class Start implements ExitCodes {
 
-    @Option(names = { "-h", "--host" }, description = "Server host.", paramLabel="<string>")
+    private static final Path DEFAULT_PID_FILE = get("pid").resolve("pid");
+
+    @Option(names = { "-h", "--host" }, description = "Server host.", paramLabel="<ip address>")
     private String host = "0.0.0.0";
 
-    @Option(names = { "-p", "--port" }, description = "Server port.", paramLabel="<int>")
+    @Option(names = { "-p", "--port" }, description = "Server port.", paramLabel="<port number>")
     private int port = 5000;
 
-    @Option(names = { "-s", "--password" }, description = "admin password.", paramLabel = "<string>")
+    @Option(names = { "-s", "--password" }, description = "admin password.", paramLabel = "<bcrypt hash value>")
     private String password;
 
-    @Option(names = { "-l", "--log-level" }, paramLabel = "<string>", description = "Sets log level (DEBUG, INFO, WARNING, ERROR).")
+    @Option(names = { "-l", "--log-level" }, paramLabel = "<string>", description = "Sets log level (DEBUG, INFO, WARNING, ERROR or OFF).")
     private Level logLevel = ERROR;
 
     @Option(names = { "-r", "--log-appender" }, paramLabel ="<string>", description = "Sets log appender. This can be either <Console> or <File>." )
@@ -93,14 +118,17 @@ public class Start implements ExitCodes {
     @Option(names = { "-a", "--access-log-file" }, arity ="1", paramLabel = "<file>", description = "Writes http access log records to file.")
     private Path accessLog = get("log").resolve("access.log");
 
-    @Option(names = { "-q", "--disable-access-log-file" }, description = "Turn off access logs.")
+    @Option(names = { "-q", "--disable-access-log" }, description = "Turn off access logs.")
     private boolean disableAccessLog;
 
-    @Option(names = { "-d", "--data-path" }, arity ="1", paramLabel = "<path>", description = "Sets data path.")
+    @Option(names = { "-d", "--data-path" }, arity = "1", paramLabel = "<directory>", description = "Sets data path.")
     private Path data = get("storage").resolve("data");
 
-    @Option(names = { "-m", "--metadata-path" }, arity ="1", paramLabel = "<path>", description = "Sets metadata path.")
+    @Option(names = { "-m", "--metadata-path" }, arity = "1", paramLabel = "<directory>", description = "Sets metadata path.")
     private Path metadata = get("storage").resolve("metadata");
+
+    @Option(names = { "-i", "--pid-file" }, arity = "1", paramLabel = "<file>", description = "Pid file." )
+    private Path pidFile = DEFAULT_PID_FILE;
 
     private final Logger log = getLogger(Start.class);
 
@@ -181,6 +209,9 @@ public class Start implements ExitCodes {
 
         getRuntime().addShutdownHook(thread);
 
+        Path file = createPidFile();
+        watchPidFile(file, server);
+
         String version = EmbeddedServer.class.getPackage().getImplementationVersion();
 
         log.info("==========================================================");
@@ -195,7 +226,94 @@ public class Start implements ExitCodes {
         log.info("Auth V2  : http://{}:{}/v2.0", new Object[] { server.getHost(), server.getPort() });
         log.info("Auth V3  : http://{}:{}/v3", new Object[] { server.getHost(), server.getPort() });
         log.info("----------------------------------------------------------");
+        log.info("pid file : {}", pidFile.toAbsolutePath());
+        log.info("==========================================================");
     }
+
+    protected void watchPidFile(Path file, CormorantServer server) {
+        if ( file == null   ||
+             ! exists(file) ||
+             ! isReadable(file) ) {
+            return;
+        }
+        Path path = file.getParent();
+        if (isDirectory(path)) {
+            FileSystemWatcher watcher = getInstance().createFileSystemWatcher("cormorant-pid-watcher", EMPTY);
+            watcher.watchPath(path.toFile(), new PidWatcher(file, server));
+        }
+    }
+
+    protected Path createPidFile() {
+        Path path = null;
+        Path file = null;
+        if (DEFAULT_PID_FILE.equals(this.pidFile)) {
+            URL location = Stop.class.getProtectionDomain().getCodeSource().getLocation();
+            Path pwd = null;
+            try {
+                pwd = get(location.toURI());
+            } catch (URISyntaxException e) {
+                log.warn(e.getMessage());
+            }
+            path = pwd.getParent().resolve("pid");
+            file = path.resolve("pid");
+            if ( path != null && ! exists(path) ) {
+                try {
+                    createDirectories(path);
+                } catch (IOException e) {
+                    log.warn(e.getMessage());
+                }
+            }
+        } else {
+            path = this.pidFile.getParent();
+            file = this.pidFile;
+        }
+        if ( exists(path) && isDirectory(path) ) {
+            if ( file != null && exists(file) ) {
+                try {
+                    delete(file);
+                } catch (IOException e) {
+                    log.warn(e.getMessage());
+                }
+            }
+            if ( ! exists(file) ) {
+                try {
+                    file = createFile(file);
+                } catch (IOException e) {
+                    log.warn(e.getMessage());
+                }
+            }
+        } else {
+            log.error("Unable to create pid file. Directory does not exist: " + path);
+            exit(PID_FILE_NOT_FOUND);
+        }
+        if ( file != null && exists(file) && isWritable(file) ) {
+            RuntimeMXBean rtb = getRuntimeMXBean();
+            String processName = rtb.getName();
+            Integer pid = parsePid(processName);
+            if (pid.intValue() > 0) {
+                try {
+                    write(file, valueOf(pid).getBytes(), TRUNCATE_EXISTING, WRITE, SYNC);
+                    return file;
+                } catch (IOException e) {
+                    log.warn(e.getMessage());
+                }
+            }
+        } else {
+            log.error("Permission denied. Unable to create pid file: " + file);
+            exit(UNABLE_TO_WRITE_PID_FILE);
+        }
+        return null;
+    }
+
+    protected static Integer parsePid(String processName) {
+        Integer result = null;
+        Pattern pattern = compile("^([0-9]+)@.+$", Pattern.CASE_INSENSITIVE);
+        Matcher matcher = pattern.matcher(processName);
+        if (matcher.matches()) {
+            result = new Integer(parseInt(matcher.group(1)));
+        }
+        return result;
+     }
 
     protected void initLogger() {
         setProperty("org.jboss.logging.provider", "slf4j");
@@ -217,6 +335,9 @@ public class Start implements ExitCodes {
             .level(Start.class, INFO)
             .level(CormorantServer.class, INFO)
             .level(PathObjectService.class, INFO)
+            .level(EmbeddedServer.class, WARNING)
+            .level(Start.class.getPackage(), WARNING)
+            .level(Xnio.class.getPackage(), WARNING)
             .formatPattern("{{level}|min-size=8} {date} {message}")
         .activate();
     }

@@ -32,6 +32,7 @@ import io.webfolder.server.command.Cormorant;
 import io.webfolder.server.command.ExitCodes;
 import io.webfolder.server.command.Help;
 import io.webfolder.server.command.Start;
+import io.webfolder.server.command.Stop;
 
 public class EmbeddedServer implements ExitCodes {
 
@@ -59,6 +60,8 @@ public class EmbeddedServer implements ExitCodes {
                 ((Start) command).start();
             } else if (Help.class.equals(command.getClass())) {
                 ((Help) command).help();
+            } else if (Stop.class.equals(command.getClass())) {
+                ((Stop) command).stop();
             }
         } else {
             commandLine.usage(err, AUTO);

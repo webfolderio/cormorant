@@ -18,8 +18,17 @@
 package io.webfolder.server.command;
 
 public interface ExitCodes {
+
     static final int INVALID_ARG                      = -1;
     static final int CAN_NOT_CREATE_DATA_FOLDER       = -1000 - 1;
     static final int CAN_NOT_CREATE_METADATA_FOLDER   = -1000 - 2;
     static final int CAN_NOT_CREATE_ACCESS_LOG_FOLDER = -1000 - 3;
+
+    static final int INVALID_PATH                     = -2000 - 1;
+    static final int PID_FILE_NOT_FOUND               = -2000 - 2;
+    static final int IO_ERROR                         = -2000 - 3;
+    static final int UNABLE_TO_READ_PID_FILE          = -2000 - 4;
+    static final int UNABLE_TO_WRITE_PID_FILE         = -2000 - 5;
+    static final int INTERRUPTED                      = -2000 - 6;
+    static final int INVALID_PID_FILE                 = -2000 - 7;
 }

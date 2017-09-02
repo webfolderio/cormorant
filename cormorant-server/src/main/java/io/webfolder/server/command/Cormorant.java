@@ -28,7 +28,8 @@ import io.webfolder.server.CommandLine.Option;
     description = "cormorant is an object storage server released under AGPL.",
     subcommands = {
                     Start.class,
-                    Help.class
+                    Help.class,
+                    Stop.class
                 },
     showDefaultValues = true
 )
