@@ -17,7 +17,7 @@
  */
 package io.webfolder.server.command;
 
-import static io.webfolder.server.command.PidWatcher.STOP;
+import static io.webfolder.server.command.PidFileWatcher.STOP;
 import static java.lang.Integer.parseInt;
 import static java.lang.System.exit;
 import static java.lang.System.setProperty;

@@ -465,63 +465,67 @@ public class PathObjectService implements ObjectService<Path>, Util {
             return cachedHash;
         }
 
-        MessageDigest javaMd5 = null;
-        Md5 fastMd5 = null;
-        if ( ! useFastMd5 ) {
+        boolean useNativeMd5 = useFastMd5 && objects.size() == 1;
+
+        String hashHexValue = null;
+
+        if (useNativeMd5) {
+            hashHexValue = Md5.generate(objects.get(0).toAbsolutePath().toString());
+        }
+
+        if (hashHexValue == null) {
+            MessageDigest digest = null;
             try {
-                javaMd5 = getInstance(MD5_CHECKSUM);
+                digest = getInstance(MD5_CHECKSUM);
             } catch (NoSuchAlgorithmException e) {
                 throw new CormorantException(e);
             }
-        } else {
-            fastMd5 = new Md5();
-        }
+            fileId = new StringBuilder();
+            for (final Path next : objects) {
+                BasicFileAttributes attributes = readAttributes(next, BasicFileAttributes.class, NOFOLLOW_LINKS);
+                String pathId = next.toString();
+                Object fileKey = attributes.fileKey();
+                if ( fileKey != null ) {
+                    fileId.append(fileKey.toString());
+                } else {
+                    fileId.append(next.toString());
+                }
+                fileId.append(pathId);
+                fileId.append(attributes.size());
+                fileId.append(attributes.lastModifiedTime().toMillis());
 
-        fileId = new StringBuilder();
-        for (final Path next : objects) {
-            BasicFileAttributes attributes = readAttributes(next, BasicFileAttributes.class, NOFOLLOW_LINKS);
-            String pathId = next.toString();
-            Object fileKey = attributes.fileKey();
-            if ( fileKey != null ) {
-                fileId.append(fileKey.toString());
-            } else {
-                fileId.append(next.toString());
-            }
-            fileId.append(pathId);
-            fileId.append(attributes.size());
-            fileId.append(attributes.lastModifiedTime().toMillis());
-
-            if ( ! useFastMd5 ) {
                 try (InputStream is = newInputStream(open(next, NOFOLLOW_LINKS, READ))) {
                     final byte[] buffer = new byte[BUFFER_SIZE];
                     int read;
                     while((read = is.read(buffer)) > 0) {
-                        javaMd5.update(buffer, 0, read);
+                        digest.update(buffer, 0, read);
                     }
                 }
-            } else {
-                try (InputStream is = newInputStream(open(next, NOFOLLOW_LINKS, READ))) {
-                    final byte[] buffer = new byte[BUFFER_SIZE];
-                    int read;
-                    while((read = is.read(buffer)) > 0) {
-                        fastMd5.update(buffer, 0, read);
-                    }
-                }                
             }
+            final byte[] hash =  digest.digest();
+            hashHexValue = format("%032x", new BigInteger(1, hash));            
         }
-        final byte[] hash =  useFastMd5 ? fastMd5.getHash() : javaMd5.digest();
-        final String hashHexValue = format("%032x", new BigInteger(1, hash));
-        cache.put(fileId.toString(), hashHexValue);
+
+        cache.put(fileId.toString(), hashHexValue.toLowerCase(ENGLISH));
         return hashHexValue;
     }
 
     protected boolean useFastMd5() {
+        Path tempFile = null;
         try {
-            Md5 md5 = new Md5();
-            md5.update(new byte[] { });
-            final String hash = format("%032x", new BigInteger(1, md5.getHash()));
+            tempFile = createTempFile("cormorant", "tmp").toAbsolutePath();
+            String hash = Md5.generate(tempFile.toString());
             return MD5_OF_EMPTY_STRING.equals(hash);
         } catch(Throwable t) {
+            // ignored
+        } finally {
+            if ( tempFile != null ) {
+                try {
+                    Files.delete(tempFile);
+                } catch (IOException e) {
+                    // ignored
+                }
+            }
         }
         return false;
     }

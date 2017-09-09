@@ -239,7 +239,7 @@ public class Start implements ExitCodes {
         Path path = file.getParent();
         if (isDirectory(path)) {
             FileSystemWatcher watcher = getInstance().createFileSystemWatcher("cormorant-pid-watcher", EMPTY);
-            watcher.watchPath(path.toFile(), new PidWatcher(file, server));
+            watcher.watchPath(path.toFile(), new PidFileWatcher(file, server));
         }
     }
 

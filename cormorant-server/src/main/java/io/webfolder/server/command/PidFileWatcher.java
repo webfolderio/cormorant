@@ -36,9 +36,9 @@ import org.xnio.FileChangeEvent;
 import io.webfolder.cormorant.api.CormorantServer;
 import static java.nio.file.Files.exists;
 
-public class PidWatcher implements FileChangeCallback {
+public class PidFileWatcher implements FileChangeCallback {
 
-    private final Logger log = LoggerFactory.getLogger(PidWatcher.class);
+    private final Logger log = LoggerFactory.getLogger(PidFileWatcher.class);
 
     private final Path file;
 
@@ -48,7 +48,7 @@ public class PidWatcher implements FileChangeCallback {
 
     public static String STOP = "stop";
 
-    public PidWatcher(Path file, CormorantServer server) {
+    public PidFileWatcher(Path file, CormorantServer server) {
         this.file = file;
         this.server = server;
         try {
