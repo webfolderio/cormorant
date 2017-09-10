@@ -473,6 +473,10 @@ public class PathObjectService implements ObjectService<Path>, Util {
             hashHexValue = Md5.generate(objects.get(0).toAbsolutePath().toString());
         }
 
+        // Fallback to use MessageDigest if we could'nt calculate the hash.
+        // On Windows platform CreateFileW() might return ERROR_SHARING_VIOLATION
+        // https://support.microsoft.com/en-us/help/316609/prb-error-sharing-violation-error-message-when-the-createfile-function
+
         if (hashHexValue == null) {
             MessageDigest digest = null;
             try {
@@ -503,7 +507,7 @@ public class PathObjectService implements ObjectService<Path>, Util {
                 }
             }
             final byte[] hash =  digest.digest();
-            hashHexValue = format("%032x", new BigInteger(1, hash));            
+            hashHexValue = format("%032x", new BigInteger(1, hash));
         }
 
         cache.put(fileId.toString(), hashHexValue.toLowerCase(ENGLISH));

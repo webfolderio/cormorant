@@ -1220,6 +1220,7 @@ public class ObjectController<T> implements Util {
                                                             container,
                                                             request.getObject() + MANIFEST_EXTENSION);
             final String eTag = objectService.calculateChecksum(asList(object));
+            objectService.deleteTempObject(request.getContainer(), container, temp);
             response.setETag("\"" + eTag + "\"");
             response.setContentType(APPLICATION_JSON);
             response.setLastModified(valueOf(objectService.getLastModified(object)));
