@@ -1040,7 +1040,7 @@ public class ObjectController<T> implements Util {
             targetObject = directory;
         } else {
             if ( ! copy ) {
-                targetObject = objectService.moveTempObject(request.getAccount(), sourceObject, targetContainer, request.getObject());
+                targetObject = objectService.moveObject(request.getAccount(), sourceObject, targetContainer, request.getObject());
             } else {
                 targetObject = objectService.copyObject(request.getAccount(),
                                                         targetContainer,
@@ -1215,12 +1215,11 @@ public class ObjectController<T> implements Util {
                     WritableByteChannel writableChannel = tempObject.getWritableByteChannel()) {
             write(readableChannel, writableChannel, 0L, contentLength);
             T temp = tempObject.toObject();
-            final T object = objectService.moveTempObject(request.getAccount(),
+            final T object = objectService.moveObject(request.getAccount(),
                                                             temp,
                                                             container,
                                                             request.getObject() + MANIFEST_EXTENSION);
             final String eTag = objectService.calculateChecksum(asList(object));
-            objectService.deleteTempObject(request.getContainer(), container, temp);
             response.setETag("\"" + eTag + "\"");
             response.setContentType(APPLICATION_JSON);
             response.setLastModified(valueOf(objectService.getLastModified(object)));

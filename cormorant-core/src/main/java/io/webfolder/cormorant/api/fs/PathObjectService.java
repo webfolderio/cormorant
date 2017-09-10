@@ -151,17 +151,17 @@ public class PathObjectService implements ObjectService<Path>, Util {
     }
 
     @Override
-    public Path moveTempObject(
+    public Path moveObject(
                 final String accountName,
-                final Path   tempObject,
+                final Path   sourceObject,
                 final Path   targetContainer,
-                final String targetObjectPath) throws IOException, SQLException {
-        final Path target       = targetContainer.resolve(targetObjectPath).toAbsolutePath().normalize();
+                final String targetObject) throws IOException, SQLException {
+        final Path target       = targetContainer.resolve(targetObject).toAbsolutePath().normalize();
         final Path targetParent = target.getParent();
         if ( ! exists(targetParent, NOFOLLOW_LINKS) ) {
             createDirectories(targetParent);
         }
-        return move(tempObject, target, ATOMIC_MOVE);
+        return move(sourceObject, target, ATOMIC_MOVE);
     }
 
     @Override
@@ -473,8 +473,8 @@ public class PathObjectService implements ObjectService<Path>, Util {
             hashHexValue = Md5.generate(objects.get(0).toAbsolutePath().toString());
         }
 
-        // Fallback to use MessageDigest if we could'nt calculate the hash.
-        // On Windows platform CreateFileW() might return ERROR_SHARING_VIOLATION
+        // Use MessageDigest if we couldn't calculate the hash.
+        // On Windows platform CreateFileW() might return ERROR_SHARING_VIOLATION.
         // https://support.microsoft.com/en-us/help/316609/prb-error-sharing-violation-error-message-when-the-createfile-function
 
         if (hashHexValue == null) {

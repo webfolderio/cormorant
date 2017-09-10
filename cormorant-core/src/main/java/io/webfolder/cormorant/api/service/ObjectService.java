@@ -38,7 +38,7 @@ public interface ObjectService<T> {
 
     void deleteTempObject(String accountName, T container, T tempObject) throws IOException, SQLException;
 
-    T moveTempObject(String accountName, T tempObject, T targetContainer, String targetObjectPath) throws IOException, SQLException;
+    T moveObject(String accountName, T tempObject, T targetContainer, String targetObject) throws IOException, SQLException;
 
     long getSize(T object) throws IOException, SQLException;
 
