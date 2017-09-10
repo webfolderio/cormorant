@@ -63,7 +63,7 @@ jobs:
 
       - run:
           name: Install refstack
-          command: bash refstack-client/setup_env -t -t tags/16.1.0
+          command: bash refstack-client/setup_env -t tags/16.1.0
 
       - run:
           name: Install ncw/swift
