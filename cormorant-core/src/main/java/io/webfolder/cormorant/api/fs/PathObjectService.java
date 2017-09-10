@@ -473,10 +473,6 @@ public class PathObjectService implements ObjectService<Path>, Util {
             hashHexValue = Md5.generate(objects.get(0).toAbsolutePath().toString());
         }
 
-        // Use MessageDigest if we couldn't calculate the hash.
-        // On Windows platform CreateFileW() might return ERROR_SHARING_VIOLATION.
-        // https://support.microsoft.com/en-us/help/316609/prb-error-sharing-violation-error-message-when-the-createfile-function
-
         if (hashHexValue == null) {
             MessageDigest digest = null;
             try {
@@ -521,7 +517,9 @@ public class PathObjectService implements ObjectService<Path>, Util {
             String hash = Md5.generate(tempFile.toString());
             return MD5_OF_EMPTY_STRING.equals(hash);
         } catch(Throwable t) {
-            // ignored
+            log.warn("Unable to load fast-md5 library. {}", new Object[] {
+                t.getMessage()
+            });
         } finally {
             if ( tempFile != null ) {
                 try {
