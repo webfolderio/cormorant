@@ -338,6 +338,7 @@ public class Start implements ExitCodes {
             .level(EmbeddedServer.class, WARNING)
             .level(Start.class.getPackage(), WARNING)
             .level(Xnio.class.getPackage(), WARNING)
+            .level(PathObjectService.class, WARNING)
             .formatPattern("{{level}|min-size=8} {date} {message}")
         .activate();
     }
