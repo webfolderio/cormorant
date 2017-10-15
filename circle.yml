@@ -167,6 +167,9 @@ jobs:
             ./refstack-client/refstack-client test -c tempest.conf -- '(\btempest.api.object_storage.test_object_temp_url.ObjectTempUrlTest.test_head_object_using_temp_url\b)'
             ./refstack-client/refstack-client test -c tempest.conf -- '(\btempest.api.object_storage.test_object_temp_url.ObjectTempUrlTest.test_put_object_using_temp_url\b)'
             cd swift
+            echo SWIFT_API_USER
+            echo SWIFT_API_KEY
+            echo SWIFT_AUTH_URL
             go test -run "(TestTransport)"
             go test -run "(TestV1V2Authenticate)"
             go test -run "(TestV3AuthenticateWithDomainNameAndTenantId)"
