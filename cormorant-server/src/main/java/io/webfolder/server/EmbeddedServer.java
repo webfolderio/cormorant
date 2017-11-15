@@ -17,22 +17,23 @@
  */
 package io.webfolder.server;
 
-import static io.webfolder.server.CommandLine.Help.Ansi.AUTO;
 import static java.lang.System.err;
 import static java.lang.System.exit;
 import static java.lang.System.out;
-import static java.util.Collections.emptyList;
 import static java.nio.file.Paths.get;
+import static java.util.Collections.emptyList;
+import static picocli.CommandLine.Help.Ansi.AUTO;
 
 import java.nio.file.Path;
 import java.util.List;
 
-import io.webfolder.server.CommandLine.ParameterException;
 import io.webfolder.server.command.Cormorant;
 import io.webfolder.server.command.ExitCodes;
 import io.webfolder.server.command.Help;
 import io.webfolder.server.command.Start;
 import io.webfolder.server.command.Stop;
+import picocli.CommandLine;
+import picocli.CommandLine.ParameterException;
 
 public class EmbeddedServer implements ExitCodes {
 

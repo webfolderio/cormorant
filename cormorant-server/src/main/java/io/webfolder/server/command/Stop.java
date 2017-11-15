@@ -40,8 +40,8 @@ import java.util.concurrent.CountDownLatch;
 
 import org.pmw.tinylog.writers.ConsoleWriter;
 
-import io.webfolder.server.CommandLine.Command;
-import io.webfolder.server.CommandLine.Option;
+import picocli.CommandLine.Command;
+import picocli.CommandLine.Option;
 
 @Command(
     name = "stop",

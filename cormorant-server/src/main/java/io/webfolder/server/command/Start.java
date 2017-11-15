@@ -83,9 +83,9 @@ import io.webfolder.cormorant.api.model.User;
 import io.webfolder.cormorant.api.service.AccountService;
 import io.webfolder.cormorant.api.service.DefaultKeystoneService;
 import io.webfolder.cormorant.api.service.KeystoneService;
-import io.webfolder.server.CommandLine.Command;
-import io.webfolder.server.CommandLine.Option;
 import io.webfolder.server.EmbeddedServer;
+import picocli.CommandLine.Command;
+import picocli.CommandLine.Option;
 
 @Command(
     name = "start",
