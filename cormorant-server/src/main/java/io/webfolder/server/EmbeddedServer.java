@@ -65,7 +65,7 @@ public class EmbeddedServer implements ExitCodes {
             } else if (Stop.class.equals(command.getClass())) {
                 ((Stop) command).stop();
             } else if (Version.class.equals(command.getClass())) {
-                ((Version) command).version();
+                ((Version) command).version(commandLine);
             }
         } else {
             commandLine.usage(err, AUTO);

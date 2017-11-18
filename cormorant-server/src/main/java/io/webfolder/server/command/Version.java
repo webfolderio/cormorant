@@ -1,6 +1,9 @@
 package io.webfolder.server.command;
 
+import picocli.CommandLine;
 import picocli.CommandLine.Command;
+
+import static java.lang.System.out;
 
 @Command(
     name = "version",
@@ -8,7 +11,7 @@ import picocli.CommandLine.Command;
 )
 public class Version {
 
-    public void version() {
-        System.out.println("1.0.0");
+    public void version(CommandLine commandLine) {
+        commandLine.printVersionHelp(out);
     }
 }
