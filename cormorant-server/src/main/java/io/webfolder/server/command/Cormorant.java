@@ -21,8 +21,8 @@ import picocli.CommandLine.Command;
 
 @Command(
     version     = "1.0.0",
-    header = { "\r\ncormorant is an object storage server released under AGPL.\r\n" },
-    footer      = "\nCopyright 2017 WebFolder OÜ",
+    header      = { "\r\ncormorant is an object storage server released under AGPL.\r\n" },
+    footer      = "\r\nCopyright 2017 WebFolder OÜ",
     name        = "cormorant",
     sortOptions = false,
     customSynopsis = { "cormorant [start|stop|version|help] <arguments>\r\n" },
