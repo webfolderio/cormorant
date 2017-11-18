@@ -31,7 +31,7 @@ import picocli.CommandLine.Parameters;
 )
 public class Help {
 
-    @Parameters(description = "Print command help (Usage: help [start|stop])")
+    @Parameters(description = "Print command help (Usage: help [start|stop|version])")
     private String command;
 
     public void help() {

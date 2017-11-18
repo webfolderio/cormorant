@@ -32,6 +32,7 @@ import io.webfolder.server.command.ExitCodes;
 import io.webfolder.server.command.Help;
 import io.webfolder.server.command.Start;
 import io.webfolder.server.command.Stop;
+import io.webfolder.server.command.Version;
 import picocli.CommandLine;
 import picocli.CommandLine.ParameterException;
 
@@ -63,6 +64,8 @@ public class EmbeddedServer implements ExitCodes {
                 ((Help) command).help();
             } else if (Stop.class.equals(command.getClass())) {
                 ((Stop) command).stop();
+            } else if (Version.class.equals(command.getClass())) {
+                ((Version) command).version();
             }
         } else {
             commandLine.usage(err, AUTO);
