@@ -82,7 +82,7 @@ public class PathAccountService implements AccountService {
         } catch (IOException e) {
             throw new CormorantException(e);
         }
-        return new Long(attributes.creationTime().toMillis());
+        return Long.valueOf(attributes.creationTime().toMillis());
     }
 
     @Override

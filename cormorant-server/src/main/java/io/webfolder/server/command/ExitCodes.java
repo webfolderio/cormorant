@@ -31,4 +31,5 @@ public interface ExitCodes {
     static final int UNABLE_TO_WRITE_PID_FILE         = -2000 - 5;
     static final int INTERRUPTED                      = -2000 - 6;
     static final int INVALID_PID_FILE                 = -2000 - 7;
+    static final int PROCESS_NOT_FOUND                = -2000 - 8;    
 }

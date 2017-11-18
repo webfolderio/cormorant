@@ -23,7 +23,7 @@ import static picocli.CommandLine.usage;
 import java.io.PrintStream;
 
 import picocli.CommandLine.Command;
-import picocli.CommandLine.Option;
+import picocli.CommandLine.Parameters;
 
 @Command(
     name = "help",
@@ -31,7 +31,7 @@ import picocli.CommandLine.Option;
 )
 public class Help {
 
-    @Option(names = { "-c", "--command" }, description = "Print command help (Usage: help -c start)")
+    @Parameters(description = "Print command help (Usage: help [start|stop])")
     private String command;
 
     public void help() {

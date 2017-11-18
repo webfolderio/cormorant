@@ -18,16 +18,20 @@
 package io.webfolder.server.command;
 
 import static io.webfolder.server.command.PidFileWatcher.STOP;
+import static java.io.File.pathSeparator;
 import static java.lang.Integer.parseInt;
 import static java.lang.System.exit;
+import static java.lang.System.getProperty;
 import static java.lang.System.setProperty;
 import static java.nio.charset.Charset.defaultCharset;
 import static java.nio.file.Files.exists;
+import static java.nio.file.Files.isDirectory;
 import static java.nio.file.Files.isWritable;
 import static java.nio.file.Files.readAllBytes;
 import static java.nio.file.Files.setAttribute;
 import static java.nio.file.Files.size;
 import static java.nio.file.Paths.get;
+import static java.util.Locale.ENGLISH;
 import static org.pmw.tinylog.Configurator.defaultConfig;
 import static org.pmw.tinylog.Level.ERROR;
 
@@ -35,9 +39,12 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Iterator;
 import java.util.Timer;
 import java.util.concurrent.CountDownLatch;
 
+import org.jvnet.winp.WinProcess;
 import org.pmw.tinylog.writers.ConsoleWriter;
 
 import picocli.CommandLine.Command;
@@ -54,6 +61,12 @@ public class Stop implements ExitCodes {
     private static final int MAX_PID_FILE_SIZE = 32;
 
     private static final Path DEFAULT_PID_FILE = get("pid").resolve("pid");
+
+    private static final String  OS      = getProperty("os.name").toLowerCase(ENGLISH);
+
+    private static final boolean WINDOWS = ";".equals(pathSeparator);
+
+    private static final boolean LINUX   = "linux".contains(OS);
 
     @Option(names = { "-i", "--pid-file" }, arity = "1", paramLabel = "<file>", description = "Pid file." )
     private Path pidFile = DEFAULT_PID_FILE;
@@ -124,6 +137,25 @@ public class Stop implements ExitCodes {
                     System.err.println("Unable to stop server. Invalid process id: " + processId);
                     exit(INVALID_PID_FILE);
                     return;
+                }
+                if (WINDOWS) {
+                    boolean found = false;
+                    Iterator<WinProcess> iterator = WinProcess.all().iterator();
+                    while (iterator.hasNext()) {
+                        WinProcess winProcess = iterator.next();
+                        found = winProcess.getPid() == processId;
+                    }
+                    if ( ! found ) {
+                        System.err.println("Process is not running.");
+                        exit(PROCESS_NOT_FOUND);
+                    }
+                } else if (LINUX) {
+                    Path pidDir = Paths.get("/proc/" + pid);
+                    boolean found = exists(pidDir) && isDirectory(pidDir);
+                    if ( ! found ) {
+                        System.err.println("Process is not running.");
+                        exit(PROCESS_NOT_FOUND);
+                    }
                 }
                 setAttribute(file, "user:command", defaultCharset().encode(STOP));
                 setAttribute(file, "user:pid", defaultCharset().encode(pid));

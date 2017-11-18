@@ -310,7 +310,7 @@ public class Start implements ExitCodes {
         Pattern pattern = compile("^([0-9]+)@.+$", Pattern.CASE_INSENSITIVE);
         Matcher matcher = pattern.matcher(processName);
         if (matcher.matches()) {
-            result = new Integer(parseInt(matcher.group(1)));
+            result = Integer.valueOf(parseInt(matcher.group(1)));
         }
         return result;
      }

@@ -61,11 +61,11 @@ public class Container implements Comparable<Container> {
     }
 
     public Long getObjectCount() {
-        return new Long(objectCount.get());
+        return Long.valueOf(objectCount.get());
     }
 
     public Long getBytesUsed() {
-        return new Long(bytesUsed.get());
+        return Long.valueOf(bytesUsed.get());
     }
 
     public Long addBytesUsed(final long delta) {
