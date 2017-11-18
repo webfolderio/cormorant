@@ -143,7 +143,10 @@ public class Stop implements ExitCodes {
                     Iterator<WinProcess> iterator = WinProcess.all().iterator();
                     while (iterator.hasNext()) {
                         WinProcess winProcess = iterator.next();
-                        found = winProcess.getPid() == processId;
+                        if (winProcess.getPid() == processId) {
+                            found = true;
+                            break;
+                        }
                     }
                     if ( ! found ) {
                         System.err.println("Process is not running.");
