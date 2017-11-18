@@ -169,7 +169,7 @@ public class Start implements ExitCodes {
                                                     toHexString(new SecureRandom().nextLong()) :
                                                     null;
 
-        String hashPwd = rndPwd != null ? hashpw(rndPwd, gensalt(12)) : password;
+        String hashPwd = rndPwd != null ? hashpw(rndPwd, gensalt(12)) : hashpw(password, gensalt(12));
 
         User admin = new User("admin",
                               hashPwd,
