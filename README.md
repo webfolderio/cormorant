@@ -1,6 +1,6 @@
 ![WebFolder](https://raw.githubusercontent.com/webfolderio/cormorant/master/cormorant.png)
 
-__cormorant__ is an object storage server released under AGPL.
+__cormorant__ is an open source OpenStack Swift compatible object storage server released under AGPL.
 
 [![License](https://img.shields.io/badge/license-AGPL-blue.svg)](https://opensource.org/licenses/AGPL-3.0)
 [![circleci](https://img.shields.io/circleci/project/github/webfolderio/cormorant.svg?label=linux)](https://circleci.com/gh/webfolderio/cormorant)
@@ -52,6 +52,10 @@ cormorant is licensed as [AGPL](https://github.com/webfolderio/cormorant/blob/ma
 
 Buying a license is __mandatory__ as soon as you develop commercial activities distributing the
 cormorant software inside your product or deploying it on a network without disclosing the source code of your own applications under the AGPL license.
+
+### Supported Java Versions
+
+Oracle & OpenJDK Java 8 & 9.
 
 ### Supported Platforms
 cormorant has been tested under Windows and Ubuntu, but should work on any platform where a Java available.
