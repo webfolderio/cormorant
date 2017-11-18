@@ -97,37 +97,37 @@ public class Start implements ExitCodes {
 
     private static final Path DEFAULT_PID_FILE = get("pid").resolve("pid");
 
-    @Option(names = { "-h", "--host" }, description = "Server host.", paramLabel="<ip address>")
+    @Option(names = { "--host" }, description = "Server host.", paramLabel="<ip address>")
     private String host = "0.0.0.0";
 
-    @Option(names = { "-p", "--port" }, description = "Server port.", paramLabel="<port number>")
+    @Option(names = { "--port" }, description = "Server port.", paramLabel="<port number>")
     private int port = 5000;
 
-    @Option(names = { "-s", "--password" }, description = "admin password.", paramLabel = "<bcrypt hash value>")
+    @Option(names = { "--password" }, description = "admin password.", paramLabel = "<bcrypt hash value>")
     private String password;
 
-    @Option(names = { "-l", "--log-level" }, paramLabel = "<string>", description = "Sets log level (DEBUG, INFO, WARNING, ERROR or OFF).")
+    @Option(names = { "--log-level" }, paramLabel = "<string>", description = "Sets log level (DEBUG, INFO, WARNING, ERROR or OFF).")
     private Level logLevel = ERROR;
 
-    @Option(names = { "-r", "--log-appender" }, paramLabel ="<string>", description = "Sets log appender. This can be either <Console> or <File>." )
+    @Option(names = { "--log-appender" }, paramLabel ="<string>", description = "Sets log appender. This can be either <Console> or <File>." )
     private LogAppender logAppender = Console;
 
-    @Option(names = { "-f", "--log-file" }, arity ="1", paramLabel = "<file>", description = "Writes generated log records to file.")
+    @Option(names = { "--log-file" }, arity = "1", paramLabel = "<file>", description = "Writes generated log records to file.")
     private Path logFile = get("log").resolve("cormorant.log");
 
-    @Option(names = { "-a", "--access-log-file" }, arity ="1", paramLabel = "<file>", description = "Writes http access log records to file.")
+    @Option(names = { "--access-log-file" }, arity = "1", paramLabel = "<file>", description = "Writes http access log records to file.")
     private Path accessLog = get("log").resolve("access.log");
 
-    @Option(names = { "-q", "--disable-access-log" }, description = "Turn off access logs.")
+    @Option(names = { "--disable-access-log" }, description = "Turn off access logs.")
     private boolean disableAccessLog;
 
-    @Option(names = { "-d", "--data-path" }, arity = "1", paramLabel = "<directory>", description = "Sets data path.")
+    @Option(names = { "--data-path" }, arity = "1", paramLabel = "<directory>", description = "Sets data path.")
     private Path data = get("storage").resolve("data");
 
-    @Option(names = { "-m", "--metadata-path" }, arity = "1", paramLabel = "<directory>", description = "Sets metadata path.")
+    @Option(names = { "--metadata-path" }, arity = "1", paramLabel = "<directory>", description = "Sets metadata path.")
     private Path metadata = get("storage").resolve("metadata");
 
-    @Option(names = { "-i", "--pid-file" }, arity = "1", paramLabel = "<file>", description = "Pid file." )
+    @Option(names = { "--pid-file" }, arity = "1", paramLabel = "<file>", description = "Pid file." )
     private Path pidFile = DEFAULT_PID_FILE;
 
     private final Logger log = getLogger(Start.class);
