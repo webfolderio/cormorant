@@ -103,7 +103,7 @@ public class Start implements ExitCodes {
     @Option(names = { "--port" }, description = "Server port.", paramLabel="<port number>")
     private int port = 5000;
 
-    @Option(names = { "--password" }, description = "admin password.", paramLabel = "<bcrypt hash value>")
+    @Option(names = { "--password" }, description = "admin password.", paramLabel = "<password>")
     private String password;
 
     @Option(names = { "--log-level" }, paramLabel = "<string>", description = "Sets log level (DEBUG, INFO, WARNING, ERROR or OFF).")
