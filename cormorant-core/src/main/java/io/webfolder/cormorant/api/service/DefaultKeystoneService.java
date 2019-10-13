@@ -46,7 +46,7 @@ public class DefaultKeystoneService implements KeystoneService {
     private final Verifyer verifyer = BCrypt.verifyer();
 
     private final Domain domain;
-    
+
     public DefaultKeystoneService(Map<String, User> users) {
         this(users, new Domain("default", "default"));
     }

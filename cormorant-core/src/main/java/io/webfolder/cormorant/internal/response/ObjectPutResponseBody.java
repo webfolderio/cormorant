@@ -29,7 +29,7 @@ public class ObjectPutResponseBody {
     /**
      * The date and time when the object was last modified.
      *
-     * The date and time stamp format is {@link <a href="https://en.wikipedia.org/wiki/ISO_8601">ISO 8601</a>
+     * The date and time stamp format is @see <a href="https://en.wikipedia.org/wiki/ISO_8601">ISO 8601</a>
      *<p>
      * CCYY-MM-DDThh:mm:ss±hh:mm
      *<p>
@@ -46,7 +46,7 @@ public class ObjectPutResponseBody {
     /**
      * The date and time when the object was last modified.
      *
-     * The date and time stamp format is {@link <a href="https://en.wikipedia.org/wiki/ISO_8601">ISO 8601</a>
+     * The date and time stamp format is @see <a href="https://en.wikipedia.org/wiki/ISO_8601">ISO 8601</a>
      *<p>
      * CCYY-MM-DDThh:mm:ss±hh:mm
      *<p>

@@ -183,7 +183,6 @@ public class ContainerController<T> {
 
     /**
      * Shows container metadata, including the number of objects and the total bytes of all objects stored in the container.
-     * @return 
      */
     @HEAD
     public Response head(@BeanParam final ContainerHeadRequest request) throws IOException, SQLException {
