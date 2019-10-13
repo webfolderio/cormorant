@@ -199,12 +199,6 @@
    <scope>provided</scope>
   </dependency>
   <dependency>
-   <groupId>org.jboss.spec.javax.servlet</groupId>
-   <artifactId>jboss-servlet-api_3.1_spec</artifactId>
-   <version>1.0.2.Final</version>
-   <scope>provided</scope>
-  </dependency>
-  <dependency>
    <groupId>org.jboss.resteasy</groupId>
    <artifactId>resteasy-core</artifactId>
    <version>4.3.1.Final</version>
