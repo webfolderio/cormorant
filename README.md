@@ -1,8 +1,8 @@
 ![WebFolder](https://raw.githubusercontent.com/webfolderio/cormorant/master/cormorant.png)
 
-__cormorant__ is an open source OpenStack Swift compatible object storage server released under AGPL.
+__cormorant__ is an open source OpenStack Swift compatible object storage server released under MIT.
 
-[![License](https://img.shields.io/badge/license-AGPL-blue.svg)](https://opensource.org/licenses/AGPL-3.0)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/webfolderio/cormorant/blob/master/LICENSE)
 [![circleci](https://img.shields.io/circleci/project/github/webfolderio/cormorant.svg?label=linux)](https://circleci.com/gh/webfolderio/cormorant)
 [![AppVeyor](https://img.shields.io/appveyor/ci/WebFolder/cormorant.svg?label=windows)](https://ci.appveyor.com/project/WebFolder/cormorant)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/d6af9f5df82d4568ba29ea6fceb9d605)](https://www.codacy.com/app/WebFolder/cormorant?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=webfolderio/cormorant&amp;utm_campaign=Badge_Grade)
@@ -48,10 +48,7 @@ __Go__
 * [ncw/swift](https://github.com/ncw/swift)
 
 ### License
-cormorant is licensed as [AGPL](https://github.com/webfolderio/cormorant/blob/master/LICENSE) software.
-
-Buying a license is __mandatory__ as soon as you develop commercial activities distributing the
-cormorant software inside your product or deploying it on a network without disclosing the source code of your own applications under the AGPL license.
+cormorant is licensed as [MIT](https://github.com/webfolderio/cormorant/blob/master/LICENSE) software.
 
 ### Supported Java Versions
 
