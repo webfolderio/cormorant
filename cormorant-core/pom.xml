@@ -175,9 +175,9 @@
    <version>1.7.28</version>
   </dependency>
   <dependency>
-   <groupId>org.mindrot</groupId>
-   <artifactId>jbcrypt</artifactId>
-   <version>0.4</version>
+    <groupId>at.favre.lib</groupId>
+    <artifactId>bcrypt</artifactId>
+    <version>0.8.0</version>
   </dependency>
   <dependency>
    <groupId>net.jodah</groupId>

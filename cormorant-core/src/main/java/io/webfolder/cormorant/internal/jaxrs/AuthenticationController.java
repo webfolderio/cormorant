@@ -35,8 +35,6 @@ import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
 import static javax.ws.rs.core.Response.Status.CREATED;
 import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 import static javax.ws.rs.core.Response.Status.NO_CONTENT;
-import static org.mindrot.jbcrypt.BCrypt.gensalt;
-import static org.mindrot.jbcrypt.BCrypt.hashpw;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -65,6 +63,8 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.UriInfo;
 
+import at.favre.lib.crypto.bcrypt.BCrypt;
+import at.favre.lib.crypto.bcrypt.BCrypt.Hasher;
 import io.webfolder.cormorant.api.Json;
 import io.webfolder.cormorant.api.exception.CormorantException;
 import io.webfolder.cormorant.api.model.Domain;
@@ -85,6 +85,10 @@ public class AuthenticationController {
     private static final String X_AUTH_TOKEN             = "X-Auth-Token";
 
     private static final String X_STORAGE_URL            = "X-Storage-Url";
+
+    private final Hasher hasher = BCrypt.withDefaults();
+
+    private final int COST = 12;
 
     private final String infoV2;
 
@@ -284,7 +288,7 @@ public class AuthenticationController {
         final String              username  = (String) map.get("name");
         final String              email     = (String) map.get("email");
 
-        String hash = hashpw(password, gensalt(12));
+        String hash         = hasher.hashToString(COST, password.toCharArray());
         final User   user   = new User(username, hash, email, projectId, Role.None, true);
         final String id     = keystoneService.createUser(user);
         final Domain domain = keystoneService.getDomain();

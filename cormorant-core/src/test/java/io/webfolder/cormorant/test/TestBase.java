@@ -48,7 +48,6 @@ import org.jclouds.openstack.swift.v1.features.AccountApi;
 import org.jclouds.openstack.swift.v1.features.ContainerApi;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-import org.mindrot.jbcrypt.BCrypt;
 import org.pmw.tinylog.Configurator;
 import org.pmw.tinylog.Level;
 import org.pmw.tinylog.writers.ConsoleWriter;
@@ -56,6 +55,7 @@ import org.pmw.tinylog.writers.ConsoleWriter;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Module;
 
+import at.favre.lib.crypto.bcrypt.BCrypt;
 import io.undertow.Handlers;
 import io.webfolder.cormorant.api.CormorantApplication;
 import io.webfolder.cormorant.api.CormorantConfiguration;
@@ -125,7 +125,7 @@ public class TestBase {
         Map<String, User> users = new HashMap<>();
 
         User user = new User("myaccount",
-                             BCrypt.hashpw("mypassword", BCrypt.gensalt(12)),
+                             BCrypt.withDefaults().hashToString(12, "mypassword".toCharArray()),
                              "test@example.com",
                              "default",
                              Role.Admin,

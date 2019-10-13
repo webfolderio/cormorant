@@ -36,11 +36,11 @@ import java.util.concurrent.CountDownLatch;
 
 import org.junit.Test;
 import org.junit.runner.JUnitCore;
-import org.mindrot.jbcrypt.BCrypt;
 import org.pmw.tinylog.Configurator;
 import org.pmw.tinylog.Level;
 import org.pmw.tinylog.writers.ConsoleWriter;
 
+import at.favre.lib.crypto.bcrypt.BCrypt;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
 import io.webfolder.cormorant.api.CormorantApplication;
@@ -51,8 +51,8 @@ import io.webfolder.cormorant.api.metadata.MetadataStorage;
 import io.webfolder.cormorant.api.model.Role;
 import io.webfolder.cormorant.api.model.User;
 import io.webfolder.cormorant.api.service.AccountService;
-import io.webfolder.cormorant.api.service.KeystoneService;
 import io.webfolder.cormorant.api.service.DefaultKeystoneService;
+import io.webfolder.cormorant.api.service.KeystoneService;
 
 public class TestServer {
 
@@ -98,7 +98,7 @@ public class TestServer {
         Map<String, User> users = new HashMap<>();
 
         User user = new User("myaccount",
-                            BCrypt.hashpw("mypassword", BCrypt.gensalt(12)),
+                            BCrypt.withDefaults().hashToString(12, "mypassword".toCharArray()),
                             "test@example.com",
                             "default",
                             Role.Admin,

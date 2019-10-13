@@ -25,11 +25,13 @@ package io.webfolder.cormorant.api.service;
 import static io.webfolder.cormorant.api.model.Role.Admin;
 import static io.webfolder.cormorant.api.model.Role.None;
 import static io.webfolder.cormorant.api.model.Role.valueOf;
-import static org.mindrot.jbcrypt.BCrypt.checkpw;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import at.favre.lib.crypto.bcrypt.BCrypt;
+import at.favre.lib.crypto.bcrypt.BCrypt.Result;
+import at.favre.lib.crypto.bcrypt.BCrypt.Verifyer;
 import io.webfolder.cormorant.api.model.Domain;
 import io.webfolder.cormorant.api.model.Project;
 import io.webfolder.cormorant.api.model.Role;
@@ -41,8 +43,10 @@ public class DefaultKeystoneService implements KeystoneService {
 
     private final Map<String, Project> projects = new ConcurrentHashMap<>();
 
-    private final Domain domain;
+    private final Verifyer verifyer = BCrypt.verifyer();
 
+    private final Domain domain;
+    
     public DefaultKeystoneService(Map<String, User> users) {
         this(users, new Domain("default", "default"));
     }
@@ -64,7 +68,9 @@ public class DefaultKeystoneService implements KeystoneService {
             return false;
         }
         try {
-            return checkpw(password, users.get(username).getPassword());
+            String realPassword = users.get(username).getPassword();
+            Result result = verifyer.verify(password.toCharArray(), realPassword.toCharArray());
+            return result.verified;
         } catch (Throwable t) {
             return false;
         }
