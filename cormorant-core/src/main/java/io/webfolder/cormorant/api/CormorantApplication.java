@@ -83,10 +83,10 @@ public class CormorantApplication extends Application {
 
         final MetadataServiceFactory metadataServiceFactory = new DefaultMetadataServiceFactory(configuration.getMetadataStore(), configuration.getStorage());
 
-        final MetadataService accountMetadataService   = metadataServiceFactory.create(ACCOUNT   , configuration.isCacheMetadata());
-        final MetadataService containerMetadataService = metadataServiceFactory.create(CONTAINER , configuration.isCacheMetadata());
-        final MetadataService objectMetadataService    = metadataServiceFactory.create(OBJECT    , configuration.isCacheMetadata());
-        final MetadataService systemMetadataService    = metadataServiceFactory.create(OBJECT_SYS, configuration.isCacheMetadata());
+        final MetadataService accountMetadataService   = metadataServiceFactory.create(ACCOUNT);
+        final MetadataService containerMetadataService = metadataServiceFactory.create(CONTAINER);
+        final MetadataService objectMetadataService    = metadataServiceFactory.create(OBJECT);
+        final MetadataService systemMetadataService    = metadataServiceFactory.create(OBJECT_SYS);
 
         final ContainerService<Path> containerService  = new PathContainerService(configuration.getObjectStore(),
                                                                 configuration.getPathMaxCount(), containerMetadataService, systemMetadataService);

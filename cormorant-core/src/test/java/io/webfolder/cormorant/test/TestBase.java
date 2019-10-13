@@ -137,7 +137,6 @@ public class TestBase {
 
         CormorantConfiguration configuration = new CormorantConfiguration.Builder()
                                                 .accountName("myaccount")
-                                                .cacheMetadata(true)
                                                 .storage(MetadataStorage.File)
                                                 .pathMaxCount(10_000)
                                                 .objectStore(objectStore)

@@ -62,21 +62,19 @@ public class DefaultMetadataServiceFactory implements MetadataServiceFactory {
     }
 
     @Override
-    public MetadataService create(
-                                final String  cacheName,
-                                final boolean cacheable) {
+    public MetadataService create(final String  name) {
         final ServiceLoader<MetadataService> loader       = load(MetadataService.class, getClass().getClassLoader());
         final Iterator<MetadataService>      iterator     = loader.iterator();
-        final Path                           absolutePath = metadataStore.toAbsolutePath().normalize().resolve(cacheName);
+        final Path                           absolutePath = metadataStore.toAbsolutePath().normalize().resolve(name);
         if (File.equals(storage)) {
             if ( ! exists(absolutePath, NOFOLLOW_LINKS) ) {
                 try {
                     createDirectories(absolutePath);
                 } catch (IOException e) {
-                    throw new CormorantException("Unable to create property directory [" + absolutePath + "], namespace [" + cacheName + "].", e);
+                    throw new CormorantException("Unable to create property directory [" + absolutePath + "], namespace [" + name + "].", e);
                 }
             } else if ( ! isDirectory(absolutePath, NOFOLLOW_LINKS) ) {
-                throw new CormorantException("Invalid property directory [" + absolutePath + "], namespace [" + cacheName + "].");
+                throw new CormorantException("Invalid property directory [" + absolutePath + "], namespace [" + name + "].");
             }
         }
         MetadataService metadataService;
@@ -84,11 +82,11 @@ public class DefaultMetadataServiceFactory implements MetadataServiceFactory {
             metadataService = iterator.next();
         } else {
             if (File.equals(storage)) {
-                metadataService = new FileMetadataService(absolutePath, cacheName);
+                metadataService = new FileMetadataService(absolutePath, name);
             } else {
                 String schema = "";
                 String table  = "";
-                switch (cacheName) {
+                switch (name) {
                     case ACCOUNT   : table = "ACCOUNT_META"   ; break;
                     case CONTAINER : table = "CONTAINER_META" ; break;
                     case OBJECT    : table = "OBJECT_META"    ; break;
@@ -102,10 +100,6 @@ public class DefaultMetadataServiceFactory implements MetadataServiceFactory {
         } catch (SQLException e) {
             throw new CormorantException(e);
         }
-        if (cacheable) {
-            return new CacheMetadataService(metadataService);
-        } else {
-            return metadataService;
-        }
+        return metadataService;
     }
 }

@@ -188,7 +188,6 @@ public class Start implements ExitCodes {
 
         CormorantConfiguration configuration = new Builder()
                                                     .accountName("default")
-                                                    .cacheMetadata(true)
                                                     .storage(SQLite)
                                                     .pathMaxCount(10_000)
                                                     .objectStore(data)

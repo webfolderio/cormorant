@@ -35,8 +35,6 @@ public class CormorantConfiguration {
 
     private String accountName;
 
-    private boolean cacheMetadata;
-
     private MetadataStorage storage;
 
     private int pathMaxCount;
@@ -47,8 +45,7 @@ public class CormorantConfiguration {
 
         public Builder() {
             storage(SQLite).
-            pathMaxCount(10_000).
-            cacheMetadata(true);
+            pathMaxCount(10_000);
         }
 
         public Builder objectStore(Path objectStore) {
@@ -76,11 +73,6 @@ public class CormorantConfiguration {
             return this;
         }
 
-        public Builder cacheMetadata(boolean cacheMetadata) {
-            configuration.cacheMetadata = cacheMetadata;
-            return this;
-        }
-
         public CormorantConfiguration build() {
             return configuration;
         }
@@ -104,9 +96,5 @@ public class CormorantConfiguration {
 
     public MetadataStorage getStorage() {
         return storage;
-    }
-
-    public boolean isCacheMetadata() {
-        return cacheMetadata;
     }
 }
