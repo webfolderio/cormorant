@@ -88,7 +88,7 @@ import io.webfolder.cormorant.api.model.User;
 import io.webfolder.cormorant.api.service.AccountService;
 import io.webfolder.cormorant.api.service.DefaultKeystoneService;
 import io.webfolder.cormorant.api.service.KeystoneService;
-import io.webfolder.server.EmbeddedServer;
+import io.webfolder.server.Server;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
@@ -216,7 +216,7 @@ public class Start implements ExitCodes {
         Path file = createPidFile();
         watchPidFile(file, server);
 
-        String version = EmbeddedServer.class.getPackage().getImplementationVersion();
+        String version = Server.class.getPackage().getImplementationVersion();
 
         log.info("==========================================================");
         log.info("Cormorant {} is ready to use.", new Object[] { version });
@@ -339,7 +339,7 @@ public class Start implements ExitCodes {
             .level(Start.class, INFO)
             .level(CormorantServer.class, INFO)
             .level(PathObjectService.class, INFO)
-            .level(EmbeddedServer.class, WARNING)
+            .level(Server.class, WARNING)
             .level(Start.class.getPackage(), WARNING)
             .level(Xnio.class.getPackage(), WARNING)
             .level(PathObjectService.class, WARNING)

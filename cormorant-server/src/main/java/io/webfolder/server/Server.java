@@ -42,7 +42,7 @@ import picocli.CommandLine;
 import picocli.CommandLine.ParameterException;
 import picocli.CommandLine.ParseResult;
 
-public class EmbeddedServer implements ExitCodes {
+public class Server implements ExitCodes {
 
     public static void main(String[] args) {
         Cormorant cormorant = new Cormorant();
